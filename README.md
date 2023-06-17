@@ -1,3 +1,12 @@
+# Features added to this fork
+
+Broadcast: Sends a message to all channels registered in config.json
+Ping: Simply responds that the bot is online.
+
+Other changes:
+Some existing modules create an embeded message now. I just think it looks cleaner :)
+
+############################
 # SysBot.ACNHOrders
 Designed as a fully automated queue-based order bot that injects item orders directly onto your island's map and lets the player that queued pick them up, then leave. All dodo fetching, gate opening & closing, movement and dialoguing (including Tom Nook's or Isabelle's morning announcement progression) is automated.
 

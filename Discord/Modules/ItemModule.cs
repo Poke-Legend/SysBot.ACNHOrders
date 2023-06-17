@@ -71,7 +71,12 @@ namespace SysBot.ACNHOrders
 
             if (result.Length == 0)
             {
-                await ReplyAsync("No matches found.").ConfigureAwait(false);
+                var responseEmbed = new EmbedBuilder()
+                    .WithTitle("Search Result")
+                    .WithDescription("No matches found.")
+                    .WithColor(Color.Blue);
+
+                await ReplyAsync(embed: responseEmbed.Build()).ConfigureAwait(false);
                 return;
             }
 
@@ -83,7 +88,12 @@ namespace SysBot.ACNHOrders
                 result = result.Substring(0, maxLength) + "...[truncated]";
             }
 
-            await ReplyAsync(Format.Code(result)).ConfigureAwait(false);
+            var codeEmbed = new EmbedBuilder()
+                .WithTitle("Search Result")
+                .WithDescription(Format.Code(result))
+                .WithColor(Color.Blue);
+
+            await ReplyAsync(embed: codeEmbed.Build()).ConfigureAwait(false);
         }
 
         [Command("item")]
@@ -109,7 +119,14 @@ namespace SysBot.ACNHOrders
             if (result.Length == 0)
                 await ReplyAsync($"No customization data available for the requested item ({name}).").ConfigureAwait(false);
             else
-                await ReplyAsync($"{name}:\r\n{result}").ConfigureAwait(false);
+            {
+                var responseEmbed = new EmbedBuilder()
+                    .WithTitle("Item Info")
+                    .WithDescription($"{name}:\r\n{result}")
+                    .WithColor(Color.Blue);
+
+                await ReplyAsync(embed: responseEmbed.Build()).ConfigureAwait(false);
+            }
         }
 
         [Command("stack")]
@@ -133,7 +150,13 @@ namespace SysBot.ACNHOrders
             var ct = count - 1; // value 0 => count of 1
             var item = new Item(itemID) { Count = (ushort)ct };
             var msg = ItemParser.GetItemText(item);
-            await ReplyAsync(msg).ConfigureAwait(false);
+
+            var responseEmbed = new EmbedBuilder()
+                .WithTitle("Stacked Item")
+                .WithDescription(msg)
+                .WithColor(Color.Blue);
+
+            await ReplyAsync(embed: responseEmbed.Build()).ConfigureAwait(false);
         }
 
         [Command("customize")]
@@ -190,7 +213,13 @@ namespace SysBot.ACNHOrders
 
             var item = new Item(itemID) { BodyType = body, PatternChoice = fabric };
             var msg = ItemParser.GetItemText(item);
-            await ReplyAsync(msg).ConfigureAwait(false);
+
+            var responseEmbed = new EmbedBuilder()
+                .WithTitle("Customized Item")
+                .WithDescription(msg)
+                .WithColor(Color.Blue);
+
+            await ReplyAsync(embed: responseEmbed.Build()).ConfigureAwait(false);
         }
     }
 }

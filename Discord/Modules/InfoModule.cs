@@ -17,12 +17,11 @@ namespace SysBot.ACNHOrders
     // ReSharper disable once UnusedType.Global
     public class InfoModule : ModuleBase<SocketCommandContext>
     {
-        private const string detail = "I am an open source Discord bot powered by SysBot.NET, NHSE, ACNHMS and other open source software.";
-        private const string repo = "https://github.com/berichan/SysBot.ACNHOrders";
+        private const string detail = "I am an open source Discord bot powered by SysBot.NET, NHSE, ACNHMS and other open source software. Forked from berichan by _hedge";
+        private const string repo = "https://github.com/CodeHedge/SysBot.ACNHOrders";
 
         [Command("info")]
         [Alias("about", "whoami", "owner")]
-        [RequireSudo]
         public async Task InfoAsync()
         {
             var app = await Context.Client.GetApplicationInfoAsync().ConfigureAwait(false);

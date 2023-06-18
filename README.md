@@ -32,7 +32,7 @@ Resources:
 
 ## Support Discord:
 
-[<img src="https://canary.discordapp.com/api/guilds/771477382409879602/widget.png?style=banner2">](https://discord.gg/5bT8XK8dYe)
+message _hedge for help with new modules
 
 [sys-botbase](https://github.com/olliz0r/sys-botbase) client for remote control automation of Nintendo Switch consoles.
 

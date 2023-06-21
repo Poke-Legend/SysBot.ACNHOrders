@@ -1,7 +1,8 @@
 # Features added to this fork
 
-Broadcast: Sends a message to all channels registered in config.json
-Ping: Simply responds that the bot is online.
+broadcast: Sends a message to all channels registered in config.json
+ping: Simply responds that the bot is online.
+mysteryorder: orders 40 random items.
 
 Other changes:
 Some existing modules create an embeded message now. I just think it looks cleaner :)

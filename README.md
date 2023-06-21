@@ -1,7 +1,9 @@
 # Features added to this fork
 
 broadcast: Sends a message to all channels registered in config.json
+
 ping: Simply responds that the bot is online.
+
 mysteryorder: orders 40 random items.
 
 Other changes:

@@ -24,6 +24,37 @@ namespace SysBot.ACNHOrders
             "Hex Mode: Item IDs (in hex); request multiple by putting spaces between items. " +
             "Text Mode: Item names; request multiple by putting commas between items. To parse for another language, include the language code first and a comma, followed by the items.";
 
+    [Command("mysteryorder")]
+    [Summary("Orders 40 random items.")]
+    [RequireQueueRole(nameof(Globals.Bot.Config.RoleUseBot))]
+    public async Task RequestMysteryOrderAsync()
+    {
+    // Get the path to the file
+    var filePath = Path.Combine(AppContext.BaseDirectory, "Resources", "InternalHexListValid.txt");
+
+    // Check if the file exists
+    if (!File.Exists(filePath))
+    {
+        // Handle the error
+        await ReplyAsync("The item list file could not be found. Please ensure it is located in the Resources folder.");
+        return;
+    }
+
+    // Load the list of valid item codes
+    var itemCodes = File.ReadAllLines(filePath);
+
+    // Select 40 random items from the list
+    var random = new Random();
+    var selectedItems = Enumerable.Range(0, 40).Select(_ => itemCodes[random.Next(itemCodes.Length)]).ToArray();
+
+    // Convert the selected item codes to Item objects
+    var items = selectedItems.Select(code => new Item(Convert.ToUInt16(code, 16))).ToArray();
+
+    // Queue the items for ordering
+    await AttemptToQueueRequest(items, Context.User, Context.Channel, null).ConfigureAwait(false);
+}
+
+
         [Command("order")]
         [Summary(OrderItemSummary)]
         [RequireQueueRole(nameof(Globals.Bot.Config.RoleUseBot))]

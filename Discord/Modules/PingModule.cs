@@ -1,22 +1,38 @@
 using Discord.Commands;
 using Discord;
 using System.Threading.Tasks;
+using Random = System.Random;
 
 namespace SysBot.ACNHOrders
 {
     public class PingModule : ModuleBase<SocketCommandContext>
     {
+        private static readonly Random random = new Random();
+
+        private static readonly string[] images =
+        {
+            "https://media3.giphy.com/media/eNmWr9p3AjNd0F7xWd/giphy.gif?cid=ecf05e47qz5n5vg83nak14var9ie1pfbinkki0lzuvca7xbs&ep=v1_gifs_related&rid=giphy.gif&ct=g",
+            "https://media.tenor.com/iehE0de38mkAAAAC/animal-crossing-hello.gif",
+            "https://media.tenor.com/zlW3iIc21joAAAAM/animal-crossing-animal-crossing-movie.gif",
+            "https://media.tenor.com/27tSiStpM58AAAAC/isabelle-animal-crossing.gif"
+            // Add as many as you want...
+        };
+
         [Command("ping")]
+        [Alias("hi", "yo", "sup", "hello", "hey")]
         [Summary("Replies with pong.")]
         public Task PingAsync()
         {
+            var randomImage = images[random.Next(images.Length)];
+
             var embed = new EmbedBuilder()
-                .WithTitle("Pong!")
+                .WithTitle("Hi!")
                 .WithDescription("The bot is alive.... Probably")
                 .WithColor(Color.Blue)
-                .WithThumbnailUrl("https://media3.giphy.com/media/eNmWr9p3AjNd0F7xWd/giphy.gif?cid=ecf05e47qz5n5vg83nak14var9ie1pfbinkki0lzuvca7xbs&ep=v1_gifs_related&rid=giphy.gif&ct=g");
+                .WithImageUrl(randomImage); // This is the image that will be displayed
 
             return ReplyAsync(embed: embed.Build());
         }
     }
+
 }

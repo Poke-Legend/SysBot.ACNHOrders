@@ -24,35 +24,43 @@ namespace SysBot.ACNHOrders
             "Hex Mode: Item IDs (in hex); request multiple by putting spaces between items. " +
             "Text Mode: Item names; request multiple by putting commas between items. To parse for another language, include the language code first and a comma, followed by the items.";
 
-    [Command("mysteryorder")]
-    [Summary("Orders 40 random items.")]
-    [RequireQueueRole(nameof(Globals.Bot.Config.RoleUseBot))]
-    public async Task RequestMysteryOrderAsync()
-    {
-    // Get the path to the file
-    var filePath = Path.Combine(AppContext.BaseDirectory, "Resources", "InternalHexListValid.txt");
+        [Command("mysteryorder")]
+        [Summary("Orders 40 random items.")]
+        [RequireQueueRole(nameof(Globals.Bot.Config.RoleUseBot))]
+        public async Task RequestMysteryOrderAsync()
+        {
+            // Get the path to the valid item codes file
+            var validFilePath = Path.Combine(AppContext.BaseDirectory, "Resources", "InternalHexListValid.txt");
+            // Get the path to the unsafe item codes file
+            var unsafeFilePath = Path.Combine(AppContext.BaseDirectory, "Resources", "InternalHexList.txt");
 
-    // Check if the file exists
-    if (!File.Exists(filePath))
-    {
-        // Handle the error
-        await ReplyAsync("The item list file could not be found. Please ensure it is located in the Resources folder.");
-        return;
-    }
+            // Check if the files exist
+            if (!File.Exists(validFilePath) || !File.Exists(unsafeFilePath))
+            {
+                // Handle the error
+                await ReplyAsync("The item list files could not be found. Please ensure they are located in the Resources folder.");
+                return;
+            }
 
-    // Load the list of valid item codes
-    var itemCodes = File.ReadAllLines(filePath);
+            // Load the list of valid item codes
+            var validItemCodes = File.ReadAllLines(validFilePath);
+            // Load the list of unsafe item codes
+            var unsafeItemCodes = File.ReadAllLines(unsafeFilePath);
 
-    // Select 40 random items from the list
-    var random = new Random();
-    var selectedItems = Enumerable.Range(0, 40).Select(_ => itemCodes[random.Next(itemCodes.Length)]).ToArray();
+            // Select 40 random items from the valid list that are not in the unsafe list
+            var random = new Random();
+            var selectedItems = Enumerable.Range(0, 40)
+                .Select(_ => validItemCodes[random.Next(validItemCodes.Length)])
+                .Where(code => !unsafeItemCodes.Contains(code))
+                .ToArray();
 
-    // Convert the selected item codes to Item objects
-    var items = selectedItems.Select(code => new Item(Convert.ToUInt16(code, 16))).ToArray();
+            // Convert the selected item codes to Item objects
+            var items = selectedItems.Select(code => new Item(Convert.ToUInt16(code, 16))).ToArray();
 
-    // Queue the items for ordering
-    await AttemptToQueueRequest(items, Context.User, Context.Channel, null).ConfigureAwait(false);
-}
+            // Queue the items for ordering
+            await AttemptToQueueRequest(items, Context.User, Context.Channel, null).ConfigureAwait(false);
+        }
+
 
 
         [Command("order")]

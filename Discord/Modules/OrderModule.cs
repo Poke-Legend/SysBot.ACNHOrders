@@ -9,6 +9,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using NHSE.Core;
 using NHSE.Villagers;
+using SysBot.Base;
 
 namespace SysBot.ACNHOrders
 {
@@ -71,6 +72,8 @@ namespace SysBot.ACNHOrders
             var cfg = Globals.Bot.Config;
             VillagerRequest? vr = null;
 
+            LogUtil.LogInfo($"order received by {Context.User.Username} - {request}", nameof(OrderModule));
+
             // try get villager
             var result = VillagerOrderParser.ExtractVillagerName(request, out var res, out var san);
             if (result == VillagerOrderParser.VillagerRequestResult.InvalidVillagerRequested)
@@ -122,6 +125,8 @@ namespace SysBot.ACNHOrders
         {
             var cfg = Globals.Bot.Config;
             VillagerRequest? vr = null;
+
+            LogUtil.LogInfo($"ordercat received by {Context.User.Username} - {request}", nameof(OrderModule));
 
             // try get villager
             var result = VillagerOrderParser.ExtractVillagerName(request, out var res, out var san);

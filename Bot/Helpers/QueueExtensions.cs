@@ -76,11 +76,11 @@ namespace SysBot.ACNHOrders
                 return false;
             }
 
-            if(Globals.Bot.CurrentUserName == traderDispName)
+            /*if(Globals.Bot.CurrentUserName == traderDispName)
             {
                 msg = $"{traderMention} - Failed to queue your order as it is the current processing order. Please wait a few seconds for the queue to clear if you've already completed it.";
                 return false;
-            }
+            }*/
 
             var position = orderArray.Length + 1;
             var idToken = Globals.Bot.Config.OrderConfig.ShowIDs ? $" (ID {itemReq.OrderID})" : string.Empty;

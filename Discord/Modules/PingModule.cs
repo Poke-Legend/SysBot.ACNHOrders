@@ -30,7 +30,7 @@ namespace SysBot.ACNHOrders
 
             var embed = new EmbedBuilder()
                 .WithTitle("Hi!")
-                .WithDescription("The bot is alive.... Probably")
+                .WithDescription("The bot program is running.")
                 .WithColor(Color.Blue)
                 .WithImageUrl(randomImage); // This is the image that will be displayed
 

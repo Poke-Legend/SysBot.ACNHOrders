@@ -28,7 +28,7 @@ namespace SysBot.ACNHOrders
             Trader = trader;
             CommandSentChannel = commandSentChannel;
             Order = order;
-            VillagerName = trader is SocketGuildUser guildUser ? guildUser.Nickname : trader.Username;
+            VillagerName = trader.Username;
             VillagerOrder = vil;
         }
 

@@ -75,12 +75,12 @@ namespace SysBot.ACNHOrders
                     msg = $"{traderMention} - You have been recently removed from the queue. Please wait a while before attempting to enter the queue again.";
                 return false;
             }
-
-            /*if(Globals.Bot.CurrentUserName == traderDispName)
+            //This is causing issues. Maybe after updating it will be fixed.
+            if (Globals.Bot.CurrentUserName == traderDispName)
             {
                 msg = $"{traderMention} - Failed to queue your order as it is the current processing order. Please wait a few seconds for the queue to clear if you've already completed it.";
                 return false;
-            }*/
+            }
 
             var position = orderArray.Length + 1;
             var idToken = Globals.Bot.Config.OrderConfig.ShowIDs ? $" (ID {itemReq.OrderID})" : string.Empty;

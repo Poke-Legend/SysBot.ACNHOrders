@@ -52,4 +52,10 @@
     <Folder Include="Bot\Injection\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Resources\InternalHexListValid.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

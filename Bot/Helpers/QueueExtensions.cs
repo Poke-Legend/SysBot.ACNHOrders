@@ -15,6 +15,7 @@ namespace SysBot.ACNHOrders
         const int ArriveTime = 90;
         const int SetupTime = 95;
 
+
         public static async Task AddToQueueAsync(this SocketCommandContext Context, OrderRequest<Item> itemReq, string player, SocketUser trader)
         {
             IUserMessage test;
@@ -75,10 +76,11 @@ namespace SysBot.ACNHOrders
                     msg = $"{traderMention} - You have been recently removed from the queue. Please wait a while before attempting to enter the queue again.";
                 return false;
             }
-            //This is causing issues. Maybe after updating it will be fixed.
+            //This is causing issues. Maybe after updating it will be fixed? Going to re-enable it and see what happens.
             if (Globals.Bot.CurrentUserName == traderDispName)
             {
-                msg = $"{traderMention} - Failed to queue your order as it is the current processing order. Please wait a few seconds for the queue to clear if you've already completed it.";
+
+                msg = $"{traderMention} - Report this error to @_hedge if you haven been waiting more than 15 minutes and are still getting this error. Most likely the bot is down for everyone. Error: Failed to queue your order as it is the current processing order. Please wait a few seconds for the queue to clear if you've already completed it.";
                 return false;
             }
 

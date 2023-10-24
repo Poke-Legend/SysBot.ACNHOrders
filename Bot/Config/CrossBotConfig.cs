@@ -86,7 +86,7 @@ namespace SysBot.ACNHOrders
         public int ExtraTimeConnectionWait { get; set; } = 1000;
 
         /// <summary> How much extra time, if any, should we wait after attempting to enter the airport door? </summary>
-        public int ExtraTimeEnterAirportWait{ get; set; } = 0;
+        public int ExtraTimeEnterAirportWait { get; set; } = 0;
 
         /// <summary> Should we check instant text offset to see if we are still in dialogue, and if so should we keep mashing B? </summary>
         public bool AttemptMitigateDialogueWarping { get; set; } = false;
@@ -120,6 +120,24 @@ namespace SysBot.ACNHOrders
 
         /// <summary> Should we press up once before starting the game? Not guaranteed to avoid the update, but the bot will try its best. </summary>
         public bool AvoidSystemUpdate { get; set; } = true;
+
+        /// <summary> Array of links (strings) for the hi command image embed </summary>
+        public string[] HiCommandImageLinks { get; set; } = new string[0];
+
+        /// <summary> Array of links (strings) for order initializing image embed thumbnail</summary>
+        public string[] OrderInitializingLinks { get; set; } = new string[0];
+
+        /// <summary> Array of links (strings) for order ready image embed thumbnail</summary>
+        public string[] OrderReadyImageLinks { get; set; } = new string[0];
+
+        /// <summary> Array of links (strings) for order Canceled image embed thumbnail</summary>
+        public string[] OrderCanceledImageLinks { get; set; } = new string[0];
+
+        /// <summary> Array of links (strings) for order Completed image embed thumbnail</summary>
+        public string[] OrderCompletedImageLinks { get; set; } = new string[0];
+
+        /// <summary> Array of links (strings) for Broadcast embed thumbnail</summary>
+        public string[] BroadcastImageLinks { get; set; } = new string[0];
 
         /// <summary> Experimental SignalR functionality </summary>
         public WebConfig SignalrConfig { get; set; } = new();

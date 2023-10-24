@@ -36,7 +36,7 @@ namespace SysBot.ACNHOrders
         {
             var embed = new EmbedBuilder()
             {
-                Color = Color.Green,
+                Color = Color.DarkBlue,
                 Title = title,
                 Description = description,
                 ThumbnailUrl = url

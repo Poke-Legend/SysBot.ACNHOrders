@@ -30,39 +30,32 @@ namespace SysBot.ACNHOrders
         [RequireQueueRole(nameof(Globals.Bot.Config.RoleUseBot))]
         public async Task RequestMysteryOrderAsync()
         {
-            // Get the path to the valid item codes file
             var validFilePath = Path.Combine(AppContext.BaseDirectory, "Resources", "InternalHexListValid.txt");
-            // Get the path to the unsafe item codes file
             var unsafeFilePath = Path.Combine(AppContext.BaseDirectory, "Resources", "InternalHexList.txt");
 
-            // Check if the files exist
             if (!File.Exists(validFilePath) || !File.Exists(unsafeFilePath))
             {
-                // Handle the error
-                await ReplyAsync("The item list files could not be found. Please ensure they are located in the Resources folder.");
+                var errorEmbed = new EmbedBuilder()
+                    .WithTitle("Error")
+                    .WithDescription("The item list files could not be found. Please ensure they are located in the Resources folder.")
+                    .WithColor(Color.Red)
+                    .Build();
+
+                await ReplyAsync(embed: errorEmbed);
                 return;
             }
 
-            // Load the list of valid item codes
             var validItemCodes = File.ReadAllLines(validFilePath);
-            // Load the list of unsafe item codes
             var unsafeItemCodes = File.ReadAllLines(unsafeFilePath);
-
-            // Select 40 random items from the valid list that are not in the unsafe list
             var random = new Random();
             var selectedItems = Enumerable.Range(0, 40)
                 .Select(_ => validItemCodes[random.Next(validItemCodes.Length)])
                 .Where(code => !unsafeItemCodes.Contains(code))
                 .ToArray();
 
-            // Convert the selected item codes to Item objects
             var items = selectedItems.Select(code => new Item(Convert.ToUInt16(code, 16))).ToArray();
-
-            // Queue the items for ordering
             await AttemptToQueueRequest(items, Context.User, Context.Channel, null).ConfigureAwait(false);
         }
-
-
 
         [Command("order")]
         [Summary(OrderItemSummary)]
@@ -74,11 +67,16 @@ namespace SysBot.ACNHOrders
 
             LogUtil.LogInfo($"order received by {Context.User.Username} - {request}", nameof(OrderModule));
 
-            // try get villager
             var result = VillagerOrderParser.ExtractVillagerName(request, out var res, out var san);
             if (result == VillagerOrderParser.VillagerRequestResult.InvalidVillagerRequested)
             {
-                await ReplyAsync($"{Context.User.Mention} - {res} Order has not been accepted.");
+                var errorEmbed = new EmbedBuilder()
+                    .WithTitle("Invalid Villager Requested")
+                    .WithDescription($"{Context.User.Mention} - {res} Order has not been accepted.")
+                    .WithColor(Color.Red)
+                    .Build();
+
+                await ReplyAsync(embed: errorEmbed);
                 return;
             }
 
@@ -86,7 +84,13 @@ namespace SysBot.ACNHOrders
             {
                 if (!cfg.AllowVillagerInjection)
                 {
-                    await ReplyAsync($"{Context.User.Mention} - Villager injection is currently disabled.");
+                    var injectionDisabledEmbed = new EmbedBuilder()
+                        .WithTitle("Villager Injection Disabled")
+                        .WithDescription($"{Context.User.Mention} - Villager injection is currently disabled.")
+                        .WithColor(Color.Orange)
+                        .Build();
+
+                    await ReplyAsync(embed: injectionDisabledEmbed);
                     return;
                 }
 
@@ -103,7 +107,13 @@ namespace SysBot.ACNHOrders
                 var att = await NetUtil.DownloadNHIAsync(attachment).ConfigureAwait(false);
                 if (!att.Success || !(att.Data is Item[] itemData))
                 {
-                    await ReplyAsync("No NHI attachment provided!").ConfigureAwait(false);
+                    var noNhiEmbed = new EmbedBuilder()
+                        .WithTitle("No NHI Attachment Provided")
+                        .WithDescription("Please provide a valid NHI attachment.")
+                        .WithColor(Color.Red)
+                        .Build();
+
+                    await ReplyAsync(embed: noNhiEmbed);
                     return;
                 }
                 else
@@ -128,11 +138,16 @@ namespace SysBot.ACNHOrders
 
             LogUtil.LogInfo($"ordercat received by {Context.User.Username} - {request}", nameof(OrderModule));
 
-            // try get villager
             var result = VillagerOrderParser.ExtractVillagerName(request, out var res, out var san);
             if (result == VillagerOrderParser.VillagerRequestResult.InvalidVillagerRequested)
             {
-                await ReplyAsync($"{Context.User.Mention} - {res} Order has not been accepted.");
+                var errorEmbed = new EmbedBuilder()
+                    .WithTitle("Invalid Villager Requested")
+                    .WithDescription($"{Context.User.Mention} - {res} Order has not been accepted.")
+                    .WithColor(Color.Red)
+                    .Build();
+
+                await ReplyAsync(embed: errorEmbed);
                 return;
             }
 
@@ -140,7 +155,13 @@ namespace SysBot.ACNHOrders
             {
                 if (!cfg.AllowVillagerInjection)
                 {
-                    await ReplyAsync($"{Context.User.Mention} - Villager injection is currently disabled.");
+                    var injectionDisabledEmbed = new EmbedBuilder()
+                        .WithTitle("Villager Injection Disabled")
+                        .WithDescription($"{Context.User.Mention} - Villager injection is currently disabled.")
+                        .WithColor(Color.Orange)
+                        .Build();
+
+                    await ReplyAsync(embed: injectionDisabledEmbed);
                     return;
                 }
 
@@ -152,6 +173,7 @@ namespace SysBot.ACNHOrders
             var items = string.IsNullOrWhiteSpace(request) ? new Item[1] { new Item(Item.NONE) } : ItemParser.GetItemsFromUserInput(request, cfg.DropConfig, ItemDestination.FieldItemDropped);
             await AttemptToQueueRequest(items, Context.User, Context.Channel, vr, true).ConfigureAwait(false);
         }
+
 
         [Command("order")]
         [Summary("Requests the bot an order of items in the NHI format.")]
@@ -247,40 +269,36 @@ namespace SysBot.ACNHOrders
         public async Task CheckItemAsync([Summary(OrderItemSummary)][Remainder] string request)
         {
             var cfg = Globals.Bot.Config;
-            var BadItemsList = "";
-            var CheckItemN = "";
+            var badItemsList = "";
+            var checkItemN = "";
             Item[]? items = null;
             items = string.IsNullOrWhiteSpace(request) ? new Item[1] { new Item(Item.NONE) } : ItemParser.GetItemsFromUserInput(request, cfg.DropConfig, ItemDestination.FieldItemDropped).ToArray();
             {
-                var Bitems = FileUtil.GetEmbeddedResource("SysBot.ACNHOrders.Resources", "InternalHexList.txt");
-                string[] CheckItems = request.Split(' ');
+                var bitems = FileUtil.GetEmbeddedResource("SysBot.ACNHOrders.Resources", "InternalHexList.txt");
+                string[] checkItems = request.Split(' ');
 
-                foreach (var CheckItem in CheckItems)
-                    if (Bitems.Contains(CheckItem))
+                foreach (var checkItem in checkItems)
+                    if (bitems.Contains(checkItem))
                     {
-                        ushort itemID = ItemParser.GetID(CheckItem);
-                        if (itemID == Item.NONE)
-                        {
-
-                        }
-                        else
+                        ushort itemID = ItemParser.GetID(checkItem);
+                        if (itemID != Item.NONE)
                         {
                             var name = GameInfo.Strings.GetItemName(itemID);
-                            CheckItemN = name + ": " + CheckItem;
+                            checkItemN = name + ": " + checkItem;
                         }
-                        BadItemsList = BadItemsList + CheckItemN + "\n";
+                        badItemsList += checkItemN + "\n";
                     }
 
-                if (BadItemsList == "")
-                {
-                    await ReplyAsync($"All items are safe to order.");
-                }
-                else
-                {
-                    await ReplyAsync($"The following items are not safe to order:\n`{BadItemsList}`");
-                }
+                var resultEmbed = new EmbedBuilder()
+                    .WithTitle("Item Check Results")
+                    .WithDescription(badItemsList == "" ? "All items are safe to order." : $"The following items are not safe to order:\n`{badItemsList}`")
+                    .WithColor(badItemsList == "" ? Color.Green : Color.Red)
+                    .Build();
+
+                await ReplyAsync(embed: resultEmbed);
             }
         }
+
 
         [Command("preset")]
         [Summary("Requests the bot an order of a preset created by the bot host.")]

@@ -37,5 +37,4 @@ namespace SysBot.ACNHOrders
             return ReplyAsync(embed: embed.Build());
         }
     }
-
 }

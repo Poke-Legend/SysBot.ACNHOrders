@@ -2,11 +2,11 @@
 using Discord.Commands;
 using Discord.WebSocket;
 using Discord.Net;
-using NHSE.Core;
 using System.Threading.Tasks;
 using System.Linq;
 using System;
 using System.Collections.Concurrent;
+using NHSE.Core;
 
 namespace SysBot.ACNHOrders
 {
@@ -15,42 +15,62 @@ namespace SysBot.ACNHOrders
         const int ArriveTime = 90;
         const int SetupTime = 95;
 
-
-        public static async Task AddToQueueAsync(this SocketCommandContext Context, OrderRequest<Item> itemReq, string player, SocketUser trader)
+        public static async Task AddToQueueAsync(this SocketCommandContext context, OrderRequest<Item> itemReq, string player, SocketUser trader)
         {
-            IUserMessage test;
             try
             {
-                const string helper = "I've added you to the queue! I'll message you here when your order is ready";
-                test = await trader.SendMessageAsync(helper).ConfigureAwait(false);
+                const string helperMessage = "I've added you to the queue! I'll message you here when your order is ready";
+                var helperEmbed = new EmbedBuilder()
+                    .WithTitle("Queue Notification")
+                    .WithDescription(helperMessage)
+                    .WithColor(Color.Blue)
+                    .Build();
+                await trader.SendMessageAsync(embed: helperEmbed).ConfigureAwait(false);
             }
             catch (HttpException ex)
             {
-                await Context.Channel.SendMessageAsync($"{ex.HttpCode}: {ex.Reason}!").ConfigureAwait(false);
-                var noAccessMsg = Context.User == trader ? "You must enable private messages in order to be queued!" : $"{player} must enable private messages in order for them to be queued!";
-                await Context.Channel.SendMessageAsync(noAccessMsg).ConfigureAwait(false);
+                var errorEmbed = new EmbedBuilder()
+                    .WithTitle("Error")
+                    .WithDescription($"{ex.HttpCode}: {ex.Reason}!")
+                    .WithColor(Color.Red)
+                    .Build();
+                await context.Channel.SendMessageAsync(embed: errorEmbed).ConfigureAwait(false);
+
+                var noAccessMsg = context.User == trader ? "You must enable private messages in order to be queued!" : $"{player} must enable private messages in order for them to be queued!";
+                var noAccessEmbed = new EmbedBuilder()
+                    .WithTitle("Private Message Disabled")
+                    .WithDescription(noAccessMsg)
+                    .WithColor(Color.Orange)
+                    .Build();
+                await context.Channel.SendMessageAsync(embed: noAccessEmbed).ConfigureAwait(false);
                 return;
             }
 
             // Try adding
             var result = AttemptAddToQueue(itemReq, trader.Mention, trader.Username, out var msg);
 
-            // Notify in channel
-            await Context.Channel.SendMessageAsync(msg).ConfigureAwait(false);
-            // Notify in PM to mirror what is said in the channel.
-            await trader.SendMessageAsync(msg).ConfigureAwait(false);
+            // Notify in channel with embed
+            var channelEmbed = new EmbedBuilder()
+                .WithTitle("Queue Update")
+                .WithDescription(msg)
+                .WithColor(result ? Color.Green : Color.Red)
+                .Build();
+            await context.Channel.SendMessageAsync(embed: channelEmbed).ConfigureAwait(false);
+
+            // Notify in PM with embed to mirror what is said in the channel.
+            var pmEmbed = new EmbedBuilder()
+                .WithTitle("Queue Update")
+                .WithDescription(msg)
+                .WithColor(result ? Color.Green : Color.Red)
+                .Build();
+            await trader.SendMessageAsync(embed: pmEmbed).ConfigureAwait(false);
 
             // Clean Up
             if (result)
             {
                 // Delete the user's join message for privacy
-                if (!Context.IsPrivate)
-                    await Context.Message.DeleteAsync(RequestOptions.Default).ConfigureAwait(false);
-            }
-            else
-            {
-                // Delete our "I'm adding you!", and send the same message that we sent to the general channel.
-                await test.DeleteAsync().ConfigureAwait(false);
+                if (!context.IsPrivate)
+                    await context.Message.DeleteAsync(RequestOptions.Default).ConfigureAwait(false);
             }
         }
 
@@ -62,7 +82,6 @@ namespace SysBot.ACNHOrders
             return result;
         }
 
-        // this sucks
         private static bool AttemptAddToQueue(IACNHOrderNotifier<Item> itemReq, string traderMention, string traderDispName, out string msg)
         {
             var orders = Globals.Hub.Orders;
@@ -76,11 +95,10 @@ namespace SysBot.ACNHOrders
                     msg = $"{traderMention} - You have been recently removed from the queue. Please wait a while before attempting to enter the queue again.";
                 return false;
             }
-            //This is causing issues. Maybe after updating it will be fixed? Going to re-enable it and see what happens.
+
             if (Globals.Bot.CurrentUserName == traderDispName)
             {
-
-                msg = $"{traderMention} - Report this error to @_hedge if you haven been waiting more than 15 minutes and are still getting this error. Most likely the bot is down for everyone. Error: Failed to queue your order as it is the current processing order. Please wait a few seconds for the queue to clear if you've already completed it.";
+                msg = $"{traderMention} - Report this error to @_hedge if you have been waiting more than 15 minutes and are still getting this error. Most likely the bot is down for everyone. Error: Failed to queue your order as it is the current processing order. Please wait a few seconds for the queue to clear if you've already completed it.";
                 return false;
             }
 
@@ -123,7 +141,7 @@ namespace SysBot.ACNHOrders
         {
             int minSeconds = ArriveTime + SetupTime + Globals.Bot.Config.OrderConfig.UserTimeAllowed + Globals.Bot.Config.OrderConfig.WaitForArriverTime;
             int addSeconds = ArriveTime + Globals.Bot.Config.OrderConfig.UserTimeAllowed + Globals.Bot.Config.OrderConfig.WaitForArriverTime;
-            var timeSpan = TimeSpan.FromSeconds(minSeconds + (addSeconds * (pos-1)));
+            var timeSpan = TimeSpan.FromSeconds(minSeconds + (addSeconds * (pos - 1)));
             if (timeSpan.Hours > 0)
                 return string.Format("{0:D2}h:{1:D2}m:{2:D2}s", timeSpan.Hours, timeSpan.Minutes, timeSpan.Seconds);
             else
@@ -131,10 +149,10 @@ namespace SysBot.ACNHOrders
         }
 
         private static ulong ID = 0;
-        private static object IDAccessor = new();
+        private static readonly object IDAccessor = new();
         public static ulong GetNextID()
         {
-            lock(IDAccessor)
+            lock (IDAccessor)
             {
                 return ID++;
             }
@@ -142,10 +160,7 @@ namespace SysBot.ACNHOrders
 
         public static void ClearQueue<T>(this ConcurrentQueue<T> queue)
         {
-            T item; // weird runtime error
-#pragma warning disable CS8600
-            while (queue.TryDequeue(out item)) { } // do nothing
-#pragma warning restore CS8600
+            while (queue.TryDequeue(out _)) { } // do nothing
         }
 
         public static string GetQueueString()

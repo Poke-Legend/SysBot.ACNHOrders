@@ -17,7 +17,6 @@ namespace SysBot.ACNHOrders
             static string GetMessage(string msg, string identity) => $"> [{DateTime.Now:hh:mm:ss}] - {identity}: {msg}";
 
             var bot = new CrossBot(config);
-
             var sys = new SysCord(bot);
 
             Globals.Self = sys;
@@ -26,26 +25,23 @@ namespace SysBot.ACNHOrders
             GlobalBan.UpdateConfiguration(config);
 
             bot.Log("Starting Discord.");
-#pragma warning disable 4014
-            Task.Run(() => sys.MainAsync(config.Token, cancel), cancel);
-#pragma warning restore 4014
-
+            _ = Task.Run(() => sys.MainAsync(config.Token, cancel), cancel);
 
             if (tConfig != null && !string.IsNullOrWhiteSpace(tConfig.Token))
             {
                 bot.Log("Starting Twitch.");
-                var _ = new TwitchCrossBot(tConfig, bot);
+                _ = new TwitchCrossBot(tConfig, bot);
             }
 
             if (!string.IsNullOrWhiteSpace(config.SignalrConfig.URIEndpoint))
             {
                 bot.Log("Starting Web.");
-                var _ = new SignalrCrossBot(config.SignalrConfig, bot);
+                _ = new SignalrCrossBot(config.SignalrConfig, bot);
             }
 
             if (config.SkipConsoleBotCreation)
             {
-                await Task.Delay(-1, cancel).ConfigureAwait(false);
+                await Task.Delay(Timeout.Infinite, cancel).ConfigureAwait(false);
                 return;
             }
 
@@ -53,44 +49,30 @@ namespace SysBot.ACNHOrders
             {
                 bot.Log("Starting bot loop.");
 
-                var task = bot.RunAsync(cancel);
-                await task.ConfigureAwait(false);
-
-                bool attemptReconnect = false;
-
-                if (task.IsFaulted)
+                try
                 {
-                    if (task.Exception == null)
-                    {
-                        bot.Log("Bot has terminated due to an unknown error.");
-                    }
-                    else
-                    {
-                        bot.Log("Bot has terminated due to an error:");
-                        foreach (var ex in task.Exception.InnerExceptions)
-                        {
-                            bot.Log(ex.Message);
-                            var st = ex.StackTrace;
-                            if (st != null)
-                                bot.Log(st);
-                        }
-                    }
-                    attemptReconnect = false;
+                    await bot.RunAsync(cancel).ConfigureAwait(false);
                 }
-                else
+                catch (Exception ex)
                 {
-                    bot.Log("Bot has terminated.");
-                    if (config.DodoModeConfig.LimitedDodoRestoreOnlyMode) // don't restore ordermode crashes
-                        attemptReconnect = true;
+                    bot.Log("Bot has terminated due to an error:");
+                    bot.Log(ex.Message);
+                    if (ex.StackTrace != null)
+                    {
+                        bot.Log(ex.StackTrace);
+                    }
                 }
 
-                if (attemptReconnect)
+                if (config.DodoModeConfig.LimitedDodoRestoreOnlyMode)
                 {
                     await Task.Delay(10_000, cancel).ConfigureAwait(false);
                     bot.Log("Bot is attempting a restart...");
                 }
                 else
+                {
+                    bot.Log("Bot has terminated.");
                     break;
+                }
             }
         }
     }

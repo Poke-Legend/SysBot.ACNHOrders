@@ -445,18 +445,6 @@ namespace SysBot.ACNHOrders
                 await ReplyAsync($"{identity} is not a valid u64.").ConfigureAwait(false);
         }
 
-        [Command("removeAlt")]
-        [Alias("removeLog", "rmAlt")]
-        [Summary("Removes an identity (name-id) from the local user-to-villager AntiAbuse database")]
-        [RequireSudo]
-        public async Task RemoveAltAsync([Remainder]string identity)
-        {
-            if (NewAntiAbuse.Instance.Remove(identity))
-                await ReplyAsync($"{identity} has been removed from the database.").ConfigureAwait(false);
-            else
-                await ReplyAsync($"{identity} is not a valid identity.").ConfigureAwait(false);
-        }
-
         [Command("removeAltLegacy")]
         [Alias("removeLogLegacy", "rmAltLegacy")]
         [Summary("(Uses legacy database) Removes an identity (name-id) from the local user-to-villager AntiAbuse database")]

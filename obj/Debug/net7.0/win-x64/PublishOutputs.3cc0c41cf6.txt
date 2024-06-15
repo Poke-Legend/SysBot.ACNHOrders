@@ -1,0 +1,4 @@
+C:\Users\bdkoh\OneDrive\Desktop\Animal Crossing\SysBot.ACNHOrders.pdb
+C:\Users\bdkoh\OneDrive\Desktop\Animal Crossing\Resources\InternalHexListValid.txt
+C:\Users\bdkoh\OneDrive\Desktop\Animal Crossing\Resources\InternalHexList.txt
+C:\Users\bdkoh\OneDrive\Desktop\Animal Crossing\SysBot.ACNHOrders.exe

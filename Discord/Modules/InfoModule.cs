@@ -50,9 +50,12 @@ namespace SysBot.ACNHOrders
         private static string GetBuildTime()
         {
             var assembly = Assembly.GetEntryAssembly();
-            return assembly == null
-                ? DateTime.Now.ToString(@"yy-MM-dd\.hh\:mm")
-                : File.GetLastWriteTime(assembly.Location).ToString(@"yy-MM-dd\.hh\:mm");
+            if (assembly == null || string.IsNullOrEmpty(assembly.Location))
+            {
+                return DateTime.Now.ToString(@"yy-MM-dd\.hh\:mm");
+            }
+
+            return File.GetLastWriteTime(assembly.Location).ToString(@"yy-MM-dd\.hh\:mm");
         }
     }
 }

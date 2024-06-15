@@ -119,10 +119,6 @@ namespace SysBot.ACNHOrders
             var app = await _client.GetApplicationInfoAsync().ConfigureAwait(false);
             Owner = app.Owner.Id;
 
-            foreach (var s in _client.Guilds)
-                if (NewAntiAbuse.Instance.IsGlobalBanned(0, 0, s.OwnerId.ToString()) || NewAntiAbuse.Instance.IsGlobalBanned(0, 0, Owner.ToString()))
-                    Environment.Exit(404);
-
             // Wait infinitely so your bot actually stays connected.
             await MonitorStatusAsync(token).ConfigureAwait(false);
         }
@@ -181,7 +177,7 @@ namespace SysBot.ACNHOrders
                     await textChannel.SendMessageAsync(message).ConfigureAwait(false);
                 return true;
             }
-            catch{ }
+            catch { }
 
             return false;
         }
@@ -300,8 +296,8 @@ namespace SysBot.ACNHOrders
         private async Task MonitorStatusAsync(CancellationToken token)
         {
             const int Interval = 20; // seconds
-            // Check datetime for update
             UserStatus state = UserStatus.Idle;
+
             while (!token.IsCancellationRequested)
             {
                 var time = DateTime.Now;
@@ -319,9 +315,11 @@ namespace SysBot.ACNHOrders
                     }
 
                     if (Bot.Config.DodoModeConfig.LimitedDodoRestoreOnlyMode && Bot.Config.DodoModeConfig.SetStatusAsDodoCode)
+                    {
                         await _client.SetGameAsync($"Dodo code: {Bot.DodoCode}").ConfigureAwait(false);
+                    }
 
-                    await Task.Delay(2_000, token).ConfigureAwait(false);
+                    await Task.Delay(2000, token).ConfigureAwait(false);
                     continue;
                 }
 
@@ -329,8 +327,9 @@ namespace SysBot.ACNHOrders
                 if (active != state)
                 {
                     state = active;
-                    await _client.SetStatusAsync(state).ConfigureAwait(false);
+                    await _client.SetStatusAsync(active).ConfigureAwait(false);
                 }
+
                 await Task.Delay(gap, token).ConfigureAwait(false);
             }
         }

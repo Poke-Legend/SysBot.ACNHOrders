@@ -19,8 +19,6 @@ namespace SysBot.ACNHOrders
         public ulong Owner = ulong.MaxValue;
         public bool Ready = false;
 
-        // Keep the CommandService and DI container around for use with commands.
-        // These two types require you install the Discord.Net.Commands package.
         private readonly CommandService _commands;
         private readonly IServiceProvider _services;
 
@@ -29,52 +27,30 @@ namespace SysBot.ACNHOrders
             Bot = bot;
             _client = new DiscordSocketClient(new DiscordSocketConfig
             {
-                // How much logging do you want to see?
                 LogLevel = LogSeverity.Info,
                 GatewayIntents = Guilds | GuildMessages | DirectMessages | GuildMembers | MessageContent,
-                // If you or another service needs to do anything with messages
-                // (eg. checking Reactions, checking the content of edited/deleted messages),
-                // you must set the MessageCacheSize. You may adjust the number as needed.
-                //MessageCacheSize = 50,
             });
 
             _commands = new CommandService(new CommandServiceConfig
             {
-                // Again, log level:
                 LogLevel = LogSeverity.Info,
-
-                // This makes commands get run on the task thread pool instead on the websocket read thread.
-                // This ensures long running logic can't block the websocket connection.
                 DefaultRunMode = RunMode.Sync,
-
-                // There's a few more properties you can set,
-                // for example, case-insensitive commands.
                 CaseSensitiveCommands = false,
             });
 
-            // Subscribe the logging handler to both the client and the CommandService.
             _client.Log += Log;
             _commands.Log += Log;
 
-            // Setup your DI container.
             _services = ConfigureServices();
         }
 
-        // If any services require the client, or the CommandService, or something else you keep on hand,
-        // pass them as parameters into this method as needed.
-        // If this method is getting pretty long, you can separate it out into another file using partials.
         private static IServiceProvider ConfigureServices()
         {
-            var map = new ServiceCollection();//.AddSingleton(new SomeServiceClass());
+            var map = new ServiceCollection()
+                .AddSingleton<CrossBot>(); // Example service
 
-            // When all your required services are in the collection, build the container.
-            // Tip: There's an overload taking in a 'validateScopes' bool to make sure
-            // you haven't made any mistakes in your dependency graph.
             return map.BuildServiceProvider();
         }
-
-        // Example of a logging handler. This can be re-used by addons
-        // that ask for a Func<LogMessage, Task>.
 
         private static Task Log(LogMessage msg)
         {
@@ -82,10 +58,8 @@ namespace SysBot.ACNHOrders
             {
                 LogSeverity.Critical => ConsoleColor.Red,
                 LogSeverity.Error => ConsoleColor.Red,
-
                 LogSeverity.Warning => ConsoleColor.Yellow,
                 LogSeverity.Info => ConsoleColor.White,
-
                 LogSeverity.Verbose => ConsoleColor.DarkGray,
                 LogSeverity.Debug => ConsoleColor.DarkGray,
                 _ => Console.ForegroundColor
@@ -102,10 +76,8 @@ namespace SysBot.ACNHOrders
 
         public async Task MainAsync(string apiToken, CancellationToken token)
         {
-            // Centralize the logic for commands into a separate method.
             await InitCommands().ConfigureAwait(false);
 
-            // Login and connect.
             await _client.LoginAsync(TokenType.Bot, apiToken).ConfigureAwait(false);
             await _client.StartAsync().ConfigureAwait(false);
             _client.Ready += ClientReady;
@@ -119,7 +91,6 @@ namespace SysBot.ACNHOrders
             var app = await _client.GetApplicationInfoAsync().ConfigureAwait(false);
             Owner = app.Owner.Id;
 
-            // Wait infinitely so your bot actually stays connected.
             await MonitorStatusAsync(token).ConfigureAwait(false);
         }
 
@@ -131,7 +102,6 @@ namespace SysBot.ACNHOrders
 
             await Task.Delay(1_000).ConfigureAwait(false);
 
-            // Add logging forwarders
             foreach (var cid in Bot.Config.LoggingChannels)
             {
                 var c = (ISocketMessageChannel)_client.GetChannel(cid);
@@ -152,9 +122,7 @@ namespace SysBot.ACNHOrders
         public async Task InitCommands()
         {
             var assembly = Assembly.GetExecutingAssembly();
-
             await _commands.AddModulesAsync(assembly, _services).ConfigureAwait(false);
-            // Subscribe a handler to see if a message invokes a command.
             _client.MessageReceived += HandleMessageAsync;
         }
 
@@ -170,14 +138,17 @@ namespace SysBot.ACNHOrders
                     var lastMsg = await msgChannel.GetMessagesAsync(1).FlattenAsync();
                     if (lastMsg != null && lastMsg.Any())
                         if (lastMsg.ElementAt(0).Content == message)
-                            return true; // exists
+                            return true;
                 }
 
                 if (channel is IMessageChannel textChannel)
                     await textChannel.SendMessageAsync(message).ConfigureAwait(false);
                 return true;
             }
-            catch { }
+            catch (Exception ex)
+            {
+                await Log(new LogMessage(LogSeverity.Error, "Exception", ex.Message, ex)).ConfigureAwait(false);
+            }
 
             return false;
         }
@@ -189,22 +160,22 @@ namespace SysBot.ACNHOrders
                 await channel.SendMessageAsync(message).ConfigureAwait(false);
                 return true;
             }
-            catch { }
+            catch (Exception ex)
+            {
+                await Log(new LogMessage(LogSeverity.Error, "Exception", ex.Message, ex)).ConfigureAwait(false);
+            }
 
             return false;
         }
 
         private async Task HandleMessageAsync(SocketMessage arg)
         {
-            // Bail out if it's a System Message.
             if (arg is not SocketUserMessage msg)
                 return;
 
-            // We don't want the bot to respond to itself or other bots.
             if (msg.Author.Id == _client.CurrentUser.Id || (!Bot.Config.IgnoreAllPermissions && msg.Author.IsBot))
                 return;
 
-            // Create a number to track where the prefix ends and the command begins
             int pos = 0;
             if (msg.HasStringPrefix(Bot.Config.Prefix, ref pos))
             {
@@ -224,7 +195,6 @@ namespace SysBot.ACNHOrders
 
         private async Task<bool> CheckMessageDeletion(SocketUserMessage msg)
         {
-            // Create a Command Context.
             var context = new SocketCommandContext(_client, msg);
 
             var usrId = msg.Author.Id;
@@ -247,7 +217,6 @@ namespace SysBot.ACNHOrders
 
         private static async Task TryHandleMessageAsync(SocketMessage msg)
         {
-            // should this be a service?
             if (msg.Attachments.Count > 0)
             {
                 await Task.CompletedTask.ConfigureAwait(false);
@@ -256,10 +225,8 @@ namespace SysBot.ACNHOrders
 
         private async Task<bool> TryHandleCommandAsync(SocketUserMessage msg, int pos)
         {
-            // Create a Command Context.
             var context = new SocketCommandContext(_client, msg);
 
-            // Check Permission
             var mgr = Bot.Config;
             if (!Bot.Config.IgnoreAllPermissions)
             {
@@ -275,8 +242,6 @@ namespace SysBot.ACNHOrders
                 }
             }
 
-            // Execute the command. (result does not indicate a return value, 
-            // rather an object stating if the command executed successfully).
             var guild = msg.Channel is SocketGuildChannel g ? g.Guild.Name : "Unknown Guild";
             await Log(new LogMessage(LogSeverity.Info, "Command", $"Executing command from {guild}#{msg.Channel.Name}:@{msg.Author.Username}. Content: {msg}")).ConfigureAwait(false);
             var result = await _commands.ExecuteAsync(context, pos, _services).ConfigureAwait(false);
@@ -284,10 +249,6 @@ namespace SysBot.ACNHOrders
             if (result.Error == CommandError.UnknownCommand)
                 return false;
 
-            // Uncomment the following lines if you want the bot
-            // to send a message if it failed.
-            // This does not catch errors from commands with 'RunMode.Async',
-            // subscribe a handler for '_commands.CommandExecuted' to see those.
             if (!result.IsSuccess)
                 await msg.Channel.SendMessageAsync(result.ErrorReason).ConfigureAwait(false);
             return true;
@@ -295,7 +256,7 @@ namespace SysBot.ACNHOrders
 
         private async Task MonitorStatusAsync(CancellationToken token)
         {
-            const int Interval = 20; // seconds
+            const int Interval = 20;
             UserStatus state = UserStatus.Idle;
 
             while (!token.IsCancellationRequested)

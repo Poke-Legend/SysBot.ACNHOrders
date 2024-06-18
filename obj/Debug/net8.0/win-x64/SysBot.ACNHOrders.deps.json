@@ -16,7 +16,7 @@
           "Microsoft.NET.ILLink.Tasks": "8.0.4",
           "NLog": "4.7.6",
           "SixLabors.Fonts": "1.0.0-beta0013",
-          "SixLabors.ImageSharp": "1.0.3",
+          "SixLabors.ImageSharp": "3.1.4",
           "SixLabors.ImageSharp.Drawing": "1.0.0-beta11",
           "System.Text.Json": "8.0.3",
           "TwitchLib.Client": "3.2.1",
@@ -300,18 +300,18 @@
           }
         }
       },
-      "SixLabors.ImageSharp/1.0.3": {
+      "SixLabors.ImageSharp/3.1.4": {
         "runtime": {
-          "lib/netcoreapp3.1/SixLabors.ImageSharp.dll": {
-            "assemblyVersion": "1.0.0.0",
-            "fileVersion": "1.0.3.0"
+          "lib/net6.0/SixLabors.ImageSharp.dll": {
+            "assemblyVersion": "3.0.0.0",
+            "fileVersion": "3.1.4.0"
           }
         }
       },
       "SixLabors.ImageSharp.Drawing/1.0.0-beta11": {
         "dependencies": {
           "SixLabors.Fonts": "1.0.0-beta0013",
-          "SixLabors.ImageSharp": "1.0.3"
+          "SixLabors.ImageSharp": "3.1.4"
         },
         "runtime": {
           "lib/netcoreapp3.1/SixLabors.ImageSharp.Drawing.dll": {
@@ -614,12 +614,12 @@
       "path": "sixlabors.fonts/1.0.0-beta0013",
       "hashPath": "sixlabors.fonts.1.0.0-beta0013.nupkg.sha512"
     },
-    "SixLabors.ImageSharp/1.0.3": {
+    "SixLabors.ImageSharp/3.1.4": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-oRmZEITad+0tL22ZfAbLps6doDV+Z0/oH0dtXLpIBwn1sgai3QxxDQPjohHiDeUp/CTzRKVrFFbc4ZITnL2UBg==",
-      "path": "sixlabors.imagesharp/1.0.3",
-      "hashPath": "sixlabors.imagesharp.1.0.3.nupkg.sha512"
+      "sha512": "sha512-lFIdxgGDA5iYkUMRFOze7BGLcdpoLFbR+a20kc1W7NepvzU7ejtxtWOg9RvgG7kb9tBoJ3ONYOK6kLil/dgF1w==",
+      "path": "sixlabors.imagesharp/3.1.4",
+      "hashPath": "sixlabors.imagesharp.3.1.4.nupkg.sha512"
     },
     "SixLabors.ImageSharp.Drawing/1.0.0-beta11": {
       "type": "package",

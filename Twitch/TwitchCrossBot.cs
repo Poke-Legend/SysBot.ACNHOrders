@@ -1,7 +1,6 @@
 ﻿using NHSE.Core;
 using SysBot.Base;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -25,22 +24,18 @@ namespace SysBot.ACNHOrders.Twitch
 
         public TwitchCrossBot(TwitchConfig settings, CrossBot bot)
         {
-            Settings = settings;
-            Bot = bot;
-            BotName = settings.Username;
+            Settings = settings ?? throw new ArgumentNullException(nameof(settings));
+            Bot = bot ?? throw new ArgumentNullException(nameof(bot));
+            BotName = settings.Username ?? throw new ArgumentNullException(nameof(settings.Username));
 
-            var credentials = new ConnectionCredentials(settings.Username.ToLower(), settings.Token);
+            var credentials = new ConnectionCredentials(settings.Username.ToLower(), settings.Token ?? throw new ArgumentNullException(nameof(settings.Token)));
 
             var clientOptions = new ClientOptions
             {
                 MessagesAllowedInPeriod = settings.ThrottleMessages,
                 ThrottlingPeriod = TimeSpan.FromSeconds(settings.ThrottleSeconds),
-
                 WhispersAllowedInPeriod = settings.ThrottleWhispers,
                 WhisperThrottlingPeriod = TimeSpan.FromSeconds(settings.ThrottleWhispersSeconds),
-
-                // message queue capacity is managed (10_000 for message & whisper separately)
-                // message send interval is managed (50ms for each message sent)
             };
 
             var lowerKeyDic = new Dictionary<string, string>();
@@ -50,7 +45,7 @@ namespace SysBot.ACNHOrders.Twitch
                 lowerKeyDic.Add(kvp.Key.ToLower(), kvp.Value);
             settings.UserDefinitedCommands = lowerKeyDic;
 
-            Channel = settings.Channel;
+            Channel = settings.Channel ?? throw new ArgumentNullException(nameof(settings.Channel));
             WebSocketClient customClient = new(clientOptions);
             client = new TwitchClient(customClient);
 
@@ -273,9 +268,7 @@ namespace SysBot.ACNHOrders.Twitch
                 var _ = AddToTradeQueue(queueItem, msg, out string message);
                 client.SendMessage(Channel, message);
             }
-#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)
-#pragma warning restore CA1031 // Do not catch general exception types
             {
                 LogUtil.LogError($"{ex.Message}", nameof(TwitchCrossBot));
             }
@@ -285,7 +278,7 @@ namespace SysBot.ACNHOrders.Twitch
         {
             return message.Replace("{islandname}", Bot.TownName)
                 .Replace("{dodo}", Bot.DodoCode)
-                .Replace("{vcount}", Math.Min(0, Bot.VisitorList.VisitorCount - 1).ToString())
+                .Replace("{vcount}", Math.Max(0, Bot.VisitorList.VisitorCount - 1).ToString())
                 .Replace("{visitorlist}", Bot.VisitorList.VisitorFormattedString)
                 .Replace("{villagerlist}", Bot.Villagers.LastVillagers)
                 .Replace("{user}", caller);

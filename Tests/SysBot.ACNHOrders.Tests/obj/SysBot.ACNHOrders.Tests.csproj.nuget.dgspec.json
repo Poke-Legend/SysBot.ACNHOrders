@@ -22,6 +22,7 @@
           "net8.0"
         ],
         "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -71,7 +72,7 @@
             },
             "SixLabors.ImageSharp": {
               "target": "Package",
-              "version": "[1.0.3, )"
+              "version": "[3.1.4, )"
             },
             "SixLabors.ImageSharp.Drawing": {
               "target": "Package",
@@ -123,6 +124,7 @@
           "net8.0"
         ],
         "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {

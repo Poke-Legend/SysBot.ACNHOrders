@@ -41,15 +41,19 @@ namespace SysBot.ACNHOrders
             var assembly = Assembly.GetExecutingAssembly();
             if (assembly == null)
                 return string.Empty;
+
             var resourceName = namespacename + "." + filename;
-#pragma warning disable CS8600, CS8604
-            using (Stream stream = assembly.GetManifestResourceStream(resourceName))
-            using (StreamReader reader = new StreamReader(stream))
+            using (Stream? stream = assembly.GetManifestResourceStream(resourceName))
             {
-                string result = reader.ReadToEnd();
-                return result;
+                if (stream == null)
+                    return string.Empty;
+
+                using (StreamReader reader = new StreamReader(stream))
+                {
+                    string result = reader.ReadToEnd();
+                    return result;
+                }
             }
-#pragma warning restore CS8600, CS8604
         }
     }
 }

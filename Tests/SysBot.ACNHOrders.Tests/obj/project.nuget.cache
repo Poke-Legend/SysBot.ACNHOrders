@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "LOwhxW7pXYIq7BW4O1sbf8pLuiCBO9334OEHJD4jgqLLlCBq4OJuiKhJL4nrUalqO/x3gGFL0tHAX4h1G7QMFg==",
+  "dgSpecHash": "GlNUrhhpmtsaBW708cji4/AD4GD2L39egLjPY+L4kamMnRr9wBevdu6T2dcTDTAixy8QV+fYwQn9fcYMIPewVg==",
   "success": true,
   "projectFilePath": "C:\\Users\\bdkoh\\source\\repos\\SysBot.ACNHOrders\\Tests\\SysBot.ACNHOrders.Tests\\SysBot.ACNHOrders.Tests.csproj",
   "expectedPackageFiles": [
@@ -55,7 +55,7 @@
     "C:\\Users\\bdkoh\\.nuget\\packages\\runtime.ubuntu.16.04-x64.runtime.native.system.security.cryptography.openssl\\4.3.0\\runtime.ubuntu.16.04-x64.runtime.native.system.security.cryptography.openssl.4.3.0.nupkg.sha512",
     "C:\\Users\\bdkoh\\.nuget\\packages\\runtime.ubuntu.16.10-x64.runtime.native.system.security.cryptography.openssl\\4.3.0\\runtime.ubuntu.16.10-x64.runtime.native.system.security.cryptography.openssl.4.3.0.nupkg.sha512",
     "C:\\Users\\bdkoh\\.nuget\\packages\\sixlabors.fonts\\1.0.0-beta0013\\sixlabors.fonts.1.0.0-beta0013.nupkg.sha512",
-    "C:\\Users\\bdkoh\\.nuget\\packages\\sixlabors.imagesharp\\1.0.3\\sixlabors.imagesharp.1.0.3.nupkg.sha512",
+    "C:\\Users\\bdkoh\\.nuget\\packages\\sixlabors.imagesharp\\3.1.4\\sixlabors.imagesharp.3.1.4.nupkg.sha512",
     "C:\\Users\\bdkoh\\.nuget\\packages\\sixlabors.imagesharp.drawing\\1.0.0-beta11\\sixlabors.imagesharp.drawing.1.0.0-beta11.nupkg.sha512",
     "C:\\Users\\bdkoh\\.nuget\\packages\\system.appcontext\\4.3.0\\system.appcontext.4.3.0.nupkg.sha512",
     "C:\\Users\\bdkoh\\.nuget\\packages\\system.buffers\\4.3.0\\system.buffers.4.3.0.nupkg.sha512",

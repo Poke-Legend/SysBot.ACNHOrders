@@ -163,3 +163,4 @@ C:\Users\brand\Source\Repos\SysBot.ACNH\obj\Debug\net8.0\refint\SysBot.ACNHOrder
 C:\Users\brand\Source\Repos\SysBot.ACNH\obj\Debug\net8.0\SysBot.ACNHOrders.pdb
 C:\Users\brand\Source\Repos\SysBot.ACNH\obj\Debug\net8.0\SysBot.ACNHOrders.genruntimeconfig.cache
 C:\Users\brand\Source\Repos\SysBot.ACNH\obj\Debug\net8.0\ref\SysBot.ACNHOrders.dll
+C:\Users\brand\source\repos\SysBot.ACNH\bin\Debug\net8.0\Microsoft.Bcl.AsyncInterfaces.dll

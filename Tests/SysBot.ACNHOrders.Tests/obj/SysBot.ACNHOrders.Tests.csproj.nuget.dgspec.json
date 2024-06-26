@@ -11,7 +11,7 @@
         "projectName": "SysBot.ACNHOrders",
         "projectPath": "C:\\Users\\brand\\source\\repos\\SysBot.ACNH\\SysBot.ACNHOrders.csproj",
         "packagesPath": "C:\\Users\\brand\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\brand\\Source\\Repos\\SysBot.ACNH\\obj\\",
+        "outputPath": "C:\\Users\\brand\\source\\repos\\SysBot.ACNH\\obj\\",
         "projectStyle": "PackageReference",
         "crossTargeting": true,
         "fallbackFolders": [
@@ -26,7 +26,6 @@
           "net8.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -52,11 +51,11 @@
           "dependencies": {
             "Discord.Net": {
               "target": "Package",
-              "version": "[3.11.0, )"
+              "version": "[3.15.2, )"
             },
             "Discord.Net.Core": {
               "target": "Package",
-              "version": "[3.11.0, )"
+              "version": "[3.15.2, )"
             },
             "Microsoft.AspNetCore.SignalR.Client": {
               "target": "Package",
@@ -118,7 +117,7 @@
         "projectName": "SysBot.ACNHOrders.Tests",
         "projectPath": "C:\\Users\\brand\\source\\repos\\SysBot.ACNH\\Tests\\SysBot.ACNHOrders.Tests\\SysBot.ACNHOrders.Tests.csproj",
         "packagesPath": "C:\\Users\\brand\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\brand\\Source\\Repos\\SysBot.ACNH\\Tests\\SysBot.ACNHOrders.Tests\\obj\\",
+        "outputPath": "C:\\Users\\brand\\source\\repos\\SysBot.ACNH\\Tests\\SysBot.ACNHOrders.Tests\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -132,7 +131,6 @@
           "net8.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {

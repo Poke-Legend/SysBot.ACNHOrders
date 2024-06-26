@@ -1,0 +1,126 @@
+2024-06-16 12:20:39.0695|INFO|SysBot.Base.LogUtil|192.168.0.1 Starting Discord.
+2024-06-16 12:20:39.1181|INFO|SysBot.Base.LogUtil|192.168.0.1 Starting bot loop.
+2024-06-16 12:20:39.1181|INFO|SysBot.Base.LogUtil|192.168.0.1 Connecting to device...
+2024-06-16 12:20:39.1758|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Discord: Discord.Net v3.11.0 (API v10) 
+2024-06-16 12:20:39.6071|INFO|SysBot.Base.LogUtil|SysCord: [ Warning] Discord: A supplied token was invalid. System.ArgumentException: A Bot token must be at least 58 characters in length. Ensure that the Bot Token provided is not an OAuth client secret. (Parameter 'token')
+   at Discord.TokenUtils.ValidateToken(TokenType tokenType, String token)
+   at Discord.Rest.BaseDiscordClient.LoginInternalAsync(TokenType tokenType, String token, Boolean validateToken)
+2024-06-16 12:20:39.6348|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Connecting 
+2024-06-16 12:20:40.8285|INFO|SysBot.Base.LogUtil|SysCord: [ Warning] Gateway:  Discord.Net.HttpException: The server responded with error 401: 401: Unauthorized
+   at Discord.Net.Queue.RequestBucket.SendAsync(RestRequest request)
+   at Discord.Net.Queue.RequestQueue.SendAsync(RestRequest request)
+   at Discord.API.DiscordRestApiClient.SendInternalAsync(String method, String endpoint, RestRequest request)
+   at Discord.API.DiscordRestApiClient.SendAsync[TResponse](String method, String endpoint, BucketId bucketId, ClientBucketType clientBucket, RequestOptions options)
+   at Discord.API.DiscordRestApiClient.GetBotGatewayAsync(RequestOptions options)
+   at Discord.API.DiscordSocketApiClient.ConnectInternalAsync()
+   at Discord.API.DiscordSocketApiClient.ConnectInternalAsync()
+   at Discord.API.DiscordSocketApiClient.ConnectAsync()
+   at Discord.WebSocket.DiscordSocketClient.OnConnectingAsync()
+   at Discord.ConnectionManager.ConnectAsync(CancellationTokenSource reconnectCancelToken)
+   at Discord.ConnectionManager.<>c__DisplayClass29_0.<<StartAsync>b__0>d.MoveNext()
+2024-06-16 12:20:40.8285|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Disconnecting 
+2024-06-16 12:20:40.8365|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Disconnected 
+2024-06-16 12:20:41.8402|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Connecting 
+2024-06-16 12:20:43.6937|INFO|SysBot.Base.LogUtil|SysCord: [ Warning] Gateway:  Discord.Net.HttpException: The server responded with error 401: 401: Unauthorized
+   at Discord.Net.Queue.RequestBucket.SendAsync(RestRequest request)
+   at Discord.Net.Queue.RequestQueue.SendAsync(RestRequest request)
+   at Discord.API.DiscordRestApiClient.SendInternalAsync(String method, String endpoint, RestRequest request)
+   at Discord.API.DiscordRestApiClient.SendAsync[TResponse](String method, String endpoint, BucketId bucketId, ClientBucketType clientBucket, RequestOptions options)
+   at Discord.API.DiscordRestApiClient.GetBotGatewayAsync(RequestOptions options)
+   at Discord.API.DiscordSocketApiClient.ConnectInternalAsync()
+   at Discord.API.DiscordSocketApiClient.ConnectInternalAsync()
+   at Discord.API.DiscordSocketApiClient.ConnectAsync()
+   at Discord.WebSocket.DiscordSocketClient.OnConnectingAsync()
+   at Discord.ConnectionManager.ConnectAsync(CancellationTokenSource reconnectCancelToken)
+   at Discord.ConnectionManager.<>c__DisplayClass29_0.<<StartAsync>b__0>d.MoveNext()
+2024-06-16 12:20:43.6937|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Disconnecting 
+2024-06-25 22:40:51.2068|INFO|SysBot.Base.LogUtil|192.168.0.1 Starting Discord.
+2024-06-25 22:40:51.2304|INFO|SysBot.Base.LogUtil|192.168.0.1 Starting bot loop.
+2024-06-25 22:40:51.2304|INFO|SysBot.Base.LogUtil|192.168.0.1 Connecting to device...
+2024-06-25 22:40:51.2681|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Discord: Discord.Net v3.11.0 (API v10) 
+2024-06-25 22:40:51.2903|INFO|SysBot.Base.LogUtil|SysCord: [ Warning] Discord: A supplied token was invalid. System.ArgumentException: A Bot token must be at least 58 characters in length. Ensure that the Bot Token provided is not an OAuth client secret. (Parameter 'token')
+   at Discord.TokenUtils.ValidateToken(TokenType tokenType, String token)
+   at Discord.Rest.BaseDiscordClient.LoginInternalAsync(TokenType tokenType, String token, Boolean validateToken)
+2024-06-25 22:40:51.2974|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Connecting 
+2024-06-25 22:40:51.8677|INFO|SysBot.Base.LogUtil|SysCord: [ Warning] Gateway:  Discord.Net.HttpException: The server responded with error 401: 401: Unauthorized
+   at Discord.Net.Queue.RequestBucket.SendAsync(RestRequest request)
+   at Discord.Net.Queue.RequestQueue.SendAsync(RestRequest request)
+   at Discord.API.DiscordRestApiClient.SendInternalAsync(String method, String endpoint, RestRequest request)
+   at Discord.API.DiscordRestApiClient.SendAsync[TResponse](String method, String endpoint, BucketId bucketId, ClientBucketType clientBucket, RequestOptions options)
+   at Discord.API.DiscordRestApiClient.GetBotGatewayAsync(RequestOptions options)
+   at Discord.API.DiscordSocketApiClient.ConnectInternalAsync()
+   at Discord.API.DiscordSocketApiClient.ConnectInternalAsync()
+   at Discord.API.DiscordSocketApiClient.ConnectAsync()
+   at Discord.WebSocket.DiscordSocketClient.OnConnectingAsync()
+   at Discord.ConnectionManager.ConnectAsync(CancellationTokenSource reconnectCancelToken)
+   at Discord.ConnectionManager.<>c__DisplayClass29_0.<<StartAsync>b__0>d.MoveNext()
+2024-06-25 22:40:51.8677|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Disconnecting 
+2024-06-25 22:40:51.8739|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Disconnected 
+2024-06-25 22:40:52.8828|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Connecting 
+2024-06-25 22:42:25.2108|INFO|SysBot.Base.LogUtil|192.168.0.1 Starting Discord.
+2024-06-25 22:42:25.2335|INFO|SysBot.Base.LogUtil|192.168.0.1 Starting bot loop.
+2024-06-25 22:42:25.2335|INFO|SysBot.Base.LogUtil|192.168.0.1 Connecting to device...
+2024-06-25 22:42:25.2697|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Discord: Discord.Net v3.11.0 (API v10) 
+2024-06-25 22:42:25.2844|INFO|SysBot.Base.LogUtil|SysCord: [ Warning] Discord: A supplied token was invalid. System.ArgumentException: A Bot token must be at least 58 characters in length. Ensure that the Bot Token provided is not an OAuth client secret. (Parameter 'token')
+   at Discord.TokenUtils.ValidateToken(TokenType tokenType, String token)
+   at Discord.Rest.BaseDiscordClient.LoginInternalAsync(TokenType tokenType, String token, Boolean validateToken)
+2024-06-25 22:42:25.2844|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Connecting 
+2024-06-25 22:42:25.6835|INFO|SysBot.Base.LogUtil|SysCord: [ Warning] Gateway:  Discord.Net.HttpException: The server responded with error 401: 401: Unauthorized
+   at Discord.Net.Queue.RequestBucket.SendAsync(RestRequest request)
+   at Discord.Net.Queue.RequestQueue.SendAsync(RestRequest request)
+   at Discord.API.DiscordRestApiClient.SendInternalAsync(String method, String endpoint, RestRequest request)
+   at Discord.API.DiscordRestApiClient.SendAsync[TResponse](String method, String endpoint, BucketId bucketId, ClientBucketType clientBucket, RequestOptions options)
+   at Discord.API.DiscordRestApiClient.GetBotGatewayAsync(RequestOptions options)
+   at Discord.API.DiscordSocketApiClient.ConnectInternalAsync()
+   at Discord.API.DiscordSocketApiClient.ConnectInternalAsync()
+   at Discord.API.DiscordSocketApiClient.ConnectAsync()
+   at Discord.WebSocket.DiscordSocketClient.OnConnectingAsync()
+   at Discord.ConnectionManager.ConnectAsync(CancellationTokenSource reconnectCancelToken)
+   at Discord.ConnectionManager.<>c__DisplayClass29_0.<<StartAsync>b__0>d.MoveNext()
+2024-06-25 22:42:25.6835|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Disconnecting 
+2024-06-25 22:42:25.6835|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Disconnected 
+2024-06-25 23:06:14.8981|INFO|SysBot.Base.LogUtil|192.168.0.1 Starting Discord.
+2024-06-25 23:06:14.9226|INFO|SysBot.Base.LogUtil|192.168.0.1 Starting bot loop.
+2024-06-25 23:06:14.9226|INFO|SysBot.Base.LogUtil|192.168.0.1 Connecting to device...
+2024-06-25 23:06:14.9614|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Discord: Discord.Net v3.11.0 (API v10) 
+2024-06-25 23:06:14.9808|INFO|SysBot.Base.LogUtil|SysCord: [ Warning] Discord: A supplied token was invalid. System.ArgumentException: A Bot token must be at least 58 characters in length. Ensure that the Bot Token provided is not an OAuth client secret. (Parameter 'token')
+   at Discord.TokenUtils.ValidateToken(TokenType tokenType, String token)
+   at Discord.Rest.BaseDiscordClient.LoginInternalAsync(TokenType tokenType, String token, Boolean validateToken)
+2024-06-25 23:06:14.9895|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Connecting 
+2024-06-25 23:30:35.0846|INFO|SysBot.Base.LogUtil|192.168.0.1 Starting Discord.
+2024-06-25 23:30:35.1054|INFO|SysBot.Base.LogUtil|192.168.0.1 Starting bot loop.
+2024-06-25 23:30:35.1054|INFO|SysBot.Base.LogUtil|192.168.0.1 Connecting to device...
+2024-06-25 23:30:35.1425|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Discord: Discord.Net v3.11.0 (API v10) 
+2024-06-25 23:30:35.1425|INFO|SysBot.Base.LogUtil|SysCord: [ Warning] Discord: A supplied token was invalid. System.ArgumentException: A Bot token must be at least 58 characters in length. Ensure that the Bot Token provided is not an OAuth client secret. (Parameter 'token')
+   at Discord.TokenUtils.ValidateToken(TokenType tokenType, String token)
+   at Discord.Rest.BaseDiscordClient.LoginInternalAsync(TokenType tokenType, String token, Boolean validateToken)
+2024-06-25 23:30:35.1620|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Connecting 
+2024-06-25 23:30:35.6018|INFO|SysBot.Base.LogUtil|SysCord: [ Warning] Gateway:  Discord.Net.HttpException: The server responded with error 401: 401: Unauthorized
+   at Discord.Net.Queue.RequestBucket.SendAsync(RestRequest request)
+   at Discord.Net.Queue.RequestQueue.SendAsync(RestRequest request)
+   at Discord.API.DiscordRestApiClient.SendInternalAsync(String method, String endpoint, RestRequest request)
+   at Discord.API.DiscordRestApiClient.SendAsync[TResponse](String method, String endpoint, BucketId bucketId, ClientBucketType clientBucket, RequestOptions options)
+   at Discord.API.DiscordRestApiClient.GetBotGatewayAsync(RequestOptions options)
+   at Discord.API.DiscordSocketApiClient.ConnectInternalAsync()
+   at Discord.API.DiscordSocketApiClient.ConnectInternalAsync()
+   at Discord.API.DiscordSocketApiClient.ConnectAsync()
+   at Discord.WebSocket.DiscordSocketClient.OnConnectingAsync()
+   at Discord.ConnectionManager.ConnectAsync(CancellationTokenSource reconnectCancelToken)
+   at Discord.ConnectionManager.<>c__DisplayClass29_0.<<StartAsync>b__0>d.MoveNext()
+2024-06-25 23:30:35.6018|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Disconnecting 
+2024-06-25 23:30:35.6018|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Disconnected 
+2024-06-25 23:30:36.6137|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Connecting 
+2024-06-25 23:30:36.6809|INFO|SysBot.Base.LogUtil|SysCord: [ Warning] Gateway:  Discord.Net.HttpException: The server responded with error 401: 401: Unauthorized
+   at Discord.Net.Queue.RequestBucket.SendAsync(RestRequest request)
+   at Discord.Net.Queue.RequestQueue.SendAsync(RestRequest request)
+   at Discord.API.DiscordRestApiClient.SendInternalAsync(String method, String endpoint, RestRequest request)
+   at Discord.API.DiscordRestApiClient.SendAsync[TResponse](String method, String endpoint, BucketId bucketId, ClientBucketType clientBucket, RequestOptions options)
+   at Discord.API.DiscordRestApiClient.GetBotGatewayAsync(RequestOptions options)
+   at Discord.API.DiscordSocketApiClient.ConnectInternalAsync()
+   at Discord.API.DiscordSocketApiClient.ConnectInternalAsync()
+   at Discord.API.DiscordSocketApiClient.ConnectAsync()
+   at Discord.WebSocket.DiscordSocketClient.OnConnectingAsync()
+   at Discord.ConnectionManager.ConnectAsync(CancellationTokenSource reconnectCancelToken)
+   at Discord.ConnectionManager.<>c__DisplayClass29_0.<<StartAsync>b__0>d.MoveNext()
+2024-06-25 23:30:36.6809|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Disconnecting 
+2024-06-25 23:30:36.6809|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Disconnected 

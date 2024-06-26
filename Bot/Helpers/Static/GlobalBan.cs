@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace SysBot.ACNHOrders
 {
+
     public class Penalty
     {
         public string ID = string.Empty;
@@ -20,23 +21,31 @@ namespace SysBot.ACNHOrders
 
         public override string ToString() => ID;
     }
-
-    public static class GlobalBan
+    public class GlobalBan
     {
-        private const string FilePath = "banlist.txt";
+        private const string UserBanFilePath = "userbanlist.txt";
+        private const string ServerBanFilePath = "serverbanlist.txt";
 
         private static int PenaltyCountBan = 0;
         private static readonly List<Penalty> PenaltyList = new();
 
-        private static readonly object MapAccessor = new();
+        private static readonly object UserMapAccessor = new object();
+        private static readonly object ServerMapAccessor = new object();
+
+        // User Bans
+        private static readonly List<string> BannedUsers = new List<string>();
+
+        // Server Bans
+        private static readonly List<string> BannedServers = new List<string>();
 
         public static void UpdateConfiguration(CrossBotConfig config)
         {
             PenaltyCountBan = config.OrderConfig.PenaltyBanCount;
 
-            lock (MapAccessor)
+            lock (UserMapAccessor)
             {
-                loadBanList();
+                LoadBannedUsers();
+                LoadBannedServers();
             }
         }
 
@@ -44,7 +53,7 @@ namespace SysBot.ACNHOrders
         {
             if (PenaltyCountBan < 1)
                 return false;
-            lock(MapAccessor)
+            lock (UserMapAccessor)
             {
                 var pen = PenaltyList.Find(x => x.ID == id);
 
@@ -57,85 +66,110 @@ namespace SysBot.ACNHOrders
                     pen = new Penalty(id, 1);
                     PenaltyList.Add(pen);
                 }
-                saveBanList();
+                SaveBannedServers();
+                SaveBannedUsers();
                 return pen.PenaltyCount >= PenaltyCountBan;
             }
         }
 
-        public static bool IsBanned(string id)
+
+        // Load bans from files on startup
+        public static void LoadBans()
         {
-            if (PenaltyCountBan < 1)
-                return false;
-            lock (MapAccessor)
-            {
-                var pen = PenaltyList.Find(x => x.ID == id);
-
-                if (pen != null)
-                    return pen.PenaltyCount >= PenaltyCountBan;
-            }
-
-            return false;
+            LoadBannedUsers();
+            LoadBannedServers();
         }
 
-        public static void UnBan(string id)
+        // User Ban Methods
+        public static void Ban(string userId)
         {
-            lock (MapAccessor)
+            lock (UserMapAccessor)
             {
-                var pen = PenaltyList.Find(x => x.ID == id);
-
-                if (pen == null)
-                    return;
-
-                PenaltyList.Remove(pen);
-                saveBanList();
-            }
-        }
-
-        public static void Ban(string id)
-        {
-            lock (MapAccessor)
-            {
-                var pen = PenaltyList.Find(x => x.ID == id);
-
-                if (pen != null)
+                if (!BannedUsers.Contains(userId))
                 {
-                    pen.PenaltyCount = (uint)PenaltyCountBan;
+                    BannedUsers.Add(userId);
+                    SaveBannedUsers();
                 }
-                else
-                    PenaltyList.Add(new Penalty(id, (uint)PenaltyCountBan));
-
-                saveBanList();
             }
         }
 
-        // only call within a lock
-        private static void saveBanList()
+        public static void UnBan(string userId)
         {
-            var allBans = PenaltyList.Where(x => x.PenaltyCount >= PenaltyCountBan).ToArray();
-            if (allBans.Length < 1)
-                return;
-
-            var banIDs = new string[allBans.Length];
-            for (int i = 0; i < banIDs.Length; ++i)
-                banIDs[i] = allBans[i].ToString();
-
-            var toWrite = string.Join("\r\n", banIDs);
-            File.WriteAllText(FilePath, toWrite);
-        }
-
-        private static void loadBanList()
-        {
-            if (!File.Exists(FilePath))
+            lock (UserMapAccessor)
             {
-                var f = File.Create(FilePath);
-                f.Close();
+                if (BannedUsers.Contains(userId))
+                {
+                    BannedUsers.Remove(userId);
+                    SaveBannedUsers();
+                }
             }
+        }
 
-            var bans = File.ReadAllLines(FilePath);
+        public static bool IsBanned(string userId)
+        {
+            lock (UserMapAccessor)
+            {
+                return BannedUsers.Contains(userId);
+            }
+        }
 
-            foreach (var b in bans)
-                if (PenaltyList.Find(x => x.ID == b) == null)
-                    PenaltyList.Add(new Penalty(b, (uint)PenaltyCountBan));
+        private static void LoadBannedUsers()
+        {
+            if (File.Exists(UserBanFilePath))
+            {
+                BannedUsers.AddRange(File.ReadAllLines(UserBanFilePath));
+            }
+        }
+
+        private static void SaveBannedUsers()
+        {
+            File.WriteAllLines(UserBanFilePath, BannedUsers);
+        }
+
+        // Server Ban Methods
+        public static void BanServer(string serverId)
+        {
+            lock (ServerMapAccessor)
+            {
+                if (!BannedServers.Contains(serverId))
+                {
+                    BannedServers.Add(serverId);
+                    SaveBannedServers();
+                }
+            }
+        }
+
+        public static void UnbanServer(string serverId)
+        {
+            lock (ServerMapAccessor)
+            {
+                if (BannedServers.Contains(serverId))
+                {
+                    BannedServers.Remove(serverId);
+                    SaveBannedServers();
+                }
+            }
+        }
+
+        public static bool IsServerBanned(string serverId)
+        {
+            lock (ServerMapAccessor)
+            {
+                return BannedServers.Contains(serverId);
+            }
+        }
+
+        private static void LoadBannedServers()
+        {
+            if (File.Exists(ServerBanFilePath))
+            {
+                BannedServers.AddRange(File.ReadAllLines(ServerBanFilePath));
+            }
+        }
+
+        private static void SaveBannedServers()
+        {
+            File.WriteAllLines(ServerBanFilePath, BannedServers);
         }
     }
 }

@@ -8,7 +8,7 @@ using NHSE.Villagers;
 
 namespace SysBot.ACNHOrders
 {
-    // ReSharper disable once UnusedType.Global
+    // ReSharper disable once UnusedType.Global 
     public class VillagerModule : ModuleBase<SocketCommandContext>
     {
 

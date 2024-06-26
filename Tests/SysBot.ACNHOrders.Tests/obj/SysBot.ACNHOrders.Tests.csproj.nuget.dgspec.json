@@ -1,21 +1,25 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\bdkoh\\source\\repos\\SysBot.ACNHOrders\\Tests\\SysBot.ACNHOrders.Tests\\SysBot.ACNHOrders.Tests.csproj": {}
+    "C:\\Users\\brand\\source\\repos\\SysBot.ACNHOrders\\Tests\\SysBot.ACNHOrders.Tests\\SysBot.ACNHOrders.Tests.csproj": {}
   },
   "projects": {
-    "C:\\Users\\bdkoh\\source\\repos\\SysBot.ACNHOrders\\SysBot.ACNHOrders.csproj": {
+    "C:\\Users\\brand\\source\\repos\\SysBot.ACNHOrders\\SysBot.ACNHOrders.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\bdkoh\\source\\repos\\SysBot.ACNHOrders\\SysBot.ACNHOrders.csproj",
+        "projectUniqueName": "C:\\Users\\brand\\source\\repos\\SysBot.ACNHOrders\\SysBot.ACNHOrders.csproj",
         "projectName": "SysBot.ACNHOrders",
-        "projectPath": "C:\\Users\\bdkoh\\source\\repos\\SysBot.ACNHOrders\\SysBot.ACNHOrders.csproj",
-        "packagesPath": "C:\\Users\\bdkoh\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\bdkoh\\source\\repos\\SysBot.ACNHOrders\\obj\\",
+        "projectPath": "C:\\Users\\brand\\source\\repos\\SysBot.ACNHOrders\\SysBot.ACNHOrders.csproj",
+        "packagesPath": "C:\\Users\\brand\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\brand\\source\\repos\\SysBot.ACNHOrders\\obj\\",
         "projectStyle": "PackageReference",
         "crossTargeting": true,
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
         "configFilePaths": [
-          "C:\\Users\\bdkoh\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\brand\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -103,21 +107,25 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.204/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.302/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\bdkoh\\source\\repos\\SysBot.ACNHOrders\\Tests\\SysBot.ACNHOrders.Tests\\SysBot.ACNHOrders.Tests.csproj": {
+    "C:\\Users\\brand\\source\\repos\\SysBot.ACNHOrders\\Tests\\SysBot.ACNHOrders.Tests\\SysBot.ACNHOrders.Tests.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\bdkoh\\source\\repos\\SysBot.ACNHOrders\\Tests\\SysBot.ACNHOrders.Tests\\SysBot.ACNHOrders.Tests.csproj",
+        "projectUniqueName": "C:\\Users\\brand\\source\\repos\\SysBot.ACNHOrders\\Tests\\SysBot.ACNHOrders.Tests\\SysBot.ACNHOrders.Tests.csproj",
         "projectName": "SysBot.ACNHOrders.Tests",
-        "projectPath": "C:\\Users\\bdkoh\\source\\repos\\SysBot.ACNHOrders\\Tests\\SysBot.ACNHOrders.Tests\\SysBot.ACNHOrders.Tests.csproj",
-        "packagesPath": "C:\\Users\\bdkoh\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\bdkoh\\source\\repos\\SysBot.ACNHOrders\\Tests\\SysBot.ACNHOrders.Tests\\obj\\",
+        "projectPath": "C:\\Users\\brand\\source\\repos\\SysBot.ACNHOrders\\Tests\\SysBot.ACNHOrders.Tests\\SysBot.ACNHOrders.Tests.csproj",
+        "packagesPath": "C:\\Users\\brand\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\brand\\source\\repos\\SysBot.ACNHOrders\\Tests\\SysBot.ACNHOrders.Tests\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
         "configFilePaths": [
-          "C:\\Users\\bdkoh\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\brand\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -131,8 +139,8 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "C:\\Users\\bdkoh\\source\\repos\\SysBot.ACNHOrders\\SysBot.ACNHOrders.csproj": {
-                "projectPath": "C:\\Users\\bdkoh\\source\\repos\\SysBot.ACNHOrders\\SysBot.ACNHOrders.csproj"
+              "C:\\Users\\brand\\source\\repos\\SysBot.ACNHOrders\\SysBot.ACNHOrders.csproj": {
+                "projectPath": "C:\\Users\\brand\\source\\repos\\SysBot.ACNHOrders\\SysBot.ACNHOrders.csproj"
               }
             }
           }
@@ -193,7 +201,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.204/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.302/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

@@ -1,21 +1,25 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\bdkoh\\source\\repos\\SysBot.ACNHOrders\\SysBot.ACNHOrders.csproj": {}
+    "C:\\Users\\brand\\Source\\Repos\\SysBot.ACNHOrders\\SysBot.ACNHOrders.csproj": {}
   },
   "projects": {
-    "C:\\Users\\bdkoh\\source\\repos\\SysBot.ACNHOrders\\SysBot.ACNHOrders.csproj": {
+    "C:\\Users\\brand\\Source\\Repos\\SysBot.ACNHOrders\\SysBot.ACNHOrders.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\bdkoh\\source\\repos\\SysBot.ACNHOrders\\SysBot.ACNHOrders.csproj",
+        "projectUniqueName": "C:\\Users\\brand\\Source\\Repos\\SysBot.ACNHOrders\\SysBot.ACNHOrders.csproj",
         "projectName": "SysBot.ACNHOrders",
-        "projectPath": "C:\\Users\\bdkoh\\source\\repos\\SysBot.ACNHOrders\\SysBot.ACNHOrders.csproj",
-        "packagesPath": "C:\\Users\\bdkoh\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\bdkoh\\source\\repos\\SysBot.ACNHOrders\\obj\\publish\\win-x64\\",
+        "projectPath": "C:\\Users\\brand\\Source\\Repos\\SysBot.ACNHOrders\\SysBot.ACNHOrders.csproj",
+        "packagesPath": "C:\\Users\\brand\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\brand\\Source\\Repos\\SysBot.ACNHOrders\\obj\\publish\\win-x64\\",
         "projectStyle": "PackageReference",
         "crossTargeting": true,
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
         "configFilePaths": [
-          "C:\\Users\\bdkoh\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\brand\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -65,7 +69,7 @@
             "Microsoft.NET.ILLink.Tasks": {
               "suppressParent": "All",
               "target": "Package",
-              "version": "[8.0.4, )",
+              "version": "[8.0.6, )",
               "autoReferenced": true
             },
             "NLog": {
@@ -107,19 +111,19 @@
           "downloadDependencies": [
             {
               "name": "Microsoft.AspNetCore.App.Runtime.win-x64",
-              "version": "[8.0.4, 8.0.4]"
+              "version": "[8.0.6, 8.0.6]"
             },
             {
               "name": "Microsoft.NETCore.App.Crossgen2.win-x64",
-              "version": "[8.0.4, 8.0.4]"
+              "version": "[8.0.6, 8.0.6]"
             },
             {
               "name": "Microsoft.NETCore.App.Runtime.win-x64",
-              "version": "[8.0.4, 8.0.4]"
+              "version": "[8.0.6, 8.0.6]"
             },
             {
               "name": "Microsoft.WindowsDesktop.App.Runtime.win-x64",
-              "version": "[8.0.4, 8.0.4]"
+              "version": "[8.0.6, 8.0.6]"
             }
           ],
           "frameworkReferences": {
@@ -127,7 +131,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.204/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.302/PortableRuntimeIdentifierGraph.json"
         }
       },
       "runtimes": {

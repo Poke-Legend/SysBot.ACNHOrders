@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "bgo+psArlN8=",
+  "dgSpecHash": "yXOyQYiwMpc=",
   "success": true,
-  "projectFilePath": "C:\\Users\\brand\\source\\repos\\SysBot.ACNHOrders\\Tests\\SysBot.ACNHOrders.Tests\\SysBot.ACNHOrders.Tests.csproj",
+  "projectFilePath": "C:\\Users\\brand\\source\\repos\\SysBot.ACNH\\Tests\\SysBot.ACNHOrders.Tests\\SysBot.ACNHOrders.Tests.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\brand\\.nuget\\packages\\coverlet.collector\\1.3.0\\coverlet.collector.1.3.0.nupkg.sha512",
     "C:\\Users\\brand\\.nuget\\packages\\discord.net\\3.11.0\\discord.net.3.11.0.nupkg.sha512",

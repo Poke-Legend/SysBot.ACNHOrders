@@ -33,7 +33,7 @@ namespace SysBot.ACNHOrders
             base.BeforeExecute(command);
         }
 
-        [Command("unBanServer")]
+        [Command("unbls")]
         [Summary("Unbans a server by its server ID.")]
         [RequireOwner] 
         public async Task UnBanServerAsync(string serverId)
@@ -49,7 +49,7 @@ namespace SysBot.ACNHOrders
             }
         }
 
-        [Command("banServer")]
+        [Command("bls")]
         [Summary("Bans a server by its server ID.")]
         [RequireOwner]
         public async Task BanServerAsync(string serverId)
@@ -72,7 +72,7 @@ namespace SysBot.ACNHOrders
             }
         }
 
-        [Command("checkServerBan")]
+        [Command("checkbls")]
         [Summary("Checks a server's ban state by its server ID.")]
         [RequireOwner]
         public async Task CheckServerBanAsync(string serverId) =>

@@ -76,7 +76,7 @@ namespace SysBot.ACNHOrders
         [Summary("Checks a server's ban state by its server ID.")]
         [RequireOwner]
         public async Task CheckServerBanAsync(string serverId) =>
-            await ReplyAsync(ServerBan.IsServerBanned(serverId) ? $"Server {serverId} is banned" : $"Server {serverId} is not banned").ConfigureAwait(false);
+            await ReplyAsync(GlobalBan.IsServerBanned(serverId) ? $"Server {serverId} is banned" : $"Server {serverId} is not banned").ConfigureAwait(false);
     }
 
     // Extension method to retrieve the bot member from a guild ID
@@ -85,6 +85,7 @@ namespace SysBot.ACNHOrders
         public static SocketGuildUser? GetBotMember(this SocketGuild guild)
         {
             return guild.GetUser(guild.CurrentUser.Id);
+
         }
     }
 }

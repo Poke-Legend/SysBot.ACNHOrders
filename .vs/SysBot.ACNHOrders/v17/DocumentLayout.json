@@ -3,16 +3,12 @@
   "WorkspaceRootPath": "C:\\Users\\brand\\source\\repos\\SysBot.ACNH\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{EF7676A2-DF5A-49E8-BF8E-F522CE5FCAC3}|SysBot.ACNHOrders.csproj|c:\\users\\brand\\source\\repos\\sysbot.acnh\\bot\\helpers\\static\\globalban.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{EF7676A2-DF5A-49E8-BF8E-F522CE5FCAC3}|SysBot.ACNHOrders.csproj|solutionrelative:bot\\helpers\\static\\globalban.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{EF7676A2-DF5A-49E8-BF8E-F522CE5FCAC3}|SysBot.ACNHOrders.csproj|c:\\users\\brand\\source\\repos\\sysbot.acnh\\discord\\modules\\serverbanmodule.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EF7676A2-DF5A-49E8-BF8E-F522CE5FCAC3}|SysBot.ACNHOrders.csproj|solutionrelative:discord\\modules\\serverbanmodule.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{EF7676A2-DF5A-49E8-BF8E-F522CE5FCAC3}|SysBot.ACNHOrders.csproj|c:\\users\\brand\\source\\repos\\sysbot.acnh\\discord\\modules\\banmodule.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{EF7676A2-DF5A-49E8-BF8E-F522CE5FCAC3}|SysBot.ACNHOrders.csproj|solutionrelative:discord\\modules\\banmodule.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{EF7676A2-DF5A-49E8-BF8E-F522CE5FCAC3}|SysBot.ACNHOrders.csproj|c:\\users\\brand\\source\\repos\\sysbot.acnh\\discord\\modules\\serverbanmodule.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{EF7676A2-DF5A-49E8-BF8E-F522CE5FCAC3}|SysBot.ACNHOrders.csproj|solutionrelative:discord\\modules\\serverbanmodule.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -22,7 +18,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 11,
+          "SelectedChildIndex": 10,
           "Children": [
             {
               "$type": "Bookmark",
@@ -62,41 +58,28 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "ServerBanModule.cs",
-              "DocumentMoniker": "C:\\Users\\brand\\source\\repos\\SysBot.ACNH\\Discord\\Modules\\ServerBanModule.cs",
-              "RelativeDocumentMoniker": "Discord\\Modules\\ServerBanModule.cs",
-              "ToolTip": "C:\\Users\\brand\\source\\repos\\SysBot.ACNH\\Discord\\Modules\\ServerBanModule.cs",
-              "RelativeToolTip": "Discord\\Modules\\ServerBanModule.cs",
-              "ViewState": "AQIAABsAAAAAAAAAAAAowCoAAAAwAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-06-26T05:07:49.981Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
               "DocumentIndex": 1,
               "Title": "BanModule.cs",
               "DocumentMoniker": "C:\\Users\\brand\\source\\repos\\SysBot.ACNH\\Discord\\Modules\\BanModule.cs",
               "RelativeDocumentMoniker": "Discord\\Modules\\BanModule.cs",
               "ToolTip": "C:\\Users\\brand\\source\\repos\\SysBot.ACNH\\Discord\\Modules\\BanModule.cs",
               "RelativeToolTip": "Discord\\Modules\\BanModule.cs",
-              "ViewState": "AQIAAAYAAAAAAAAAAAAAABIAAAAkAAAA",
+              "ViewState": "AQIAACQAAAAAAAAAAAAYwC4AAACtAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-06-26T05:07:04.357Z",
+              "WhenOpened": "2024-06-26T05:48:44.905Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "GlobalBan.cs",
-              "DocumentMoniker": "C:\\Users\\brand\\source\\repos\\SysBot.ACNH\\Bot\\Helpers\\Static\\GlobalBan.cs",
-              "RelativeDocumentMoniker": "Bot\\Helpers\\Static\\GlobalBan.cs",
-              "ToolTip": "C:\\Users\\brand\\source\\repos\\SysBot.ACNH\\Bot\\Helpers\\Static\\GlobalBan.cs",
-              "RelativeToolTip": "Bot\\Helpers\\Static\\GlobalBan.cs",
-              "ViewState": "AQIAAIUAAAAAAAAAAAAiwBgAAAAAAAAA",
+              "Title": "ServerBanModule.cs",
+              "DocumentMoniker": "C:\\Users\\brand\\source\\repos\\SysBot.ACNH\\Discord\\Modules\\ServerBanModule.cs",
+              "RelativeDocumentMoniker": "Discord\\Modules\\ServerBanModule.cs",
+              "ToolTip": "C:\\Users\\brand\\source\\repos\\SysBot.ACNH\\Discord\\Modules\\ServerBanModule.cs",
+              "RelativeToolTip": "Discord\\Modules\\ServerBanModule.cs",
+              "ViewState": "AQIAAEMAAAAAAAAAAAAwwE8AAAAFAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-06-26T04:49:48.976Z",
+              "WhenOpened": "2024-06-26T05:48:33.18Z",
               "EditorCaption": ""
             }
           ]

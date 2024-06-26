@@ -40,7 +40,7 @@ namespace SysBot.ACNHOrders
         {
             if (ServerBan.IsServerBanned(serverId))
             {
-                ServerBan.UnBanServer(serverId);
+                GlobalBan.UnbanServer(serverId);
                 await ReplyAsync($"Server {serverId} has been unbanned.").ConfigureAwait(false);
             }
             else
@@ -60,7 +60,7 @@ namespace SysBot.ACNHOrders
             }
             else
             {
-                ServerBan.BanServer(serverId);
+                GlobalBan.BanServer(serverId);
                 await ReplyAsync($"Server {serverId} has been banned.").ConfigureAwait(false);
 
                 // Check if the bot is in the server and kick it if necessary

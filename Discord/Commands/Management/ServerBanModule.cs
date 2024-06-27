@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace SysBot.ACNHOrders
+namespace SysBot.ACNHOrders.Discord.Commands.Management
 {
     public static class ServerBan
     {
@@ -35,7 +35,7 @@ namespace SysBot.ACNHOrders
 
         [Command("unbls")]
         [Summary("Unbans a server by its server ID.")]
-        [RequireOwner] 
+        [RequireOwner]
         public async Task UnBanServerAsync(string serverId)
         {
             if (GlobalBan.IsServerBanned(serverId))

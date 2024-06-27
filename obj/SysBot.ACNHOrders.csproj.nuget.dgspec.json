@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\brand\\source\\repos\\SysBot.ACNH\\SysBot.ACNHOrders.csproj": {}
+    "C:\\Users\\brand\\Source\\Repos\\SysBot.ACNH\\SysBot.ACNHOrders.csproj": {}
   },
   "projects": {
-    "C:\\Users\\brand\\source\\repos\\SysBot.ACNH\\SysBot.ACNHOrders.csproj": {
+    "C:\\Users\\brand\\Source\\Repos\\SysBot.ACNH\\SysBot.ACNHOrders.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\brand\\source\\repos\\SysBot.ACNH\\SysBot.ACNHOrders.csproj",
+        "projectUniqueName": "C:\\Users\\brand\\Source\\Repos\\SysBot.ACNH\\SysBot.ACNHOrders.csproj",
         "projectName": "SysBot.ACNHOrders",
-        "projectPath": "C:\\Users\\brand\\source\\repos\\SysBot.ACNH\\SysBot.ACNHOrders.csproj",
+        "projectPath": "C:\\Users\\brand\\Source\\Repos\\SysBot.ACNH\\SysBot.ACNHOrders.csproj",
         "packagesPath": "C:\\Users\\brand\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\brand\\source\\repos\\SysBot.ACNH\\obj\\",
+        "outputPath": "C:\\Users\\brand\\Source\\Repos\\SysBot.ACNH\\obj\\",
         "projectStyle": "PackageReference",
         "crossTargeting": true,
         "fallbackFolders": [

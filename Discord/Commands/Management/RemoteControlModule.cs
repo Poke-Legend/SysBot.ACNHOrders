@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace SysBot.ACNHOrders
+namespace SysBot.ACNHOrders.Discord.Commands.Management
 {
     public class RemoteControlModule : ModuleBase<SocketCommandContext>
     {
@@ -76,7 +76,7 @@ namespace SysBot.ACNHOrders
         [Command("readCommand")]
         [Summary("Writes the requested command to the sysmodule and awaits a return value")]
         [RequireSudo]
-        public async Task ReadCommandAsync(int expectedReturnSize, [Remainder]string command)
+        public async Task ReadCommandAsync(int expectedReturnSize, [Remainder] string command)
         {
             var b = Bot;
             var data = System.Text.Encoding.UTF8.GetBytes(command + "\r\n");

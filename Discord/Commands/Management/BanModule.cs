@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SysBot.ACNHOrders
+namespace SysBot.ACNHOrders.Discord.Commands.Management
 {
     public class BanModule : ModuleBase<SocketCommandContext>
     {
@@ -45,6 +45,6 @@ namespace SysBot.ACNHOrders
         [Summary("checks a user's ban state by their long number id.")]
         [RequireSudo]
         public async Task CheckBanAsync(string id) => await ReplyAsync(GlobalBan.IsBanned(id) ? $"{id} is abuse-banned" : $"{id} is not abuse-banned").ConfigureAwait(false);
-        
+
     }
 }

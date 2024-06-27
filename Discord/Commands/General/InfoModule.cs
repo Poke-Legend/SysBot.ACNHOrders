@@ -8,8 +8,9 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using TwitchLib.Communication.Models;
 
-namespace SysBot.ACNHOrders
+namespace SysBot.ACNHOrders.Discord.Commands.General
 {
     // src: https://github.com/foxbot/patek/blob/master/src/Patek/Modules/InfoModule.cs
     // ISC License (ISC)
@@ -17,24 +18,35 @@ namespace SysBot.ACNHOrders
     // ReSharper disable once UnusedType.Global
     public class InfoModule : ModuleBase<SocketCommandContext>
     {
+        private const string Discord = "https://pokelegends.org";
+        private const string Contributor = "Kurt";
+        private const string Contributor1 = "Berichan";
+        private const string Contributor2 = "CodeHedge";
+        private const string Contributor3 = "DeVry";
+
+
         [Command("info")]
         [Alias("about", "whoami", "owner")]
         public async Task InfoAsync()
         {
+
             if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
             {
                 await Context.Guild.LeaveAsync().ConfigureAwait(false);
                 return;
             }
 
+          
+            
             var app = await Context.Client.GetApplicationInfoAsync().ConfigureAwait(false);
-
             var builder = new EmbedBuilder
             {
                 Color = new Color(114, 137, 218),
             };
 
-            builder.AddField("Info", $"- {Format.Bold("Owner")}: {app.Owner} ({app.Owner.Id})\n" +
+           builder.AddField("Info", $"- {Format.Bold("Contributions")}: {Contributor}, {Contributor1}\n {Contributor2}, {Contributor3}\n" +
+                                    $"- [Pokemon Legends]({Discord})\n" +
+                                    $"- {Format.Bold("Owner")}: {app.Owner} ({app.Owner.Id})\n" +
                                     $"- {Format.Bold("Library")}: Discord.Net ({DiscordConfig.Version})\n" +
                                     $"- {Format.Bold("Uptime")}: {GetUptime()}\n" +
                                     $"- {Format.Bold("Runtime")}: {RuntimeInformation.FrameworkDescription} {RuntimeInformation.ProcessArchitecture} " +

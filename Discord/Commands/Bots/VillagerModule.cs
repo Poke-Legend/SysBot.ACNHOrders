@@ -5,7 +5,7 @@ using Discord.Commands;
 using NHSE.Core;
 using NHSE.Villagers;
 
-namespace SysBot.ACNHOrders
+namespace SysBot.ACNHOrders.Discord.Commands.Bots
 {
     // ReSharper disable once UnusedType.Global 
     public class VillagerModule : ModuleBase<SocketCommandContext>

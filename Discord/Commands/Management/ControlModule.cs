@@ -7,7 +7,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using SysBot.Base;
 
-namespace SysBot.ACNHOrders
+namespace SysBot.ACNHOrders.Discord.Commands.Management
 {
     // ReSharper disable once UnusedType.Global
     public class ControlModule : ModuleBase<SocketCommandContext>
@@ -27,7 +27,7 @@ namespace SysBot.ACNHOrders
         [RequireSudo]
         public async Task ToggleRequestsAsync()
         {
-            bool value = (Globals.Bot.Config.AcceptingCommands ^= true);
+            bool value = Globals.Bot.Config.AcceptingCommands ^= true;
             await ReplyAsync($"Accepting drop requests: {value}.").ConfigureAwait(false);
         }
 
@@ -124,7 +124,7 @@ namespace SysBot.ACNHOrders
         private async Task SetScreen(bool on)
         {
             var bot = Globals.Bot;
-                
+
             await bot.SetScreenCheck(on, CancellationToken.None, true).ConfigureAwait(false);
             await ReplyAsync("Screen state set to: " + (on ? "On" : "Off")).ConfigureAwait(false);
         }

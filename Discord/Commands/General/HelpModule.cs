@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 
-namespace SysBot.ACNHOrders
+namespace SysBot.ACNHOrders.Discord.Commands.General
 {
     // ReSharper disable once UnusedType.Global
     public class HelpModule : ModuleBase<SocketCommandContext>

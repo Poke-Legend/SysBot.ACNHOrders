@@ -11,7 +11,7 @@ using Discord.WebSocket;
 using NHSE.Core;
 using SysBot.Base;
 
-namespace SysBot.ACNHOrders
+namespace SysBot.ACNHOrders.Discord.Commands.Management
 {
     // ReSharper disable once UnusedType.Global
     public class DropModule : ModuleBase<SocketCommandContext>
@@ -81,7 +81,7 @@ namespace SysBot.ACNHOrders
 
             var cfg = Globals.Bot.Config;
             var MesUser = Context.User.Username;
-            Globals.Bot.DisUserID = ($"{Context.User.Id}");
+            Globals.Bot.DisUserID = $"{Context.User.Id}";
             if (!Globals.Bot.Config.DodoModeConfig.AllowSendDodo && !Globals.Bot.Config.CanUseSudo(Context.User.Id) && Globals.Self.Owner != Context.User.Id)
                 return;
             if (!Globals.Bot.Config.DodoModeConfig.LimitedDodoRestoreOnlyMode)
@@ -98,7 +98,7 @@ namespace SysBot.ACNHOrders
             {
                 if (cfg.FieldLayerName != "name")
                 {
-                    var MapFile = ($"{Globals.Bot.Config.FieldLayerNHLDirectory}/{Globals.Bot.CLayer}.png");
+                    var MapFile = $"{Globals.Bot.Config.FieldLayerNHLDirectory}/{Globals.Bot.CLayer}.png";
                     await Context.User.SendMessageAsync($"Dodo Code for {Globals.Bot.TownName}: {Globals.Bot.DodoCode}.\n{Globals.Bot.TownName} is currently set to the following layer: {Globals.Bot.CLayer}.").ConfigureAwait(false);
                     if (File.Exists($"{MapFile}"))
                     {

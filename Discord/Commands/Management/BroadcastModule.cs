@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace SysBot.ACNHOrders
+namespace SysBot.ACNHOrders.Discord.Commands.Management
 {
     public class BroadcastModule : ModuleBase<SocketCommandContext>
     {
@@ -22,7 +22,7 @@ namespace SysBot.ACNHOrders
             public List<ulong> Channels { get; set; }
             public List<ulong> Sudo { get; set; }
         }
-        
+
         [Command("broadcast")]
         [Summary("Broadcasts a message to channel ids in config")]
         [RequireSudo]
@@ -87,14 +87,7 @@ namespace SysBot.ACNHOrders
                 embed.WithThumbnailUrl("https://media.giphy.com/media/T87BZ7cyOH7TwDBgwy/giphy.gif");
                 var broadcastMessage = embed.Build();
 
-                try
-                {
-                    await channel.SendMessageAsync(null, false, broadcastMessage);
-                }
-                catch (Discord.Net.HttpException e)
-                {
-                    Console.WriteLine($"Failed to send message to channel {channelId}. Error: {e.Message}");
-                }
+                await channel.SendMessageAsync(null, false, broadcastMessage);
             }
         }
     }

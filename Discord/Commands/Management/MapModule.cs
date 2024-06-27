@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Discord.Commands;
 using Discord.WebSocket;
 
-namespace SysBot.ACNHOrders
+namespace SysBot.ACNHOrders.Discord.Commands.Management
 {
     public class MapModule : ModuleBase<SocketCommandContext>
     {
@@ -33,7 +33,7 @@ namespace SysBot.ACNHOrders
             bot.MapOverrides.Enqueue(req);
 
             await ReplyAsync($"Map refresh layer set to: {Path.GetFileNameWithoutExtension(filename)}.").ConfigureAwait(false);
-            Globals.Bot.CLayer = ($"{Path.GetFileNameWithoutExtension(filename)}");
+            Globals.Bot.CLayer = $"{Path.GetFileNameWithoutExtension(filename)}";
 
         }
     }

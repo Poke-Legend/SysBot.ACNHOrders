@@ -6,7 +6,7 @@ using Discord;
 using Discord.Commands;
 using NHSE.Core;
 
-namespace SysBot.ACNHOrders
+namespace SysBot.ACNHOrders.Discord.Commands.Bots
 {
     // ReSharper disable once UnusedType.Global
     public class RecipeModule : ModuleBase<SocketCommandContext>

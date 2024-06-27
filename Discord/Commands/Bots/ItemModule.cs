@@ -6,7 +6,7 @@ using Discord;
 using Discord.Commands;
 using NHSE.Core;
 
-namespace SysBot.ACNHOrders
+namespace SysBot.ACNHOrders.Discord.Commands.Bots
 {
     // ReSharper disable once UnusedType.Global
     public class ItemModule : ModuleBase<SocketCommandContext>
@@ -227,7 +227,7 @@ namespace SysBot.ACNHOrders
 
             int body = sum & 7;
             int fabric = sum >> 5;
-            if (fabric > 7 || ((fabric << 5) | body) != sum)
+            if (fabric > 7 || (fabric << 5 | body) != sum)
             {
                 await ReplyAsync("Invalid customization data specified.").ConfigureAwait(false);
                 return;

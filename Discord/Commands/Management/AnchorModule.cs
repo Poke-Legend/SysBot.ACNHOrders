@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Discord.Commands;
 
-namespace SysBot.ACNHOrders
+namespace SysBot.ACNHOrders.Discord.Commands.Management
 {
     public class AnchorModule : ModuleBase<SocketCommandContext>
     {

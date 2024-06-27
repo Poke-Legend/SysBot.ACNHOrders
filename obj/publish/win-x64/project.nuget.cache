@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "vHmqZJ8a2/E=",
+  "dgSpecHash": "vFcOgWMjf6I=",
   "success": true,
-  "projectFilePath": "C:\\Users\\brand\\source\\repos\\SysBot.ACNH\\SysBot.ACNHOrders.csproj",
+  "projectFilePath": "C:\\Users\\brand\\Source\\Repos\\SysBot.ACNH\\SysBot.ACNHOrders.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\brand\\.nuget\\packages\\discord.net\\3.15.2\\discord.net.3.15.2.nupkg.sha512",
     "C:\\Users\\brand\\.nuget\\packages\\discord.net.commands\\3.15.2\\discord.net.commands.3.15.2.nupkg.sha512",

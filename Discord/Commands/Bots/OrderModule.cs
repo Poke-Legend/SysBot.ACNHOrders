@@ -11,7 +11,7 @@ using NHSE.Core;
 using NHSE.Villagers;
 using SysBot.Base;
 
-namespace SysBot.ACNHOrders
+namespace SysBot.ACNHOrders.Discord.Commands.Bots
 {
     // ReSharper disable once UnusedType.Global
     public class OrderModule : ModuleBase<SocketCommandContext>
@@ -235,7 +235,7 @@ namespace SysBot.ACNHOrders
             }
 
             var cfg = Globals.Bot.Config;
-            string path = ("UserOrder\\" + $"{Context.User.Id}.txt");
+            string path = "UserOrder\\" + $"{Context.User.Id}.txt";
             if (File.Exists(path))
             {
                 string request = File.ReadAllText(path);
@@ -627,7 +627,7 @@ namespace SysBot.ACNHOrders
 
             if (Globals.Bot.Config.DodoModeConfig.LimitedDodoRestoreOnlyMode)
             {
-                var nooksMessage = (bot.LastTimeState.Hour >= 22 || bot.LastTimeState.Hour < 8) ? "Nook's Cranny is closed" : "Nook's Cranny is expected to be open.";
+                var nooksMessage = bot.LastTimeState.Hour >= 22 || bot.LastTimeState.Hour < 8 ? "Nook's Cranny is closed" : "Nook's Cranny is expected to be open.";
                 await ReplyAsync($"The current in-game time is: {bot.LastTimeState} \r\n{nooksMessage}").ConfigureAwait(false);
                 return;
             }

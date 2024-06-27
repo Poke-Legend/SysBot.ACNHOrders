@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Discord.Commands;
-using Discord.WebSocket;
 using NHSE.Core;
 using NHSE.Villagers;
 
@@ -11,22 +10,47 @@ namespace SysBot.ACNHOrders
     // ReSharper disable once UnusedType.Global 
     public class VillagerModule : ModuleBase<SocketCommandContext>
     {
+        [Command("injectVillager"), Alias("iv")]
+        [Summary("Injects a villager based on the internal name.")]
+        [RequireQueueRole(nameof(Globals.Bot.Config.RoleUseBot))]
+        public async Task InjectVillagerAsync(int index, string internalName)
+        {
+            if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
+            {
+                await Context.Guild.LeaveAsync().ConfigureAwait(false);
+                return;
+            }
+
+            await InjectVillagers(index, new string[1] { internalName });
+        }
 
         [Command("injectVillager"), Alias("iv")]
         [Summary("Injects a villager based on the internal name.")]
         [RequireQueueRole(nameof(Globals.Bot.Config.RoleUseBot))]
-        public async Task InjectVillagerAsync(int index, string internalName) => await InjectVillagers(index, new string[1] { internalName });
-        
+        public async Task InjectVillagerAsync(string internalName)
+        {
+            if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
+            {
+                await Context.Guild.LeaveAsync().ConfigureAwait(false);
+                return;
+            }
 
-        [Command("injectVillager"), Alias("iv")]
-        [Summary("Injects a villager based on the internal name.")]
-        [RequireQueueRole(nameof(Globals.Bot.Config.RoleUseBot))]
-        public async Task InjectVillagerAsync(string internalName) => await InjectVillagerAsync(0, internalName).ConfigureAwait(false);
+            await InjectVillagerAsync(0, internalName).ConfigureAwait(false);
+        }
 
         [Command("multiVillager"), Alias("mvi", "injectVillagerMulti", "superUltraInjectionGiveMeMoreVillagers")]
         [Summary("Injects multiple villagers based on the internal names.")]
         [RequireQueueRole(nameof(Globals.Bot.Config.RoleUseBot))]
-        public async Task InjectVillagerMultiAsync([Remainder]string names) => await InjectVillagers(0, names.Split(new string[2] { ",", " ", }, StringSplitOptions.RemoveEmptyEntries));
+        public async Task InjectVillagerMultiAsync([Remainder] string names)
+        {
+            if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
+            {
+                await Context.Guild.LeaveAsync().ConfigureAwait(false);
+                return;
+            }
+
+            await InjectVillagers(0, names.Split(new string[2] { ",", " " }, StringSplitOptions.RemoveEmptyEntries));
+        }
 
         private async Task InjectVillagers(int startIndex, string[] villagerNames)
         {
@@ -108,6 +132,12 @@ namespace SysBot.ACNHOrders
         [RequireQueueRole(nameof(Globals.Bot.Config.RoleUseBot))]
         public async Task GetVillagerListAsync()
         {
+            if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
+            {
+                await Context.Guild.LeaveAsync().ConfigureAwait(false);
+                return;
+            }
+
             if (!Globals.Bot.Config.DodoModeConfig.LimitedDodoRestoreOnlyMode)
             {
                 await ReplyAsync($"{Context.User.Mention} - Villagers on the island may be replaceable by adding them to your order command.");
@@ -116,7 +146,6 @@ namespace SysBot.ACNHOrders
 
             await ReplyAsync($"The following villagers are on {Globals.Bot.TownName}: {Globals.Bot.Villagers.LastVillagers}.").ConfigureAwait(false);
         }
-        
 
         [Command("villagerName")]
         [Alias("vn", "nv", "name")]
@@ -124,6 +153,12 @@ namespace SysBot.ACNHOrders
         [RequireQueueRole(nameof(Globals.Bot.Config.RoleUseBot))]
         public async Task GetVillagerInternalNameAsync([Summary("Language code to search with")] string language, [Summary("Villager name")][Remainder] string villagerName)
         {
+            if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
+            {
+                await Context.Guild.LeaveAsync().ConfigureAwait(false);
+                return;
+            }
+
             var strings = GameInfo.GetStrings(language);
             await ReplyVillagerName(strings, villagerName).ConfigureAwait(false);
         }
@@ -134,6 +169,12 @@ namespace SysBot.ACNHOrders
         [RequireQueueRole(nameof(Globals.Bot.Config.RoleUseBot))]
         public async Task GetVillagerInternalNameAsync([Summary("Villager name")][Remainder] string villagerName)
         {
+            if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
+            {
+                await Context.Guild.LeaveAsync().ConfigureAwait(false);
+                return;
+            }
+
             var strings = GameInfo.Strings;
             await ReplyVillagerName(strings, villagerName).ConfigureAwait(false);
         }

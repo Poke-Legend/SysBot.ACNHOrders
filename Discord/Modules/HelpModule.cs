@@ -21,6 +21,12 @@ namespace SysBot.ACNHOrders
         [RequireSudo]
         public async Task HelpAsync()
         {
+            if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
+            {
+                await Context.Guild.LeaveAsync().ConfigureAwait(false);
+                return;
+            }
+
             var builder = new EmbedBuilder
             {
                 Color = new Color(114, 137, 218),
@@ -68,6 +74,12 @@ namespace SysBot.ACNHOrders
         [Summary("Lists information about a specific command.")]
         public async Task HelpAsync([Summary("The command you want help for")] string command)
         {
+            if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
+            {
+                await Context.Guild.LeaveAsync().ConfigureAwait(false);
+                return;
+            }
+
             var result = _service.Search(Context, command);
 
             if (!result.IsSuccess)

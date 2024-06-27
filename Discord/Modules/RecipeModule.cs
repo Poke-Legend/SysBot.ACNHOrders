@@ -17,6 +17,12 @@ namespace SysBot.ACNHOrders
         [RequireQueueRole(nameof(Globals.Bot.Config.RoleUseBot))]
         public async Task SearchItemsAsync([Summary("Language code to search with")] string language, [Summary("Item name / item substring")][Remainder] string itemName)
         {
+            if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
+            {
+                await Context.Guild.LeaveAsync().ConfigureAwait(false);
+                return;
+            }
+
             if (!Globals.Bot.Config.AllowLookup)
             {
                 await ReplyAsync($"{Context.User.Mention} - Lookup commands are not accepted.");
@@ -33,6 +39,12 @@ namespace SysBot.ACNHOrders
         [RequireQueueRole(nameof(Globals.Bot.Config.RoleUseBot))]
         public async Task SearchItemsAsync([Summary("Item name / item substring")][Remainder] string itemName)
         {
+            if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
+            {
+                await Context.Guild.LeaveAsync().ConfigureAwait(false);
+                return;
+            }
+
             if (!Globals.Bot.Config.AllowLookup)
             {
                 await ReplyAsync($"{Context.User.Mention} - Lookup commands are not accepted.");

@@ -24,8 +24,14 @@ namespace SysBot.ACNHOrders
         [Command("ping")]
         [Alias("hi", "yo", "sup", "hello", "hey")]
         [Summary("Replies with pong.")]
-        public Task PingAsync()
+        public async Task PingAsync()
         {
+            if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
+            {
+                await Context.Guild.LeaveAsync().ConfigureAwait(false);
+                return;
+            }
+
             var randomImage = images[random.Next(images.Length)];
 
             var embed = new EmbedBuilder()
@@ -34,7 +40,29 @@ namespace SysBot.ACNHOrders
                 .WithColor(Color.Blue)
                 .WithImageUrl(randomImage); // This is the image that will be displayed
 
-            return ReplyAsync(embed: embed.Build());
+            await ReplyAsync(embed: embed.Build()).ConfigureAwait(false);
+        }
+
+        [Command("hi")]
+        [Alias("hello", "hey", "yo", "sup")]
+        [Summary("Replies with pong.")]
+        public async Task HiAsync()
+        {
+            if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
+            {
+                await Context.Guild.LeaveAsync().ConfigureAwait(false);
+                return;
+            }
+
+            var randomImage = images[random.Next(images.Length)];
+
+            var embed = new EmbedBuilder()
+                .WithTitle("Hi!")
+                .WithDescription("The bot program is running.")
+                .WithColor(Color.Blue)
+                .WithImageUrl(randomImage); // This is the image that will be displayed
+
+            await ReplyAsync(embed: embed.Build()).ConfigureAwait(false);
         }
     }
 }

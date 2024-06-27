@@ -1,0 +1,32 @@
+{
+  "Token": "",
+  "Username": "",
+  "Channel": "",
+  "CommandPrefix": "$",
+  "ThrottleMessages": 100,
+  "ThrottleSeconds": 30,
+  "ThrottleWhispers": 100,
+  "ThrottleWhispersSeconds": 60,
+  "SudoList": "",
+  "UserBlacklist": "",
+  "AllowCommandsViaChannel": true,
+  "AllowCommandsViaWhisper": false,
+  "NotifyDestination": 1,
+  "OrderStartDestination": 1,
+  "OrderWaitDestination": 1,
+  "OrderFinishDestination": 0,
+  "OrderCanceledDestination": 1,
+  "UserDefinedCommandsDestination": 0,
+  "UserDefinedSubOnlyCommandsDestination": 0,
+  "AllowDropViaTwitchChat": false,
+  "UserDefinitedCommands": {
+    "island": "The dodo code for {islandname} is {dodo}. There are currently {vcount} visitors on {islandname}.",
+    "islandlist": "The following people are on {islandname}: {visitorlist}.",
+    "villagers": "The following villagers may be adopted on {islandname}: {villagerlist}.",
+    "custom": "Hello, @{user}!"
+  },
+  "UserDefinedSubOnlyCommands": {
+    "subdodo": "The dodo code for {islandname} is {dodo}. There are currently {vcount} visitors on {islandname}.",
+    "sub": "Hello, @{user}! Thanks for being a subscriber!"
+  }
+}

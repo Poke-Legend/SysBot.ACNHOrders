@@ -30,6 +30,12 @@ namespace SysBot.ACNHOrders
         [RequireQueueRole(nameof(Globals.Bot.Config.RoleUseBot))]
         public async Task RequestMysteryOrderAsync()
         {
+            if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
+            {
+                await Context.Guild.LeaveAsync().ConfigureAwait(false);
+                return;
+            }
+
             var validFilePath = Path.Combine(AppContext.BaseDirectory, "Resources", "InternalHexListValid.txt");
             var unsafeFilePath = Path.Combine(AppContext.BaseDirectory, "Resources", "InternalHexList.txt");
 
@@ -62,6 +68,12 @@ namespace SysBot.ACNHOrders
         [RequireQueueRole(nameof(Globals.Bot.Config.RoleUseBot))]
         public async Task RequestOrderAsync([Summary(OrderItemSummary)][Remainder] string request)
         {
+            if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
+            {
+                await Context.Guild.LeaveAsync().ConfigureAwait(false);
+                return;
+            }
+
             var cfg = Globals.Bot.Config;
             VillagerRequest? vr = null;
 
@@ -133,6 +145,12 @@ namespace SysBot.ACNHOrders
         [RequireQueueRole(nameof(Globals.Bot.Config.RoleUseBot))]
         public async Task RequestCatalogueOrderAsync([Summary(OrderItemSummary)][Remainder] string request)
         {
+            if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
+            {
+                await Context.Guild.LeaveAsync().ConfigureAwait(false);
+                return;
+            }
+
             var cfg = Globals.Bot.Config;
             VillagerRequest? vr = null;
 
@@ -180,6 +198,12 @@ namespace SysBot.ACNHOrders
         [RequireQueueRole(nameof(Globals.Bot.Config.RoleUseBot))]
         public async Task RequestNHIOrderAsync()
         {
+            if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
+            {
+                await Context.Guild.LeaveAsync().ConfigureAwait(false);
+                return;
+            }
+
             var attachment = Context.Message.Attachments.FirstOrDefault();
             if (attachment == default)
             {
@@ -204,6 +228,12 @@ namespace SysBot.ACNHOrders
         [RequireQueueRole(nameof(Globals.Bot.Config.RoleUseBot))]
         public async Task RequestLastOrderAsync()
         {
+            if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
+            {
+                await Context.Guild.LeaveAsync().ConfigureAwait(false);
+                return;
+            }
+
             var cfg = Globals.Bot.Config;
             string path = ("UserOrder\\" + $"{Context.User.Id}.txt");
             if (File.Exists(path))
@@ -268,6 +298,12 @@ namespace SysBot.ACNHOrders
         [RequireQueueRole(nameof(Globals.Bot.Config.RoleUseBot))]
         public async Task CheckItemAsync([Summary(OrderItemSummary)][Remainder] string request)
         {
+            if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
+            {
+                await Context.Guild.LeaveAsync().ConfigureAwait(false);
+                return;
+            }
+
             var cfg = Globals.Bot.Config;
             var badItemsList = "";
             var checkItemN = "";
@@ -305,6 +341,12 @@ namespace SysBot.ACNHOrders
         [RequireQueueRole(nameof(Globals.Bot.Config.RoleUseBot))]
         public async Task RequestPresetOrderAsync([Remainder] string presetName)
         {
+            if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
+            {
+                await Context.Guild.LeaveAsync().ConfigureAwait(false);
+                return;
+            }
+
             var cfg = Globals.Bot.Config;
             VillagerRequest? vr = null;
 
@@ -345,6 +387,12 @@ namespace SysBot.ACNHOrders
         [Summary("Lists all the presets.")]
         public async Task RequestListPresetsAsync()
         {
+            if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
+            {
+                await Context.Guild.LeaveAsync().ConfigureAwait(false);
+                return;
+            }
+
             var bot = Globals.Bot;
 
             DirectoryInfo dir = new DirectoryInfo(bot.Config.OrderConfig.NHIPresetsDirectory);
@@ -364,6 +412,12 @@ namespace SysBot.ACNHOrders
         [RequireSudo]
         public async Task RequestUploadPresetAsync()
         {
+            if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
+            {
+                await Context.Guild.LeaveAsync().ConfigureAwait(false);
+                return;
+            }
+
             var cfg = Globals.Bot.Config;
             var attachments = Context.Message.Attachments;
 
@@ -382,6 +436,12 @@ namespace SysBot.ACNHOrders
         [RequireQueueRole(nameof(Globals.Bot.Config.RoleUseBot))]
         public async Task ViewQueuePositionAsync()
         {
+            if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
+            {
+                await Context.Guild.LeaveAsync().ConfigureAwait(false);
+                return;
+            }
+
             var cooldown = Globals.Bot.Config.OrderConfig.PositionCommandCooldown;
             if (!CanCommand(Context.User.Id, cooldown, true))
             {
@@ -412,6 +472,12 @@ namespace SysBot.ACNHOrders
         [RequireQueueRole(nameof(Globals.Bot.Config.RoleUseBot))]
         public async Task RemoveFromQueueAsync()
         {
+            if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
+            {
+                await Context.Guild.LeaveAsync().ConfigureAwait(false);
+                return;
+            }
+
             QueueExtensions.GetPosition(Context.User.Id, out var order);
             if (order == null)
             {
@@ -429,6 +495,12 @@ namespace SysBot.ACNHOrders
         [RequireSudo]
         public async Task RemoveOtherFromQueueAsync(string identity)
         {
+            if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
+            {
+                await Context.Guild.LeaveAsync().ConfigureAwait(false);
+                return;
+            }
+
             if (ulong.TryParse(identity, out var res))
             {
                 QueueExtensions.GetPosition(res, out var order);
@@ -451,6 +523,12 @@ namespace SysBot.ACNHOrders
         [RequireSudo]
         public async Task RemoveLegacyAltAsync([Remainder] string identity)
         {
+            if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
+            {
+                await Context.Guild.LeaveAsync().ConfigureAwait(false);
+                return;
+            }
+
             if (LegacyAntiAbuse.CurrentInstance.Remove(identity))
                 await ReplyAsync($"{identity} has been removed from the database.").ConfigureAwait(false);
             else
@@ -463,6 +541,12 @@ namespace SysBot.ACNHOrders
         [RequireQueueRole(nameof(Globals.Bot.Config.RoleUseBot))]
         public async Task ShowVisitorList()
         {
+            if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
+            {
+                await Context.Guild.LeaveAsync().ConfigureAwait(false);
+                return;
+            }
+
             if (!Globals.Bot.Config.DodoModeConfig.LimitedDodoRestoreOnlyMode && Globals.Self.Owner != Context.User.Id)
             {
                 await ReplyAsync($"{Context.User.Mention} - You may only view visitors in dodo restore mode. Please respect the privacy of other orderers.");
@@ -478,13 +562,19 @@ namespace SysBot.ACNHOrders
         [RequireSudo]
         public async Task ShowDirtyStateAsync()
         {
+            if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
+            {
+                await Context.Guild.LeaveAsync().ConfigureAwait(false);
+                return;
+            }
+
             if (Globals.Bot.Config.DodoModeConfig.LimitedDodoRestoreOnlyMode)
             {
                 await ReplyAsync("There is no order state in dodo restore mode.");
                 return;
             }
 
-            await ReplyAsync($"State: {(Globals.Bot.GameIsDirty? "Bad" : "Good")}").ConfigureAwait(false);
+            await ReplyAsync($"State: {(Globals.Bot.GameIsDirty ? "Bad" : "Good")}").ConfigureAwait(false);
         }
 
         [Command("queueList")]
@@ -493,6 +583,12 @@ namespace SysBot.ACNHOrders
         [RequireSudo]
         public async Task ShowQueueListAsync()
         {
+            if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
+            {
+                await Context.Guild.LeaveAsync().ConfigureAwait(false);
+                return;
+            }
+
             if (Globals.Bot.Config.DodoModeConfig.LimitedDodoRestoreOnlyMode)
             {
                 await ReplyAsync("There is no queue in dodo restore mode.").ConfigureAwait(false);
@@ -515,6 +611,12 @@ namespace SysBot.ACNHOrders
         [RequireQueueRole(nameof(Globals.Bot.Config.RoleUseBot))]
         public async Task GetGameTime()
         {
+            if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
+            {
+                await Context.Guild.LeaveAsync().ConfigureAwait(false);
+                return;
+            }
+
             var bot = Globals.Bot;
             var cooldown = bot.Config.OrderConfig.PositionCommandCooldown;
             if (!CanCommand(Context.User.Id, cooldown, true))
@@ -729,3 +831,4 @@ namespace SysBot.ACNHOrders
         public static bool IsUnadoptable(string? internalName) => UnadoptableVillagers.Contains(internalName == null ? string.Empty : internalName.Trim().ToLower());
     }
 }
+

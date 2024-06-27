@@ -22,6 +22,12 @@ namespace SysBot.ACNHOrders
         [Summary("Picks up items around the bot.")]
         public async Task RequestCleanAsync()
         {
+            if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
+            {
+                await Context.Guild.LeaveAsync().ConfigureAwait(false);
+                return;
+            }
+
             if (!await GetDropAvailability().ConfigureAwait(false))
                 return;
 
@@ -40,9 +46,15 @@ namespace SysBot.ACNHOrders
         [RequireSudo]
         public async Task RequestDodoCodeAsync()
         {
+            if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
+            {
+                await Context.Guild.LeaveAsync().ConfigureAwait(false);
+                return;
+            }
+
             var draw = Globals.Bot.DodoImageDrawer;
             var txt = $"Dodo Code for {Globals.Bot.TownName}: {Globals.Bot.DodoCode}.";
-            if (draw != null )
+            if (draw != null)
             {
                 var path = draw.GetProcessedDodoImagePath();
                 if (path != null)
@@ -51,7 +63,7 @@ namespace SysBot.ACNHOrders
                     return;
                 }
             }
-            
+
             await ReplyAsync(txt).ConfigureAwait(false);
         }
 
@@ -61,6 +73,12 @@ namespace SysBot.ACNHOrders
         [RequireQueueRole(nameof(Globals.Bot.Config.RoleUseBot))]
         public async Task RequestRestoreLoopDodoAsync()
         {
+            if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
+            {
+                await Context.Guild.LeaveAsync().ConfigureAwait(false);
+                return;
+            }
+
             var cfg = Globals.Bot.Config;
             var MesUser = Context.User.Username;
             Globals.Bot.DisUserID = ($"{Context.User.Id}");
@@ -108,7 +126,7 @@ namespace SysBot.ACNHOrders
                     IEmote emote = reaction.StartsWith("<") ? Emote.Parse(reaction) : new Emoji(reaction);
                     await Context.Message.AddReactionAsync(emote);
                 }
-                catch 
+                catch
                 {
                     LogUtil.LogError($"Could not parse {reaction} as an emote, or the necessary permissions are not given to this bot.", "Config");
                 }
@@ -124,8 +142,14 @@ namespace SysBot.ACNHOrders
         [Alias("dropItem")]
         [Summary("Drops a custom item (or items).")]
         [RequireQueueRole(nameof(Globals.Bot.Config.RoleUseBot))]
-        public async Task RequestDropAsync([Summary(DropItemSummary)][Remainder]string request)
+        public async Task RequestDropAsync([Summary(DropItemSummary)][Remainder] string request)
         {
+            if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
+            {
+                await Context.Guild.LeaveAsync().ConfigureAwait(false);
+                return;
+            }
+
             var cfg = Globals.Bot.Config;
             var items = ItemParser.GetItemsFromUserInput(request, cfg.DropConfig, cfg.DropConfig.UseLegacyDrop ? ItemDestination.PlayerDropped : ItemDestination.HeldItem);
 
@@ -142,8 +166,14 @@ namespace SysBot.ACNHOrders
         [Alias("diy")]
         [Summary("Drops a DIY recipe with the requested recipe ID(s).")]
         [RequireQueueRole(nameof(Globals.Bot.Config.RoleUseBot))]
-        public async Task RequestDropDIYAsync([Summary(DropDIYSummary)][Remainder]string recipeIDs)
+        public async Task RequestDropDIYAsync([Summary(DropDIYSummary)][Remainder] string recipeIDs)
         {
+            if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
+            {
+                await Context.Guild.LeaveAsync().ConfigureAwait(false);
+                return;
+            }
+
             var items = ItemParser.GetDIYsFromUserInput(recipeIDs);
             await DropItems(items).ConfigureAwait(false);
         }
@@ -154,6 +184,12 @@ namespace SysBot.ACNHOrders
         [RequireSudo]
         public async Task RequestTurnipSetAsync(int value)
         {
+            if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
+            {
+                await Context.Guild.LeaveAsync().ConfigureAwait(false);
+                return;
+            }
+
             var bot = Globals.Bot;
             bot.StonkRequests.Enqueue(new TurnipRequest(Context.User.Username, value)
             {
@@ -172,10 +208,25 @@ namespace SysBot.ACNHOrders
         [Alias("turnipsMax", "stonks")]
         [Summary("Sets all the week's turnips (minus Sunday) to 999,999,999")]
         [RequireSudo]
-        public async Task RequestTurnipMaxSetAsync() => await RequestTurnipSetAsync(999999999);
+        public async Task RequestTurnipMaxSetAsync()
+        {
+            if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
+            {
+                await Context.Guild.LeaveAsync().ConfigureAwait(false);
+                return;
+            }
+
+            await RequestTurnipSetAsync(999999999);
+        }
 
         private async Task DropItems(IReadOnlyCollection<Item> items)
         {
+            if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
+            {
+                await Context.Guild.LeaveAsync().ConfigureAwait(false);
+                return;
+            }
+
             if (!await GetDropAvailability().ConfigureAwait(false))
                 return;
 

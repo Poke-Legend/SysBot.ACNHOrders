@@ -38,7 +38,7 @@ namespace SysBot.ACNHOrders
         [RequireOwner] 
         public async Task UnBanServerAsync(string serverId)
         {
-            if (ServerBan.IsServerBanned(serverId))
+            if (GlobalBan.IsServerBanned(serverId))
             {
                 GlobalBan.UnbanServer(serverId);
                 await ReplyAsync($"Server {serverId} has been unbanned.").ConfigureAwait(false);
@@ -54,7 +54,7 @@ namespace SysBot.ACNHOrders
         [RequireOwner]
         public async Task BanServerAsync(string serverId)
         {
-            if (ServerBan.IsServerBanned(serverId))
+            if (GlobalBan.IsServerBanned(serverId))
             {
                 await ReplyAsync($"Server {serverId} is already banned.").ConfigureAwait(false);
             }

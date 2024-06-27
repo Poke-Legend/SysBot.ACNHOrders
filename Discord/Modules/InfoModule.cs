@@ -21,6 +21,12 @@ namespace SysBot.ACNHOrders
         [Alias("about", "whoami", "owner")]
         public async Task InfoAsync()
         {
+            if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
+            {
+                await Context.Guild.LeaveAsync().ConfigureAwait(false);
+                return;
+            }
+
             var app = await Context.Client.GetApplicationInfoAsync().ConfigureAwait(false);
 
             var builder = new EmbedBuilder
@@ -49,13 +55,15 @@ namespace SysBot.ACNHOrders
 
         private static string GetBuildTime()
         {
-            var assembly = Assembly.GetEntryAssembly();
-            if (assembly == null || string.IsNullOrEmpty(assembly.Location))
+            var baseDirectory = AppContext.BaseDirectory;
+            var filePath = Path.Combine(baseDirectory, AppDomain.CurrentDomain.FriendlyName);
+
+            if (File.Exists(filePath))
             {
-                return DateTime.Now.ToString(@"yy-MM-dd\.hh\:mm");
+                return File.GetLastWriteTime(filePath).ToString(@"yy-MM-dd\.hh\:mm");
             }
 
-            return File.GetLastWriteTime(assembly.Location).ToString(@"yy-MM-dd\.hh\:mm");
+            return DateTime.Now.ToString(@"yy-MM-dd\.hh\:mm");
         }
     }
 }

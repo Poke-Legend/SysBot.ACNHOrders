@@ -517,24 +517,6 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
                 await ReplyAsync($"{identity} is not a valid u64.").ConfigureAwait(false);
         }
 
-        [Command("removeAltLegacy")]
-        [Alias("removeLogLegacy", "rmAltLegacy")]
-        [Summary("(Uses legacy database) Removes an identity (name-id) from the local user-to-villager AntiAbuse database")]
-        [RequireSudo]
-        public async Task RemoveLegacyAltAsync([Remainder] string identity)
-        {
-            if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
-            {
-                await Context.Guild.LeaveAsync().ConfigureAwait(false);
-                return;
-            }
-
-            if (LegacyAntiAbuse.CurrentInstance.Remove(identity))
-                await ReplyAsync($"{identity} has been removed from the database.").ConfigureAwait(false);
-            else
-                await ReplyAsync($"{identity} is not a valid identity.").ConfigureAwait(false);
-        }
-
         [Command("visitorList")]
         [Alias("visitors")]
         [Summary("Print the list of visitors on the island (dodo restore mode only).")]
@@ -638,12 +620,6 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
 
         private async Task AttemptToQueueRequest(IReadOnlyCollection<Item> items, SocketUser orderer, ISocketMessageChannel msgChannel, VillagerRequest? vr, bool catalogue = false)
         {
-            if (!Globals.Bot.Config.AllowKnownAbusers && LegacyAntiAbuse.CurrentInstance.IsGlobalBanned(orderer.Id))
-            {
-                await ReplyAsync($"{Context.User.Mention} - You are not permitted to use this bot.");
-                return;
-            }
-
             if (Globals.Bot.Config.DodoModeConfig.LimitedDodoRestoreOnlyMode || Globals.Bot.Config.SkipConsoleBotCreation)
             {
                 await ReplyAsync($"{Context.User.Mention} - Orders are not currently accepted.");
@@ -652,7 +628,7 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
 
             if (GlobalBan.IsBanned(orderer.Id.ToString()))
             {
-                await ReplyAsync($"{Context.User.Mention} - You have been banned for abuse. Order has not been accepted.");
+                await ReplyAsync($"{Context.User.Mention} - You have been banned. Order has not been accepted.");
                 return;
             }
 

@@ -716,7 +716,6 @@ namespace SysBot.ACNHOrders
             var nid = await Connection.ReadBytesAsync((uint)OffsetHelper.ArriverNID, 8, token).ConfigureAwait(false);
             var islandId = await Connection.ReadBytesAsync((uint)OffsetHelper.ArriverVillageId, 4, token).ConfigureAwait(false);
 
-            bool IsSafeNewAbuse = true;
             try
             {
                 var newnid = BitConverter.ToUInt64(nid, 0);
@@ -729,22 +728,7 @@ namespace SysBot.ACNHOrders
                 LogUtil.LogInfo(e.Message + "\r\n" + e.StackTrace, Config.IP);
             }
 
-            var IsSafe = LegacyAntiAbuse.CurrentInstance.LogUser(LastArrival, LastArrivalIsland, $"{order.VillagerName}-{order.UserGuid}") && IsSafeNewAbuse;
-            if (!IsSafe)
-            {
-                if (!Config.AllowKnownAbusers)
-                {
-                    LogUtil.LogInfo($"{LastArrival} from {LastArrivalIsland} is a known abuser. Starting next order...", Config.IP);
-                    order.OrderCancelled(this, $"You are a known abuser. You cannot use this bot.", false);
-                    return OrderResult.NoArrival;
-                }
-                else
-                {
-                    LogUtil.LogInfo($"{LastArrival} from {LastArrivalIsland} is a known abuser, but you are allowing them to use your bot at your own risk.", Config.IP);
-                }
-            }
-
-            order.SendNotification(this, $"Visitor arriving: {LastArrival}. Your items will be in front of you once you land.");
+           order.SendNotification(this, $"Visitor arriving: {LastArrival}. Your items will be in front of you once you land.");
             if (order.VillagerName != string.Empty && Config.OrderConfig.EchoArrivingLeavingChannels.Count > 0)
                 await AttemptEchoHook($"> Visitor arriving: {order.VillagerName}", Config.OrderConfig.EchoArrivingLeavingChannels, token).ConfigureAwait(false);
 

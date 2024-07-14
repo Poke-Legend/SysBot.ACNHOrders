@@ -3,40 +3,66 @@ using SysBot.Base;
 
 namespace SocketAPI
 {
-	public class Logger
-	{
-		/// <summary>
-		/// Whether logs are enabled or not.
-		/// </summary>
-		private static bool logsEnabled = true;
-		
-		public static void LogInfo(string message, bool ignoreDisabled = false)
-		{
-			if (!logsEnabled && !ignoreDisabled)
-				return;
+    public static class Logger
+    {
+        /// <summary>
+        /// Whether logs are enabled or not.
+        /// </summary>
+        private static bool logsEnabled = true;
 
-			LogUtil.LogInfo(message, nameof(SocketAPI));
-		}
+        /// <summary>
+        /// Logs an informational message.
+        /// </summary>
+        /// <param name="message">The message to log.</param>
+        /// <param name="ignoreDisabled">If set to true, ignores the log enabled flag.</param>
+        public static void LogInfo(string message, bool ignoreDisabled = false)
+        {
+            if (!logsEnabled && !ignoreDisabled)
+                return;
 
-		public static void LogWarning(string message, bool ignoreDisabled = false)
-		{
-			if (!logsEnabled && !ignoreDisabled)
-				return;
+            LogUtil.LogInfo(message, nameof(SocketAPI));
+        }
 
-			LogUtil.LogInfo(message, nameof(SocketAPI) + "Warning");
-		}
+        /// <summary>
+        /// Logs a warning message.
+        /// </summary>
+        /// <param name="message">The message to log.</param>
+        /// <param name="ignoreDisabled">If set to true, ignores the log enabled flag.</param>
+        public static void LogWarning(string message, bool ignoreDisabled = false)
+        {
+            if (!logsEnabled && !ignoreDisabled)
+                return;
 
-		public static void LogError(string message, bool ignoreDisabled = false)
-		{
-			if (!logsEnabled && !ignoreDisabled)
-				return;
+            LogUtil.LogInfo(message, $"{nameof(SocketAPI)} Warning");
+        }
 
-			LogUtil.LogError(message, nameof(SocketAPI));
-		}
+        /// <summary>
+        /// Logs an error message.
+        /// </summary>
+        /// <param name="message">The message to log.</param>
+        /// <param name="ignoreDisabled">If set to true, ignores the log enabled flag.</param>
+        public static void LogError(string message, bool ignoreDisabled = false)
+        {
+            if (!logsEnabled && !ignoreDisabled)
+                return;
 
-		public static void disableLogs()
-		{
-			logsEnabled = false;
-		}
-	}
+            LogUtil.LogError(message, nameof(SocketAPI));
+        }
+
+        /// <summary>
+        /// Disables logging.
+        /// </summary>
+        public static void DisableLogs()
+        {
+            logsEnabled = false;
+        }
+
+        /// <summary>
+        /// Enables logging.
+        /// </summary>
+        public static void EnableLogs()
+        {
+            logsEnabled = true;
+        }
+    }
 }

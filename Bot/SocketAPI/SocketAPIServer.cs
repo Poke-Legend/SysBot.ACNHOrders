@@ -16,43 +16,17 @@ namespace SocketAPI
     /// </summary>
     public sealed class SocketAPIServer : IDisposable
     {
-        /// <summary>
-        /// Useful for TcpListener's graceful shutdown.
-        /// </summary>
         private readonly CancellationTokenSource tcpListenerCancellationSource = new();
-
-        /// <summary>
-        /// Provides an alias to the cancellation token.
-        /// </summary>
         private CancellationToken tcpListenerCancellationToken => tcpListenerCancellationSource.Token;
-
-        /// <summary>
-        /// The TCP listener used to listen for incoming connections.
-        /// </summary>
         private TcpListener? listener;
-
-        /// <summary>
-        /// Keeps a list of callable endpoints.
-        /// </summary>
         private readonly Dictionary<string, Delegate> apiEndpoints = new();
-
-        /// <summary>
-        /// Keeps the list of connected clients to broadcast events to.
-        /// </summary>
         private readonly ConcurrentBag<TcpClient> clients = new();
+        private static SocketAPIServer? _shared;
 
         private SocketAPIServer() { }
 
-        private static SocketAPIServer? _shared;
+        public static SocketAPIServer Shared => _shared ??= new SocketAPIServer();
 
-        /// <summary>
-        /// The singleton instance of the `SocketAPIServer`.
-        /// </summary>
-        public static SocketAPIServer shared => _shared ??= new SocketAPIServer();
-
-        /// <summary>
-        /// Starts listening for incoming connections on the configured port.
-        /// </summary>
         public async Task Start(SocketAPIServerConfig config)
         {
             if (!config.Enabled)
@@ -61,11 +35,9 @@ namespace SocketAPI
             if (!config.LogsEnabled)
                 Logger.DisableLogs();
 
-            int eps = RegisterEndpoints();
-            Logger.LogInfo($"n. of registered endpoints: {eps}");
+            Logger.LogInfo($"Number of registered endpoints: {RegisterEndpoints()}");
 
             listener = new TcpListener(IPAddress.Any, config.Port);
-
             try
             {
                 listener.Start();
@@ -79,115 +51,105 @@ namespace SocketAPI
             Logger.LogInfo($"Socket API server listening on port {config.Port}.");
 
             tcpListenerCancellationToken.ThrowIfCancellationRequested();
-            tcpListenerCancellationToken.Register(() => listener.Stop());
+            tcpListenerCancellationToken.Register(() =>
+            {
+                if (listener != null)
+                {
+                    listener.Stop();
+                }
+            });
 
+            await AcceptClientsAsync();
+        }
+
+        private async Task AcceptClientsAsync()
+        {
             while (!tcpListenerCancellationToken.IsCancellationRequested)
             {
                 try
                 {
-                    TcpClient client = await listener.AcceptTcpClientAsync();
+                    TcpClient client = await listener?.AcceptTcpClientAsync()!;
                     clients.Add(client);
 
                     IPEndPoint? clientEP = client.Client.RemoteEndPoint as IPEndPoint;
-                    Logger.LogInfo($"A client connected! IP: {clientEP?.Address}, on port: {clientEP?.Port}");
+                    Logger.LogInfo($"Client connected! IP: {clientEP?.Address}, Port: {clientEP?.Port}");
 
-                    _ = Task.Run(() => HandleTcpClient(client));
+                    _ = HandleTcpClientAsync(client);
                 }
                 catch (OperationCanceledException) when (tcpListenerCancellationToken.IsCancellationRequested)
                 {
-                    Logger.LogInfo("The socket API server was closed.", true);
+                    Logger.LogInfo("Socket API server was closed.");
                     while (!clients.IsEmpty)
                         clients.TryTake(out _);
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError($"An error occurred on the socket API server: {ex.Message}", true);
+                    Logger.LogError($"Error on the socket API server: {ex.Message}");
                 }
             }
         }
 
-        /// <summary>
-        /// Given a connected TcpClient, this callback handles communication & graceful shutdown.
-        /// </summary>
-        private async Task HandleTcpClient(TcpClient client)
+        private async Task HandleTcpClientAsync(TcpClient client)
         {
-            NetworkStream stream = client.GetStream();
+            using NetworkStream stream = client.GetStream();
 
             try
             {
+                byte[] buffer = new byte[client.ReceiveBufferSize];
                 while (!tcpListenerCancellationToken.IsCancellationRequested)
                 {
-                    byte[] buffer = new byte[client.ReceiveBufferSize];
-                    int bytesRead = await stream.ReadAsync(buffer, 0, client.ReceiveBufferSize, tcpListenerCancellationToken);
-
+                    int bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length, tcpListenerCancellationToken);
                     if (bytesRead == 0)
                     {
-                        Logger.LogInfo("A remote client closed the connection.");
+                        Logger.LogInfo("Remote client closed the connection.");
                         break;
                     }
 
-                    string rawMessage = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-                    rawMessage = Regex.Replace(rawMessage, @"\r\n?|\n|\0", "");
-
+                    string rawMessage = Encoding.UTF8.GetString(buffer, 0, bytesRead).Trim();
                     SocketAPIRequest? request = SocketAPIProtocol.DecodeMessage(rawMessage);
 
                     if (request == null)
                     {
-                        SendResponse(client, SocketAPIMessage.FromError("There was an error while JSON-parsing the provided request."));
+                        SendResponse(client, SocketAPIMessage.FromError("Error parsing request."));
                         continue;
                     }
 
-                    SocketAPIMessage? message = InvokeEndpoint(request.Endpoint!, request.Args);
-
-                    if (message == null)
-                        message = SocketAPIMessage.FromError("The supplied endpoint was not found.");
+                    SocketAPIMessage? message = InvokeEndpoint(request.Endpoint!, request.Args)
+                        ?? SocketAPIMessage.FromError("Endpoint not found.");
 
                     message.Id = request.Id;
-
                     SendResponse(client, message);
                 }
             }
             catch (Exception ex)
             {
-                Logger.LogError($"An error occurred while handling a client: {ex.Message}");
+                Logger.LogError($"Error handling client: {ex.Message}");
             }
             finally
             {
-                client.Close();
                 clients.TryTake(out _);
             }
         }
 
-        /// <summary>
-        /// Sends to the supplied client the given message of type `Response`.
-        /// </summary>
         public void SendResponse(TcpClient client, SocketAPIMessage message)
         {
             message.Type = SocketAPIMessageType.Response;
             SendMessage(client, message);
         }
 
-        /// <summary>
-        /// Sends to the supplied client the given message of type `Event`.
-        /// </summary>
         public void SendEvent(TcpClient client, SocketAPIMessage message)
         {
             message.Type = SocketAPIMessageType.Event;
             SendMessage(client, message);
         }
 
-        /// <summary>
-        /// Given a message, this method sends it to all currently connected clients in parallel encoded as an event.
-        /// </summary>
         public async void BroadcastEvent(SocketAPIMessage message)
         {
-            var sendTasks = clients.Where(client => client.Connected).Select(client => Task.Run(() => SendEvent(client, message)));
+            var sendTasks = clients.Where(client => client.Connected)
+                                   .Select(client => Task.Run(() => SendEvent(client, message)));
             await Task.WhenAll(sendTasks);
         }
 
-        /// <summary>
-        /// Encodes a message and sends it to a client.
-        /// </summary>
         private async void SendMessage(TcpClient toClient, SocketAPIMessage message)
         {
             byte[] wBuff = Encoding.UTF8.GetBytes(SocketAPIProtocol.EncodeMessage(message)!);
@@ -197,43 +159,29 @@ namespace SocketAPI
             }
             catch (Exception ex)
             {
-                Logger.LogError($"There was an error while sending a message to a client: {ex.Message}");
+                Logger.LogError($"Error sending message to client: {ex.Message}");
                 toClient.Close();
             }
         }
 
-        /// <summary>
-        /// Stops the execution of the server.
-        /// </summary>
         public void Stop()
         {
-            listener?.Stop();
+            if (listener != null)
+            {
+                listener.Stop();
+            }
             tcpListenerCancellationSource.Cancel();
         }
 
-        /// <summary>
-        /// Registers an API endpoint by its name.
-        /// </summary>
-        /// <param name="name">The name of the endpoint used to invoke the provided handler.</param>
-        /// <param name="handler">The handler responsible for generating a response.</param>
-        /// <returns></returns>
         private bool RegisterEndpoint(string name, Func<string, object?> handler)
         {
             if (apiEndpoints.ContainsKey(name))
                 return false;
 
             apiEndpoints.Add(name, handler);
-
             return true;
         }
 
-        /// <summary>
-        /// Loads all the classes marked as `SocketAPIController` and respective `SocketAPIEndpoint`-marked methods.
-        /// </summary>
-        /// <remarks>
-        /// The SocketAPIEndpoint marked methods 
-        /// </remarks>
-        /// <returns>The number of methods successfully registered.</returns>
         private int RegisterEndpoints()
         {
             var endpoints = AppDomain.CurrentDomain.GetAssemblies()
@@ -245,39 +193,31 @@ namespace SocketAPI
                 .Where(m => m.GetParameters().Length == 1 &&
                             m.IsStatic &&
                             m.GetParameters()[0].ParameterType == typeof(string) &&
-                            m.ReturnType == typeof(object));
+                            m.ReturnType == typeof(object))
+                .ToList();
 
             foreach (var endpoint in endpoints)
                 RegisterEndpoint(endpoint.Name, (Func<string, object?>)endpoint.CreateDelegate(typeof(Func<string, object?>)));
 
-            return endpoints.Count();
+            return endpoints.Count;
         }
 
-        /// <summary>
-        /// Invokes the registered endpoint via endpoint name, providing it with JSON-encoded arguments.
-        /// </summary>
-        /// <param name="endpointName">The name of the registered endpoint. Case-sensitive!</param>
-        /// <param name="jsonArgs">The arguments to provide to the endpoint, encoded in JSON format.</param>
-        /// <returns>A JSON-formatted response. `null` if the endpoint was not found.</returns>
         private SocketAPIMessage? InvokeEndpoint(string endpointName, string? jsonArgs)
         {
-            if (!apiEndpoints.ContainsKey(endpointName))
-                return SocketAPIMessage.FromError("The supplied endpoint was not found.");
+            if (!apiEndpoints.TryGetValue(endpointName, out var handler))
+                return SocketAPIMessage.FromError("Endpoint not found.");
 
             try
             {
-                object? rawResponse = apiEndpoints[endpointName].DynamicInvoke(jsonArgs);
+                object? rawResponse = handler.DynamicInvoke(jsonArgs);
                 return SocketAPIMessage.FromValue(rawResponse);
             }
             catch (Exception ex)
             {
-                return SocketAPIMessage.FromError(ex.InnerException?.Message ?? "A generic exception was thrown.");
+                return SocketAPIMessage.FromError(ex.InnerException?.Message ?? "An exception was thrown.");
             }
         }
 
-        /// <summary>
-        /// Disposes resources used by the server.
-        /// </summary>
         public void Dispose()
         {
             tcpListenerCancellationSource.Dispose();

@@ -54,3 +54,4 @@ C:\Users\brand\source\repos\SysBot.ACNH\obj\Release\net8.0\win-x64\refint\SysBot
 C:\Users\brand\source\repos\SysBot.ACNH\obj\Release\net8.0\win-x64\SysBot.ACNHOrders.pdb
 C:\Users\brand\source\repos\SysBot.ACNH\obj\Release\net8.0\win-x64\SysBot.ACNHOrders.genruntimeconfig.cache
 C:\Users\brand\source\repos\SysBot.ACNH\obj\Release\net8.0\win-x64\ref\SysBot.ACNHOrders.dll
+C:\Users\brand\source\repos\SysBot.ACNH\bin\Release\net8.0\win-x64\System.Text.Json.dll

@@ -35,6 +35,7 @@ C:\Users\brand\source\repos\SysBot.ACNH\bin\Release\net8.0\System.Interactive.As
 C:\Users\brand\source\repos\SysBot.ACNH\bin\Release\net8.0\System.IO.Pipelines.dll
 C:\Users\brand\source\repos\SysBot.ACNH\bin\Release\net8.0\System.Linq.Async.dll
 C:\Users\brand\source\repos\SysBot.ACNH\bin\Release\net8.0\System.Reactive.dll
+C:\Users\brand\source\repos\SysBot.ACNH\bin\Release\net8.0\System.Text.Json.dll
 C:\Users\brand\source\repos\SysBot.ACNH\bin\Release\net8.0\TwitchLib.Client.dll
 C:\Users\brand\source\repos\SysBot.ACNH\bin\Release\net8.0\TwitchLib.Client.Enums.dll
 C:\Users\brand\source\repos\SysBot.ACNH\bin\Release\net8.0\TwitchLib.Client.Models.dll

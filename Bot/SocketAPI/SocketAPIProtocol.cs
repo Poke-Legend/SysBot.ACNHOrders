@@ -13,16 +13,12 @@ namespace SocketAPI
         {
             try
             {
-                SocketAPIRequest? request = JsonSerializer.Deserialize<SocketAPIRequest>(message);
-
-                if (request?.Endpoint == null)
-                    return null;
-
-                return request;
+                var request = JsonSerializer.Deserialize<SocketAPIRequest>(message);
+                return request?.Endpoint == null ? null : request;
             }
             catch (JsonException ex)
             {
-                Logger.LogError($"Could not deserialize inbound request ({message}). Error: {ex.Message}");
+                Logger.LogError($"Could not deserialize inbound request: {message}. Error: {ex.Message}");
                 return null;
             }
         }
@@ -30,7 +26,6 @@ namespace SocketAPI
         /// <summary>
         /// Given the message type and input string, this method returns an encoded message ready to be sent to a client.
         /// The JSON-encoded message is terminated by "\0\0".
-        /// Do not send messages of length > 2^16 bytes (or your OS's default TCP buffer size)! The messages would get TCP-fragmented.
         /// </summary>
         public static string? EncodeMessage(SocketAPIMessage message)
         {
@@ -40,15 +35,15 @@ namespace SocketAPI
             }
             catch (JsonException ex)
             {
-                Logger.LogError($"Could not serialize outbound message ({message}). Error: {ex.Message}");
+                Logger.LogError($"Could not serialize outbound message: {message}. Error: {ex.Message}");
                 return null;
             }
         }
 
         /// <summary>
-        /// Given the input message, this method retrieves the message type as per protocol specification (1.)
+        /// Retrieves the message type as per protocol specification.
         /// </summary>
-        private static SocketAPIMessageType GetMessageTypeFromMessage(string type)
+        public static SocketAPIMessageType GetMessageTypeFromMessage(string type)
         {
             return (SocketAPIMessageType)Enum.Parse(typeof(SocketAPIMessageType), type, true);
         }

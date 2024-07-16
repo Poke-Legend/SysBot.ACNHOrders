@@ -569,7 +569,7 @@
           }
         }
       },
-      "System.Text.Json/8.0.3": {
+      "System.Text.Json/8.0.4": {
         "type": "package",
         "dependencies": {
           "System.Text.Encodings.Web": "8.0.0"
@@ -1535,10 +1535,10 @@
         "useSharedDesignerContext.txt"
       ]
     },
-    "System.Text.Json/8.0.3": {
-      "sha512": "hpagS9joOwv6efWfrMmV9MjQXpiXZH72PgN067Ysfr6AWMSD1/1hEcvh/U5mUpPLezEWsOJSuVrmqDIVD958iA==",
+    "System.Text.Json/8.0.4": {
+      "sha512": "bAkhgDJ88XTsqczoxEMliSrpijKZHhbJQldhAmObj/RbrN3sU5dcokuXmWJWsdQAhiMJ9bTayWsL1C9fbbCRhw==",
       "type": "package",
-      "path": "system.text.json/8.0.3",
+      "path": "system.text.json/8.0.4",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -1603,7 +1603,7 @@
         "lib/net8.0/System.Text.Json.xml",
         "lib/netstandard2.0/System.Text.Json.dll",
         "lib/netstandard2.0/System.Text.Json.xml",
-        "system.text.json.8.0.3.nupkg.sha512",
+        "system.text.json.8.0.4.nupkg.sha512",
         "system.text.json.nuspec",
         "useSharedDesignerContext.txt"
       ]
@@ -1746,7 +1746,7 @@
       "SixLabors.Fonts >= 2.0.4",
       "SixLabors.ImageSharp >= 3.1.4",
       "SixLabors.ImageSharp.Drawing >= 2.1.3",
-      "System.Text.Json >= 8.0.3",
+      "System.Text.Json >= 8.0.4",
       "TwitchLib.Client >= 3.3.1"
     ]
   },
@@ -1833,7 +1833,7 @@
           },
           "System.Text.Json": {
             "target": "Package",
-            "version": "[8.0.3, )"
+            "version": "[8.0.4, )"
           },
           "TwitchLib.Client": {
             "target": "Package",

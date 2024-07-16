@@ -1,40 +1,35 @@
-# Pokemon Legends Animal Crossing New Horizon Sysbot
+# Pokemon Legends Animal Crossing New Horizons Sysbot
 
-## Features added to this fork:
-- Server Banned System
-- Broadcasting System
-- Ping System
-- MysteryOrder System
-- Embeds System
+## Features Added to This Fork
+
+- **Server Banned System**
+- **Broadcasting System**
+- **Ping System**
+- **MysteryOrder System**
+- **Embeds System**
 
 ## SysBot.ACNHOrders
 
-Designed as a fully automated queue-based order bot that injects item orders directly onto your island's map and lets the player that queued pick them up, then leave. All dodo fetching, gate opening & closing, movement and dialoguing (including Tom Nook's or Isabelle's morning announcement progression) is automated.
+SysBot.ACNHOrders is a fully automated, queue-based order bot designed to inject item orders directly onto your island's map. Players can queue their orders, pick them up, and leave, with all processes, including dodo fetching, gate opening and closing, and even Tom Nook's or Isabelle's morning announcements, being fully automated.
 
-Alternatively, you may use this as a fully automated connection, logging, advanced item dropping, and map refresh bot (among other things) that restores the online session after a network or online crash/disconnect.
+Additionally, this bot serves as an advanced tool for connection logging, item dropping, map refreshing, and restoring online sessions after network or online crashes/disconnects.
 
 ## License
 
-This project is licensed under the terms specified in the License.md file.
+This project is licensed under the terms specified in the [License.md](./License.md) file.
 
 ## See Also
 
 ### SysBot.AnimalCrossing
+
 Special thanks to:
-- **kwsch** for the original project and everything that makes this work.
-- **Red** for the original Dodo-fetch code, pointer logic, and a bunch of other things that make this possible.
-
-## Resources
-
-- **[Wiki](#)**: Read the wiki for setup instructions and FAQ.
-- **[Bot Showcase](#)**: Watch the bot showcase to see it in action from the host's POV.
-- **[How to Order Items](#)**: Watch how to order items using ACNHMS to be used by the end-user of your bot.
-- **Support Discord**: Message DeVry
+- **kwsch** for the original project and foundational work.
+- **Red** for the original Dodo-fetch code, pointer logic, and numerous contributions.
 
 ## Dependencies
 
 - **sys-botbase client**: For remote control automation of Nintendo Switch consoles.
-- **Discord.Net**: Used as a dependency via NuGet.
+- **Discord.Net**: Managed via NuGet.
 - **Animal Crossing API logic**: Provided by NHSE.
 
-Refer to the License.md for details regarding licensing.
+For detailed licensing information, please refer to the [License.md](./License.md) file.

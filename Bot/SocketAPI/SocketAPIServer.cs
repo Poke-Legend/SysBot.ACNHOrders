@@ -7,7 +7,6 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Text;
-using System.Text.RegularExpressions;
 
 namespace SocketAPI
 {
@@ -17,7 +16,7 @@ namespace SocketAPI
     public sealed class SocketAPIServer : IDisposable
     {
         private readonly CancellationTokenSource tcpListenerCancellationSource = new();
-        private CancellationToken tcpListenerCancellationToken => tcpListenerCancellationSource.Token;
+        private CancellationToken TcpListenerCancellationToken => tcpListenerCancellationSource.Token;
         private TcpListener? listener;
         private readonly Dictionary<string, Delegate> apiEndpoints = new();
         private readonly ConcurrentBag<TcpClient> clients = new();
@@ -29,11 +28,9 @@ namespace SocketAPI
 
         public async Task Start(SocketAPIServerConfig config)
         {
-            if (!config.Enabled)
-                return;
+            if (!config.Enabled) return;
 
-            if (!config.LogsEnabled)
-                Logger.DisableLogs();
+            if (!config.LogsEnabled) Logger.DisableLogs();
 
             Logger.LogInfo($"Number of registered endpoints: {RegisterEndpoints()}");
 
@@ -50,37 +47,29 @@ namespace SocketAPI
 
             Logger.LogInfo($"Socket API server listening on port {config.Port}.");
 
-            tcpListenerCancellationToken.ThrowIfCancellationRequested();
-            tcpListenerCancellationToken.Register(() =>
-            {
-                if (listener != null)
-                {
-                    listener.Stop();
-                }
-            });
+            TcpListenerCancellationToken.Register(() => listener?.Stop());
 
             await AcceptClientsAsync();
         }
 
         private async Task AcceptClientsAsync()
         {
-            while (!tcpListenerCancellationToken.IsCancellationRequested)
+            while (!TcpListenerCancellationToken.IsCancellationRequested)
             {
                 try
                 {
-                    TcpClient client = await listener?.AcceptTcpClientAsync()!;
+                    var client = await listener?.AcceptTcpClientAsync()!;
                     clients.Add(client);
 
-                    IPEndPoint? clientEP = client.Client.RemoteEndPoint as IPEndPoint;
+                    var clientEP = client.Client.RemoteEndPoint as IPEndPoint;
                     Logger.LogInfo($"Client connected! IP: {clientEP?.Address}, Port: {clientEP?.Port}");
 
                     _ = HandleTcpClientAsync(client);
                 }
-                catch (OperationCanceledException) when (tcpListenerCancellationToken.IsCancellationRequested)
+                catch (OperationCanceledException) when (TcpListenerCancellationToken.IsCancellationRequested)
                 {
                     Logger.LogInfo("Socket API server was closed.");
-                    while (!clients.IsEmpty)
-                        clients.TryTake(out _);
+                    clients.Clear();
                 }
                 catch (Exception ex)
                 {
@@ -91,22 +80,22 @@ namespace SocketAPI
 
         private async Task HandleTcpClientAsync(TcpClient client)
         {
-            using NetworkStream stream = client.GetStream();
+            using var stream = client.GetStream();
+            var buffer = new byte[client.ReceiveBufferSize];
 
             try
             {
-                byte[] buffer = new byte[client.ReceiveBufferSize];
-                while (!tcpListenerCancellationToken.IsCancellationRequested)
+                while (!TcpListenerCancellationToken.IsCancellationRequested)
                 {
-                    int bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length, tcpListenerCancellationToken);
+                    int bytesRead = await stream.ReadAsync(buffer, TcpListenerCancellationToken);
                     if (bytesRead == 0)
                     {
                         Logger.LogInfo("Remote client closed the connection.");
                         break;
                     }
 
-                    string rawMessage = Encoding.UTF8.GetString(buffer, 0, bytesRead).Trim();
-                    SocketAPIRequest? request = SocketAPIProtocol.DecodeMessage(rawMessage);
+                    var rawMessage = Encoding.UTF8.GetString(buffer, 0, bytesRead).Trim();
+                    var request = SocketAPIProtocol.DecodeMessage(rawMessage);
 
                     if (request == null)
                     {
@@ -114,7 +103,7 @@ namespace SocketAPI
                         continue;
                     }
 
-                    SocketAPIMessage? message = InvokeEndpoint(request.Endpoint!, request.Args)
+                    var message = InvokeEndpoint(request.Endpoint!, request.Args)
                         ?? SocketAPIMessage.FromError("Endpoint not found.");
 
                     message.Id = request.Id;
@@ -131,7 +120,7 @@ namespace SocketAPI
             }
         }
 
-        public void SendResponse(TcpClient client, SocketAPIMessage message)
+        private void SendResponse(TcpClient client, SocketAPIMessage message)
         {
             message.Type = SocketAPIMessageType.Response;
             SendMessage(client, message);
@@ -152,10 +141,10 @@ namespace SocketAPI
 
         private async void SendMessage(TcpClient toClient, SocketAPIMessage message)
         {
-            byte[] wBuff = Encoding.UTF8.GetBytes(SocketAPIProtocol.EncodeMessage(message)!);
+            var wBuff = Encoding.UTF8.GetBytes(SocketAPIProtocol.EncodeMessage(message)!);
             try
             {
-                await toClient.GetStream().WriteAsync(wBuff, 0, wBuff.Length, tcpListenerCancellationToken);
+                await toClient.GetStream().WriteAsync(wBuff, TcpListenerCancellationToken);
             }
             catch (Exception ex)
             {
@@ -166,17 +155,13 @@ namespace SocketAPI
 
         public void Stop()
         {
-            if (listener != null)
-            {
-                listener.Stop();
-            }
+            listener?.Stop();
             tcpListenerCancellationSource.Cancel();
         }
 
         private bool RegisterEndpoint(string name, Func<string, object?> handler)
         {
-            if (apiEndpoints.ContainsKey(name))
-                return false;
+            if (apiEndpoints.ContainsKey(name)) return false;
 
             apiEndpoints.Add(name, handler);
             return true;
@@ -187,7 +172,7 @@ namespace SocketAPI
             var endpoints = AppDomain.CurrentDomain.GetAssemblies()
                 .Where(a => a.FullName?.Contains("SysBot.ACNHOrders") ?? false)
                 .SelectMany(a => a.GetTypes())
-                .Where(t => t.IsClass && t.GetCustomAttributes(typeof(SocketAPIController), true).Any())
+                .Where(t => t.IsClass && t.GetCustomAttributes(typeof(SocketAPIController), true).Length != 0)
                 .SelectMany(c => c.GetMethods())
                 .Where(m => m.GetCustomAttributes(typeof(SocketAPIEndpoint), true).Any())
                 .Where(m => m.GetParameters().Length == 1 &&
@@ -209,7 +194,7 @@ namespace SocketAPI
 
             try
             {
-                object? rawResponse = handler.DynamicInvoke(jsonArgs);
+                var rawResponse = handler.DynamicInvoke(jsonArgs);
                 return SocketAPIMessage.FromValue(rawResponse);
             }
             catch (Exception ex)

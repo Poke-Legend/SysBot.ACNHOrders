@@ -45,7 +45,14 @@ namespace SocketAPI
         /// </summary>
         public static SocketAPIMessageType GetMessageTypeFromMessage(string type)
         {
-            return (SocketAPIMessageType)Enum.Parse(typeof(SocketAPIMessageType), type, true);
+            if (Enum.TryParse<SocketAPIMessageType>(type, true, out var messageType))
+            {
+                return messageType;
+            }
+            else
+            {
+                throw new ArgumentException($"Invalid message type: {type}", nameof(type));
+            }
         }
     }
 }

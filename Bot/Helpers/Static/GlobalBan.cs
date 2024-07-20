@@ -26,10 +26,10 @@ namespace SysBot.ACNHOrders
         public override string ToString() => ID;
     }
 
-    public class GlobalBan
+    public static class GlobalBan
     {
-        private const string UserBanFilePath = "userbanlist.txt";
-        private const string ServerBanFilePath = "serverbanlist.txt";
+        private const string UserBanFilePath = "userban.txt";
+        private const string ServerBanFilePath = "serverban.txt";
 
         private static int PenaltyCountBan = 0;
         private static readonly List<Penalty> PenaltyList = new List<Penalty>();
@@ -98,7 +98,11 @@ namespace SysBot.ACNHOrders
             lock (UserMapAccessor)
             {
                 BannedUsers.Clear();
-                if (File.Exists(UserBanFilePath))
+                if (!File.Exists(UserBanFilePath))
+                {
+                    File.Create(UserBanFilePath).Dispose();
+                }
+                else
                 {
                     BannedUsers.AddRange(File.ReadAllLines(UserBanFilePath));
                 }
@@ -134,7 +138,11 @@ namespace SysBot.ACNHOrders
             lock (ServerMapAccessor)
             {
                 BannedServers.Clear();
-                if (File.Exists(ServerBanFilePath))
+                if (!File.Exists(ServerBanFilePath))
+                {
+                    File.Create(ServerBanFilePath).Dispose();
+                }
+                else
                 {
                     BannedServers.AddRange(File.ReadAllLines(ServerBanFilePath));
                 }

@@ -5,64 +5,39 @@ namespace SocketAPI
 {
     public static class Logger
     {
-        /// <summary>
-        /// Whether logs are enabled or not.
-        /// </summary>
         private static bool logsEnabled = true;
 
-        /// <summary>
-        /// Logs an informational message.
-        /// </summary>
-        /// <param name="message">The message to log.</param>
-        /// <param name="ignoreDisabled">If set to true, ignores the log enabled flag.</param>
         public static void LogInfo(string message, bool ignoreDisabled = false)
         {
-            if (!logsEnabled && !ignoreDisabled)
-                return;
-
-            LogUtil.LogInfo(message, nameof(SocketAPI));
+            Log(message, nameof(SocketAPI), LogUtil.LogInfo, ignoreDisabled);
         }
 
-        /// <summary>
-        /// Logs a warning message.
-        /// </summary>
-        /// <param name="message">The message to log.</param>
-        /// <param name="ignoreDisabled">If set to true, ignores the log enabled flag.</param>
         public static void LogWarning(string message, bool ignoreDisabled = false)
         {
-            if (!logsEnabled && !ignoreDisabled)
-                return;
-
-            LogUtil.LogInfo(message, $"{nameof(SocketAPI)} Warning");
+            Log(message, $"{nameof(SocketAPI)} Warning", LogUtil.LogInfo, ignoreDisabled);
         }
 
-        /// <summary>
-        /// Logs an error message.
-        /// </summary>
-        /// <param name="message">The message to log.</param>
-        /// <param name="ignoreDisabled">If set to true, ignores the log enabled flag.</param>
         public static void LogError(string message, bool ignoreDisabled = false)
         {
-            if (!logsEnabled && !ignoreDisabled)
-                return;
-
-            LogUtil.LogError(message, nameof(SocketAPI));
+            Log(message, nameof(SocketAPI), LogUtil.LogError, ignoreDisabled);
         }
 
-        /// <summary>
-        /// Disables logging.
-        /// </summary>
         public static void DisableLogs()
         {
             logsEnabled = false;
         }
 
-        /// <summary>
-        /// Enables logging.
-        /// </summary>
         public static void EnableLogs()
         {
             logsEnabled = true;
+        }
+
+        private static void Log(string message, string context, Action<string, string> logAction, bool ignoreDisabled)
+        {
+            if (!logsEnabled && !ignoreDisabled)
+                return;
+
+            logAction(message, context);
         }
     }
 }

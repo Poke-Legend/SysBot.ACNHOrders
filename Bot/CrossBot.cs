@@ -10,6 +10,7 @@ using SysBot.Base;
 using System.Text;
 using System.IO;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 namespace SysBot.ACNHOrders
 {
@@ -101,9 +102,6 @@ namespace SysBot.ACNHOrders
                 LogUtil.LogInfo("Detaching controller on startup as first interaction.", Config.IP);
                 await Connection.SendAsync(SwitchCommand.DetachController(), token).ConfigureAwait(false);
                 await Task.Delay(200, token).ConfigureAwait(false);
-
-                await UpdateBlocker(false, token).ConfigureAwait(false);
-                await SetScreenCheck(false, token).ConfigureAwait(false);
 
                 await Task.Delay(100, token).ConfigureAwait(false);
                 LogUtil.LogInfo("Attempting get version. Please wait...", Config.IP);
@@ -728,7 +726,7 @@ namespace SysBot.ACNHOrders
                 LogUtil.LogInfo(e.Message + "\r\n" + e.StackTrace, Config.IP);
             }
 
-           order.SendNotification(this, $"Visitor arriving: {LastArrival}. Your items will be in front of you once you land.");
+            order.SendNotification(this, $"Visitor arriving: {LastArrival}. Your items will be in front of you once you land.");
             if (order.VillagerName != string.Empty && Config.OrderConfig.EchoArrivingLeavingChannels.Count > 0)
                 await AttemptEchoHook($"> Visitor arriving: {order.VillagerName}", Config.OrderConfig.EchoArrivingLeavingChannels, token).ConfigureAwait(false);
 
@@ -744,12 +742,10 @@ namespace SysBot.ACNHOrders
 
                 if (!isUserArriveLeaving && state == OverworldState.UserArriveLeaving)
                 {
-                    await UpdateBlocker(true, token).ConfigureAwait(false);
                     isUserArriveLeaving = true;
                 }
                 else if (isUserArriveLeaving && state != OverworldState.UserArriveLeaving)
                 {
-                    await UpdateBlocker(false, token).ConfigureAwait(false);
                     isUserArriveLeaving = false;
                 }
 
@@ -757,8 +753,6 @@ namespace SysBot.ACNHOrders
                 if (VisitorList.VisitorCount < 2)
                     break;
             }
-
-            await UpdateBlocker(false, token).ConfigureAwait(false);
 
             CurrentUserId = order.UserGuid;
 
@@ -793,13 +787,11 @@ namespace SysBot.ACNHOrders
             }
 
             LogUtil.LogInfo($"Order completed. Notifying visitor of completion.", Config.IP);
-            await UpdateBlocker(true, token).ConfigureAwait(false);
             order.OrderFinished(this, Config.OrderConfig.CompleteOrderMessage);
             if (order.VillagerName != string.Empty && Config.OrderConfig.EchoArrivingLeavingChannels.Count > 0)
                 await AttemptEchoHook($"> Visitor completed order, and is now leaving: {order.VillagerName}", Config.OrderConfig.EchoArrivingLeavingChannels, token).ConfigureAwait(false);
 
             await Task.Delay(5_000, token).ConfigureAwait(false);
-            await UpdateBlocker(false, token).ConfigureAwait(false);
             await Task.Delay(15_000, token).ConfigureAwait(false);
 
             while (await DodoPosition.GetOverworldState(OffsetHelper.PlayerCoordJumps, token).ConfigureAwait(false) != OverworldState.Overworld)
@@ -1247,8 +1239,6 @@ namespace SysBot.ACNHOrders
                 return;
             await SetScreen(on, token).ConfigureAwait(false);
         }
-
-        public async Task UpdateBlocker(bool show, CancellationToken token) => await FileUtil.WriteBytesToFileAsync(show ? Encoding.UTF8.GetBytes(Config.BlockerEmoji) : Array.Empty<byte>(), "blocker.txt", token).ConfigureAwait(false);
 
         private void NotifyDodo(string dodo)
         {

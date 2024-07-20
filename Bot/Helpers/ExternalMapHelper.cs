@@ -2,83 +2,105 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SysBot.ACNHOrders
 {
     public class ExternalMapHelper
     {
-        private readonly string RootPathNHL;
+        private readonly string _rootPathNHL;
+        private readonly Dictionary<string, byte[]> _loadedNHLs;
+        private readonly bool _cycleMap;
+        private readonly int _cycleTime;
+        private DateTime _lastCycleTime;
+        private int _lastCycledIndex;
 
-        private Dictionary<string, byte[]> LoadedNHLs;
-
-        private readonly bool CycleMap;
-        private readonly int CycleTime;
-
-        private DateTime LastCycleTime;
-        private int LastCycledIndex = 0;
-
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ExternalMapHelper"/> class.
+        /// </summary>
+        /// <param name="cfg">The configuration object containing settings for the bot.</param>
+        /// <param name="lastFileLoaded">The name of the last file that was loaded.</param>
         public ExternalMapHelper(CrossBotConfig cfg, string lastFileLoaded)
         {
-            RootPathNHL = cfg.FieldLayerNHLDirectory;
-            LoadedNHLs = new Dictionary<string, byte[]>();
+            _rootPathNHL = cfg.FieldLayerNHLDirectory;
+            _loadedNHLs = new Dictionary<string, byte[]>();
 
-            if (!Directory.Exists(RootPathNHL))
-                Directory.CreateDirectory(RootPathNHL);
+            if (!Directory.Exists(_rootPathNHL))
+                Directory.CreateDirectory(_rootPathNHL);
 
-            var files = Directory.EnumerateFiles(RootPathNHL);
+            LoadNHLFiles();
 
-            foreach (var file in files)
+            _cycleMap = cfg.DodoModeConfig.CycleNHLs;
+            _cycleTime = cfg.DodoModeConfig.CycleNHLMinutes;
+            _lastCycleTime = DateTime.Now;
+
+            _lastCycledIndex = _loadedNHLs.Keys
+                .ToList()
+                .FindIndex(x => x.Equals(lastFileLoaded, StringComparison.InvariantCultureIgnoreCase));
+        }
+
+        /// <summary>
+        /// Loads NHL files from the root path into the dictionary.
+        /// </summary>
+        private void LoadNHLFiles()
+        {
+            foreach (var file in Directory.EnumerateFiles(_rootPathNHL))
             {
                 var info = new FileInfo(file);
                 if (info.Length == ACNHMobileSpawner.MapTerrainLite.ByteSize)
-                    LoadedNHLs.Add(info.Name, File.ReadAllBytes(file));
+                    _loadedNHLs[info.Name] = File.ReadAllBytes(file);
             }
-
-            CycleMap = cfg.DodoModeConfig.CycleNHLs;
-            CycleTime = cfg.DodoModeConfig.CycleNHLMinutes;
-            LastCycleTime = DateTime.Now;
-
-            var existingKey = LoadedNHLs.Keys.FirstOrDefault(x => x.Equals(lastFileLoaded, StringComparison.InvariantCultureIgnoreCase));
-            if (existingKey != null)
-                LastCycledIndex = LoadedNHLs.Keys.ToList().IndexOf(lastFileLoaded);
         }
 
+        /// <summary>
+        /// Gets the NHL file as a byte array.
+        /// </summary>
+        /// <param name="filename">The name of the NHL file.</param>
+        /// <returns>A byte array representing the NHL file, or null if not found.</returns>
         public byte[]? GetNHL(string filename)
         {
-            if (!filename.ToLower().EndsWith(".nhl"))
-                filename += ".nhl";
-            if (LoadedNHLs.ContainsKey(filename))
-                return LoadedNHLs[filename];
+            filename = filename.EndsWith(".nhl", StringComparison.OrdinalIgnoreCase) ? filename : $"{filename}.nhl";
+            if (_loadedNHLs.TryGetValue(filename, out var nhlData))
+                return nhlData;
 
-            filename = Path.Combine(RootPathNHL, filename);
-            if (File.Exists(filename))
+            var filePath = Path.Combine(_rootPathNHL, filename);
+            return File.Exists(filePath) ? LoadAndCacheNHL(filePath) : null;
+        }
+
+        /// <summary>
+        /// Loads and caches an NHL file.
+        /// </summary>
+        /// <param name="filePath">The path to the NHL file.</param>
+        /// <returns>A byte array representing the NHL file, or null if the file is invalid.</returns>
+        private byte[]? LoadAndCacheNHL(string filePath)
+        {
+            var bytes = File.ReadAllBytes(filePath);
+            if (bytes.Length == ACNHMobileSpawner.MapTerrainLite.ByteSize)
             {
-                var bytes = File.ReadAllBytes(filename);
-                if (bytes.Length == ACNHMobileSpawner.MapTerrainLite.ByteSize)
-                {
-                    LoadedNHLs.Add(filename, bytes);
-                    return bytes;
-                }
+                var filename = Path.GetFileName(filePath);
+                _loadedNHLs[filename] = bytes;
+                return bytes;
             }
-
             return null;
         }
 
+        /// <summary>
+        /// Checks whether it is time to cycle to the next NHL file.
+        /// </summary>
+        /// <param name="request">The map override request if cycling occurs.</param>
+        /// <returns>True if a cycle occurred, otherwise false.</returns>
         public bool CheckForCycle(out MapOverrideRequest? request)
         {
             request = null;
-            if (!CycleMap || LoadedNHLs.Count == 0)
+            if (!_cycleMap || _loadedNHLs.Count == 0)
                 return false;
 
             var now = DateTime.Now;
-            bool cycle = CycleTime == -1 ? LastCycleTime.Date != now.Date : (now - LastCycleTime).TotalMinutes >= CycleTime;
-            if (cycle)
+            bool shouldCycle = _cycleTime == -1 ? _lastCycleTime.Date != now.Date : (now - _lastCycleTime).TotalMinutes >= _cycleTime;
+            if (shouldCycle)
             {
-                LastCycleTime = now;
-                LastCycledIndex = (LastCycledIndex + 1) % LoadedNHLs.Count;
-                var nhl = LoadedNHLs.ElementAt(LastCycledIndex);
+                _lastCycleTime = now;
+                _lastCycledIndex = (_lastCycledIndex + 1) % _loadedNHLs.Count;
+                var nhl = _loadedNHLs.ElementAt(_lastCycledIndex);
                 request = new MapOverrideRequest(nameof(ExternalMapHelper), nhl.Value, nhl.Key);
                 return true;
             }

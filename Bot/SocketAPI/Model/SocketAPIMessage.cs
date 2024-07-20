@@ -1,3 +1,5 @@
+using System.Text.Json;
+
 namespace SocketAPI
 {
     /// <summary>
@@ -9,14 +11,14 @@ namespace SocketAPI
 
         public SocketAPIMessage(object? value, string? error)
         {
-            this.Value = value;
-            this.Error = error;
+            Value = value;
+            Error = error;
         }
 
         /// <summary>
         /// Describes whether the request completed successfully or not.
         /// </summary>
-        public string Status => this.Error != null ? "error" : "okay";
+        public string Status => Error != null ? "error" : "okay";
 
         /// <summary>
         /// The unique identifier of the associated request.
@@ -27,10 +29,10 @@ namespace SocketAPI
         /// Describes the type of response; i.e. event or response.
         /// Wrapper property used for encoding purposes.
         /// </summary>
-        public string? _Type => this.Type?.ToString().ToLower();
+        public string? _Type => Type?.ToString().ToLower();
 
         /// <summary>
-        /// Describes the type of response; i.e. event or response. 
+        /// Describes the type of response; i.e. event or response.
         /// </summary>
         public SocketAPIMessageType? Type { get; set; }
 
@@ -48,34 +50,25 @@ namespace SocketAPI
         /// Serializes this object to a JSON string.
         /// </summary>
         /// <returns>A JSON string representation of this object.</returns>
-        public string Serialize()
-        {
-            return System.Text.Json.JsonSerializer.Serialize(this);
-        }
+        public string Serialize() => JsonSerializer.Serialize(this);
 
         /// <summary>
         /// Creates a `SocketAPIMessage` populated with the supplied value object.
         /// </summary>
         /// <param name="value">The value to include in the message.</param>
         /// <returns>A new `SocketAPIMessage` instance with the given value.</returns>
-        public static SocketAPIMessage FromValue(object? value)
-        {
-            return new SocketAPIMessage(value, null);
-        }
+        public static SocketAPIMessage FromValue(object? value) => new SocketAPIMessage(value, null);
 
         /// <summary>
         /// Creates a `SocketAPIMessage` populated with the supplied error message.
         /// </summary>
         /// <param name="errorMessage">The error message to include in the message.</param>
         /// <returns>A new `SocketAPIMessage` instance with the given error message.</returns>
-        public static SocketAPIMessage FromError(string errorMessage)
-        {
-            return new SocketAPIMessage(null, errorMessage);
-        }
+        public static SocketAPIMessage FromError(string errorMessage) => new SocketAPIMessage(null, errorMessage);
 
         public override string ToString()
         {
-            return $"SocketAPI.SocketAPIMessage (id: {this.Id}) - status: {this.Status}, type: {this.Type}, value: {this.Value}, error: {this.Error}";
+            return $"SocketAPI.SocketAPIMessage (id: {Id}) - status: {Status}, type: {Type}, value: {Value}, error: {Error}";
         }
     }
 }

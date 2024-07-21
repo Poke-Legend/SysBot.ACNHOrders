@@ -71,8 +71,7 @@ namespace SysBot.ACNHOrders
                 }
 
                 SaveBannedUsers();
-                SaveBannedServers();
-
+                
                 return pen.PenaltyCount >= PenaltyCountBan;
             }
         }

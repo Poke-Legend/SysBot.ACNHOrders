@@ -9,7 +9,7 @@ namespace SysBot.ACNHOrders
 {
     public static class NetUtil
     {
-        private static readonly HttpClient httpClient = new HttpClient();
+        private static readonly HttpClient httpClient = new();
 
         public static async Task<byte[]> DownloadFromUrlAsync(string url)
         {
@@ -52,21 +52,13 @@ namespace SysBot.ACNHOrders
 
         public static async Task DownloadFileAsync(string url, string destinationFilePath)
         {
-            using (HttpClient httpClient = new HttpClient())
-            {
-                using (HttpResponseMessage response = await httpClient.GetAsync(url))
-                {
-                    response.EnsureSuccessStatusCode();
+            using HttpClient httpClient = new HttpClient();
+            using HttpResponseMessage response = await httpClient.GetAsync(url);
+            response.EnsureSuccessStatusCode();
 
-                    using (Stream contentStream = await response.Content.ReadAsStreamAsync())
-                    {
-                        using (FileStream fileStream = new FileStream(destinationFilePath, FileMode.Create, FileAccess.Write, FileShare.None, 4096, true))
-                        {
-                            await contentStream.CopyToAsync(fileStream);
-                        }
-                    }
-                }
-            }
+            await using Stream contentStream = await response.Content.ReadAsStreamAsync();
+            await using FileStream fileStream = new(destinationFilePath, FileMode.Create, FileAccess.Write, FileShare.None, 4096, true);
+            await contentStream.CopyToAsync(fileStream);
         }
     }
 

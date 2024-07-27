@@ -29,7 +29,10 @@ namespace SocketAPI
         /// Describes the type of response; i.e. event or response.
         /// Wrapper property used for encoding purposes.
         /// </summary>
-        public string? _Type => Type?.ToString().ToLower();
+        public string? Get_Type()
+        {
+            return Type?.ToString().ToLower();
+        }
 
         /// <summary>
         /// Describes the type of response; i.e. event or response.

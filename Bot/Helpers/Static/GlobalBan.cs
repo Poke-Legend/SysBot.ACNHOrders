@@ -9,7 +9,7 @@ namespace SysBot.ACNHOrders
 {
     public class Penalty
     {
-        public string ID { get; private set; }
+        public string ID { get; protected set; }
         public uint PenaltyCount { get; private set; }
 
         public Penalty(string id, uint pcount)
@@ -32,16 +32,16 @@ namespace SysBot.ACNHOrders
         private const string ServerBanFilePath = "serverban.txt";
 
         private static int PenaltyCountBan = 0;
-        private static readonly List<Penalty> PenaltyList = new List<Penalty>();
+        private static readonly List<Penalty> PenaltyList = new();
 
-        private static readonly object UserMapAccessor = new object();
-        private static readonly object ServerMapAccessor = new object();
+        private static readonly object UserMapAccessor = new();
+        private static readonly object ServerMapAccessor = new();
 
         // User Bans
-        private static readonly List<string> BannedUsers = new List<string>();
+        private static readonly List<string> BannedUsers = new();
 
         // Server Bans
-        private static readonly List<string> BannedServers = new List<string>();
+        private static readonly List<string> BannedServers = new();
 
         public static void UpdateConfiguration(CrossBotConfig config)
         {
@@ -124,11 +124,12 @@ namespace SysBot.ACNHOrders
         {
             lock (UserMapAccessor)
             {
-                if (BannedUsers.Contains(userId))
+                if (!BannedUsers.Contains(userId))
                 {
-                    BannedUsers.Remove(userId);
-                    SaveBannedUsers();
+                    return;
                 }
+                BannedUsers.Remove(userId);
+                SaveBannedUsers();
             }
         }
 
@@ -164,11 +165,12 @@ namespace SysBot.ACNHOrders
         {
             lock (ServerMapAccessor)
             {
-                if (BannedServers.Contains(serverId))
+                if (!BannedServers.Contains(serverId))
                 {
-                    BannedServers.Remove(serverId);
-                    SaveBannedServers();
+                    return;
                 }
+                BannedServers.Remove(serverId);
+                SaveBannedServers();
             }
         }
 

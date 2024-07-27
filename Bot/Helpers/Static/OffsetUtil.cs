@@ -19,12 +19,12 @@ namespace SysBot.ACNHOrders
 
         private static async Task<string[]> FetchPlayerNames(IConsoleConnectionAsync connection, uint rootInventoryOffset, uint playerSize, CancellationToken token)
         {
-            List<string> toRet = new List<string>();
+            List<string> toRet = new();
             for (int i = 0; i < 8; ++i)
             {
                 ulong address = OffsetHelper.getPlayerIdAddress(rootInventoryOffset) - 0xB8 + 0x20 + (playerSize * (ulong)i);
                 byte[] pName = await connection.ReadBytesAsync((uint)address, 20, token).ConfigureAwait(false);
-                if (!isZeroArray(pName))
+                if (!IsZeroArray(pName))
                 {
                     string name = StringUtil.GetString(pName, 0, 10);
                     toRet.Add(name);
@@ -34,7 +34,7 @@ namespace SysBot.ACNHOrders
             return toRet.ToArray();
         }
 
-        private static bool isZeroArray(byte[] bytes)
+        private static bool IsZeroArray(byte[] bytes)
         {
             for (int i = 0; i < bytes.Length; ++i)
                 if (bytes[i] != 0)

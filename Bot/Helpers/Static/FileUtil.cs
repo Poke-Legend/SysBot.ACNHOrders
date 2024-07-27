@@ -17,12 +17,10 @@ namespace SysBot.ACNHOrders
             {
                 try
                 {
-                    using (FileStream sourceStream = new FileStream(path,
+                    await using FileStream sourceStream = new(path,
                         FileMode.Create, FileAccess.Write, FileShare.None,
-                        bufferSize: 4096, useAsync: true))
-                    {
-                        await sourceStream.WriteAsync(bytes, 0, bytes.Length, token).ConfigureAwait(false);
-                    }
+                        bufferSize: 4096, useAsync: true);
+                    await sourceStream.WriteAsync(bytes, token).ConfigureAwait(false);
                     return; // Success, exit method
                 }
                 catch (IOException ex) when (attempt < MaxRetryAttempts - 1)
@@ -43,17 +41,13 @@ namespace SysBot.ACNHOrders
                 return string.Empty;
 
             var resourceName = namespacename + "." + filename;
-            using (Stream? stream = assembly.GetManifestResourceStream(resourceName))
-            {
-                if (stream == null)
-                    return string.Empty;
+            using Stream? stream = assembly.GetManifestResourceStream(resourceName);
+            if (stream == null)
+                return string.Empty;
 
-                using (StreamReader reader = new StreamReader(stream))
-                {
-                    string result = reader.ReadToEnd();
-                    return result;
-                }
-            }
+            using StreamReader reader = new(stream);
+            string result = reader.ReadToEnd();
+            return result;
         }
     }
 }

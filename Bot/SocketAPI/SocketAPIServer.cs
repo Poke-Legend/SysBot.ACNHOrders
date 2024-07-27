@@ -7,6 +7,7 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Text;
+using SysBot.ACNHOrders.Bot.SocketAPI.Attributes;
 
 namespace SocketAPI
 {
@@ -174,8 +175,7 @@ namespace SocketAPI
                 .SelectMany(a => a.GetTypes())
                 .Where(t => t.IsClass && t.GetCustomAttributes(typeof(SocketAPIController), true).Length != 0)
                 .SelectMany(c => c.GetMethods())
-                .Where(m => m.GetCustomAttributes(typeof(SocketAPIEndpoint), true).Any())
-                .Where(m => m.GetParameters().Length == 1 &&
+                .Where(m => m.GetCustomAttributes(typeof(SocketAPIEndpoint), true).Length != 0 && m.GetParameters().Length == 1 &&
                             m.IsStatic &&
                             m.GetParameters()[0].ParameterType == typeof(string) &&
                             m.ReturnType == typeof(object))

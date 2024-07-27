@@ -1,6 +1,7 @@
 ﻿using NHSE.Core;
 using System.IO;
 using SysBot.Base;
+using System.Linq;
 
 namespace SysBot.ACNHOrders
 {
@@ -15,7 +16,7 @@ namespace SysBot.ACNHOrders
             }
 
             var fileBytes = File.ReadAllBytes(nhiPath);
-            if (fileBytes.Length > (Item.SIZE * 40) || fileBytes.Length == 0 || fileBytes.Length % 8 != 0)
+            if (!IsValidNhiFile(fileBytes))
             {
                 LogUtil.LogInfo($"{nhiPath} is an invalid size for an NHI file.", nameof(PresetLoader));
                 return null;
@@ -35,12 +36,24 @@ namespace SysBot.ACNHOrders
 
         public static string[] GetPresets(OrderBotConfig cfg)
         {
-            var files = Directory.GetFiles(cfg.NHIPresetsDirectory);
-            var presets = new string[files.Length];
-            for(int i = 0; i < files.Length; ++i)
-                presets[i] = Path.GetFileNameWithoutExtension(files[i]);
+            var filesInDirectory = Directory.GetFiles(cfg.NHIPresetsDirectory);
+            return filesInDirectory.Select(Path.GetFileNameWithoutExtension)
+                                   .Where(fileName => !string.IsNullOrEmpty(fileName))
+                                   .ToArray()!;
+        }
 
-            return presets;
+        public static string[] GetPresets(OrderBotConfig cfg, System.Collections.Generic.IEnumerable<string> additionalFiles)
+        {
+            var filesInDirectory = Directory.GetFiles(cfg.NHIPresetsDirectory);
+            var allFiles = filesInDirectory.Concat(additionalFiles);
+            return allFiles.Select(Path.GetFileNameWithoutExtension)
+                           .Where(fileName => !string.IsNullOrEmpty(fileName))
+                           .ToArray()!;
+        }
+
+        private static bool IsValidNhiFile(byte[] fileBytes)
+        {
+            return fileBytes.Length <= (Item.SIZE * 40) && fileBytes.Length != 0 && fileBytes.Length % 8 == 0;
         }
     }
 }

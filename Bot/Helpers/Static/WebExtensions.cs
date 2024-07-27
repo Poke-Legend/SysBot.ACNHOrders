@@ -41,7 +41,7 @@ namespace SysBot.ACNHOrders
                 if (pTo == -1)
                     return false;
 
-                processed = str.Substring(pFrom, pTo - pFrom);
+                processed = str[pFrom..pTo];
                 return true;
             }
             catch { return false; }

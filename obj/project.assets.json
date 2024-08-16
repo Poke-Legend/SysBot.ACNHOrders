@@ -2,21 +2,21 @@
   "version": 3,
   "targets": {
     "net8.0": {
-      "Discord.Net/3.15.2": {
+      "Discord.Net/3.15.3": {
         "type": "package",
         "dependencies": {
-          "Discord.Net.Commands": "3.15.2",
-          "Discord.Net.Core": "3.15.2",
-          "Discord.Net.Interactions": "3.15.2",
-          "Discord.Net.Rest": "3.15.2",
-          "Discord.Net.WebSocket": "3.15.2",
-          "Discord.Net.Webhook": "3.15.2"
+          "Discord.Net.Commands": "3.15.3",
+          "Discord.Net.Core": "3.15.3",
+          "Discord.Net.Interactions": "3.15.3",
+          "Discord.Net.Rest": "3.15.3",
+          "Discord.Net.WebSocket": "3.15.3",
+          "Discord.Net.Webhook": "3.15.3"
         }
       },
-      "Discord.Net.Commands/3.15.2": {
+      "Discord.Net.Commands/3.15.3": {
         "type": "package",
         "dependencies": {
-          "Discord.Net.Core": "3.15.2"
+          "Discord.Net.Core": "3.15.3"
         },
         "compile": {
           "lib/net6.0/Discord.Net.Commands.dll": {
@@ -29,7 +29,7 @@
           }
         }
       },
-      "Discord.Net.Core/3.15.2": {
+      "Discord.Net.Core/3.15.3": {
         "type": "package",
         "dependencies": {
           "Newtonsoft.Json": "13.0.3",
@@ -48,11 +48,11 @@
           }
         }
       },
-      "Discord.Net.Interactions/3.15.2": {
+      "Discord.Net.Interactions/3.15.3": {
         "type": "package",
         "dependencies": {
-          "Discord.Net.Core": "3.15.2",
-          "Discord.Net.Rest": "3.15.2",
+          "Discord.Net.Core": "3.15.3",
+          "Discord.Net.Rest": "3.15.3",
           "Microsoft.Extensions.DependencyInjection.Abstractions": "6.0.0",
           "System.Collections.Immutable": "6.0.0",
           "System.Reactive": "6.0.0"
@@ -68,10 +68,10 @@
           }
         }
       },
-      "Discord.Net.Rest/3.15.2": {
+      "Discord.Net.Rest/3.15.3": {
         "type": "package",
         "dependencies": {
-          "Discord.Net.Core": "3.15.2"
+          "Discord.Net.Core": "3.15.3"
         },
         "compile": {
           "lib/net6.0/Discord.Net.Rest.dll": {
@@ -84,11 +84,11 @@
           }
         }
       },
-      "Discord.Net.Webhook/3.15.2": {
+      "Discord.Net.Webhook/3.15.3": {
         "type": "package",
         "dependencies": {
-          "Discord.Net.Core": "3.15.2",
-          "Discord.Net.Rest": "3.15.2"
+          "Discord.Net.Core": "3.15.3",
+          "Discord.Net.Rest": "3.15.3"
         },
         "compile": {
           "lib/net6.0/Discord.Net.Webhook.dll": {
@@ -101,11 +101,11 @@
           }
         }
       },
-      "Discord.Net.WebSocket/3.15.2": {
+      "Discord.Net.WebSocket/3.15.3": {
         "type": "package",
         "dependencies": {
-          "Discord.Net.Core": "3.15.2",
-          "Discord.Net.Rest": "3.15.2"
+          "Discord.Net.Core": "3.15.3",
+          "Discord.Net.Rest": "3.15.3"
         },
         "compile": {
           "lib/net6.0/Discord.Net.WebSocket.dll": {
@@ -118,10 +118,10 @@
           }
         }
       },
-      "Microsoft.AspNetCore.Connections.Abstractions/8.0.6": {
+      "Microsoft.AspNetCore.Connections.Abstractions/8.0.7": {
         "type": "package",
         "dependencies": {
-          "Microsoft.Extensions.Features": "8.0.6",
+          "Microsoft.Extensions.Features": "8.0.7",
           "System.IO.Pipelines": "8.0.0"
         },
         "compile": {
@@ -135,10 +135,10 @@
           }
         }
       },
-      "Microsoft.AspNetCore.Http.Connections.Client/8.0.6": {
+      "Microsoft.AspNetCore.Http.Connections.Client/8.0.7": {
         "type": "package",
         "dependencies": {
-          "Microsoft.AspNetCore.Http.Connections.Common": "8.0.6",
+          "Microsoft.AspNetCore.Http.Connections.Common": "8.0.7",
           "Microsoft.Extensions.Logging.Abstractions": "8.0.1",
           "Microsoft.Extensions.Options": "8.0.2"
         },
@@ -153,10 +153,10 @@
           }
         }
       },
-      "Microsoft.AspNetCore.Http.Connections.Common/8.0.6": {
+      "Microsoft.AspNetCore.Http.Connections.Common/8.0.7": {
         "type": "package",
         "dependencies": {
-          "Microsoft.AspNetCore.Connections.Abstractions": "8.0.6"
+          "Microsoft.AspNetCore.Connections.Abstractions": "8.0.7"
         },
         "compile": {
           "lib/net8.0/Microsoft.AspNetCore.Http.Connections.Common.dll": {
@@ -169,11 +169,11 @@
           }
         }
       },
-      "Microsoft.AspNetCore.SignalR.Client/8.0.6": {
+      "Microsoft.AspNetCore.SignalR.Client/8.0.7": {
         "type": "package",
         "dependencies": {
-          "Microsoft.AspNetCore.Http.Connections.Client": "8.0.6",
-          "Microsoft.AspNetCore.SignalR.Client.Core": "8.0.6"
+          "Microsoft.AspNetCore.Http.Connections.Client": "8.0.7",
+          "Microsoft.AspNetCore.SignalR.Client.Core": "8.0.7"
         },
         "compile": {
           "lib/net8.0/Microsoft.AspNetCore.SignalR.Client.dll": {
@@ -186,11 +186,11 @@
           }
         }
       },
-      "Microsoft.AspNetCore.SignalR.Client.Core/8.0.6": {
+      "Microsoft.AspNetCore.SignalR.Client.Core/8.0.7": {
         "type": "package",
         "dependencies": {
-          "Microsoft.AspNetCore.SignalR.Common": "8.0.6",
-          "Microsoft.AspNetCore.SignalR.Protocols.Json": "8.0.6",
+          "Microsoft.AspNetCore.SignalR.Common": "8.0.7",
+          "Microsoft.AspNetCore.SignalR.Protocols.Json": "8.0.7",
           "Microsoft.Extensions.DependencyInjection": "8.0.0",
           "Microsoft.Extensions.Logging": "8.0.0",
           "System.Threading.Channels": "8.0.0"
@@ -206,10 +206,10 @@
           }
         }
       },
-      "Microsoft.AspNetCore.SignalR.Common/8.0.6": {
+      "Microsoft.AspNetCore.SignalR.Common/8.0.7": {
         "type": "package",
         "dependencies": {
-          "Microsoft.AspNetCore.Connections.Abstractions": "8.0.6",
+          "Microsoft.AspNetCore.Connections.Abstractions": "8.0.7",
           "Microsoft.Extensions.Options": "8.0.2"
         },
         "compile": {
@@ -223,10 +223,10 @@
           }
         }
       },
-      "Microsoft.AspNetCore.SignalR.Protocols.Json/8.0.6": {
+      "Microsoft.AspNetCore.SignalR.Protocols.Json/8.0.7": {
         "type": "package",
         "dependencies": {
-          "Microsoft.AspNetCore.SignalR.Common": "8.0.6"
+          "Microsoft.AspNetCore.SignalR.Common": "8.0.7"
         },
         "compile": {
           "lib/net8.0/Microsoft.AspNetCore.SignalR.Protocols.Json.dll": {
@@ -287,7 +287,7 @@
           "buildTransitive/net6.0/_._": {}
         }
       },
-      "Microsoft.Extensions.Features/8.0.6": {
+      "Microsoft.Extensions.Features/8.0.7": {
         "type": "package",
         "compile": {
           "lib/net8.0/Microsoft.Extensions.Features.dll": {
@@ -415,7 +415,7 @@
           }
         }
       },
-      "SixLabors.ImageSharp/3.1.4": {
+      "SixLabors.ImageSharp/3.1.5": {
         "type": "package",
         "compile": {
           "lib/net6.0/SixLabors.ImageSharp.dll": {
@@ -431,11 +431,11 @@
           "build/SixLabors.ImageSharp.props": {}
         }
       },
-      "SixLabors.ImageSharp.Drawing/2.1.3": {
+      "SixLabors.ImageSharp.Drawing/2.1.4": {
         "type": "package",
         "dependencies": {
-          "SixLabors.Fonts": "2.0.3",
-          "SixLabors.ImageSharp": "3.1.4"
+          "SixLabors.Fonts": "2.0.4",
+          "SixLabors.ImageSharp": "3.1.5"
         },
         "compile": {
           "lib/net6.0/SixLabors.ImageSharp.Drawing.dll": {
@@ -673,29 +673,29 @@
     }
   },
   "libraries": {
-    "Discord.Net/3.15.2": {
-      "sha512": "+OwnSHaAJdKRLd8CVqSrlANX3EupQ5w5Vej2zor+wVcJ0ek7M3bZFzjJvXqx6cXeU6TQPBy6vpopzOwA2TU2Xg==",
+    "Discord.Net/3.15.3": {
+      "sha512": "qXnqM8Hh2/FH44zz8P2cte5ti63CTLdwDaU3WB+S24m9yQ27mjHSDYb8jlSJbK/RMCNmCOyRFA57uTwaKk73jQ==",
       "type": "package",
-      "path": "discord.net/3.15.2",
+      "path": "discord.net/3.15.3",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "NUGET_README.md",
         "PackageLogo.png",
-        "discord.net.3.15.2.nupkg.sha512",
+        "discord.net.3.15.3.nupkg.sha512",
         "discord.net.nuspec"
       ]
     },
-    "Discord.Net.Commands/3.15.2": {
-      "sha512": "a55wlniMT0kr7w8h/zlpR3slBeA07qJaqOnuB/X7Kp8W7aOYD3le0+uMKu7Er2ypvysa8MMRMNRpn94OSqbA6w==",
+    "Discord.Net.Commands/3.15.3": {
+      "sha512": "g3OFzjWx7xxl+EXm7UmqQWM2RKOlTWEhadwc89B1SyYjbN72U9pU8pXvZbZLe29Psqd2k5neFVc25GwiCBjbmQ==",
       "type": "package",
-      "path": "discord.net.commands/3.15.2",
+      "path": "discord.net.commands/3.15.3",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "NUGET_README.md",
         "PackageLogo.png",
-        "discord.net.commands.3.15.2.nupkg.sha512",
+        "discord.net.commands.3.15.3.nupkg.sha512",
         "discord.net.commands.nuspec",
         "lib/net461/Discord.Net.Commands.dll",
         "lib/net461/Discord.Net.Commands.xml",
@@ -709,16 +709,16 @@
         "lib/netstandard2.1/Discord.Net.Commands.xml"
       ]
     },
-    "Discord.Net.Core/3.15.2": {
-      "sha512": "985EAMCn8K9gS8WUAt+hF96nEvnbHGb8mqCFpxS1EO74MpgIZRk3DLHQeHhpEpX1R/NR/YdOvfw0aM/4bl3DGw==",
+    "Discord.Net.Core/3.15.3": {
+      "sha512": "FvOEC1Buam9C+aJ5CaLb5FEPKVdXjaNrEmgexo02n9bSRILQNi8iBM6f3K/Ziq2SLEZn+tujEHwNH8zFMzZwVA==",
       "type": "package",
-      "path": "discord.net.core/3.15.2",
+      "path": "discord.net.core/3.15.3",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "NUGET_README.md",
         "PackageLogo.png",
-        "discord.net.core.3.15.2.nupkg.sha512",
+        "discord.net.core.3.15.3.nupkg.sha512",
         "discord.net.core.nuspec",
         "lib/net461/Discord.Net.Core.dll",
         "lib/net461/Discord.Net.Core.xml",
@@ -732,16 +732,16 @@
         "lib/netstandard2.1/Discord.Net.Core.xml"
       ]
     },
-    "Discord.Net.Interactions/3.15.2": {
-      "sha512": "w2ar8ga1mntK9gD/0zwV7m/9cQliah0C4KCweG+TXTljJTU9GLxXDBBGpMfo2jE2P5FSVS48gLGd5y6G+fxoKQ==",
+    "Discord.Net.Interactions/3.15.3": {
+      "sha512": "Bo8nX2Ho0sypNCPJ6jb/Bvx7LlVZc3bN70Fq31q5uWjK+DSKTIPsSOacPuxGCHAeq7VZCPbEqaGLb8EZ+YnmHw==",
       "type": "package",
-      "path": "discord.net.interactions/3.15.2",
+      "path": "discord.net.interactions/3.15.3",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "NUGET_README.md",
         "PackageLogo.png",
-        "discord.net.interactions.3.15.2.nupkg.sha512",
+        "discord.net.interactions.3.15.3.nupkg.sha512",
         "discord.net.interactions.nuspec",
         "lib/net461/Discord.Net.Interactions.dll",
         "lib/net461/Discord.Net.Interactions.xml",
@@ -755,16 +755,16 @@
         "lib/netstandard2.1/Discord.Net.Interactions.xml"
       ]
     },
-    "Discord.Net.Rest/3.15.2": {
-      "sha512": "P+SuiwjN1zBo9DMqgxIzlKNNZKaD47CfJyqlkbOtJUmfWhA9BDrmCgo/DSE+FTJAWEjiLO4rcQ8XEx/qDbkphg==",
+    "Discord.Net.Rest/3.15.3": {
+      "sha512": "sMfO42ZqzRHmVSEgbAG+FbkeKDorvfksH+1D0ds8hG1IWhK3mzZIeE8FkVLRputRxcAnP5eHbiBOhtgbN4hRMA==",
       "type": "package",
-      "path": "discord.net.rest/3.15.2",
+      "path": "discord.net.rest/3.15.3",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "NUGET_README.md",
         "PackageLogo.png",
-        "discord.net.rest.3.15.2.nupkg.sha512",
+        "discord.net.rest.3.15.3.nupkg.sha512",
         "discord.net.rest.nuspec",
         "lib/net461/Discord.Net.Rest.dll",
         "lib/net461/Discord.Net.Rest.xml",
@@ -778,16 +778,16 @@
         "lib/netstandard2.1/Discord.Net.Rest.xml"
       ]
     },
-    "Discord.Net.Webhook/3.15.2": {
-      "sha512": "L14uU+rXa1ERqpl5K4xFERCM0LaSgWVBuTLJqt15pps0gsmEISr52NxZ1F9dcysi8YFfUSlREnJ+ih/PomJ8+g==",
+    "Discord.Net.Webhook/3.15.3": {
+      "sha512": "69dvN5L0aKyATSET3lFemQd2ZyYBAxr9kde4PPhpiyx58N/AKsBQRqeBQE9PUIuIdEcFwllmgorHaVTBKLw6lw==",
       "type": "package",
-      "path": "discord.net.webhook/3.15.2",
+      "path": "discord.net.webhook/3.15.3",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "NUGET_README.md",
         "PackageLogo.png",
-        "discord.net.webhook.3.15.2.nupkg.sha512",
+        "discord.net.webhook.3.15.3.nupkg.sha512",
         "discord.net.webhook.nuspec",
         "lib/net5.0/Discord.Net.Webhook.dll",
         "lib/net5.0/Discord.Net.Webhook.xml",
@@ -799,16 +799,16 @@
         "lib/netstandard2.1/Discord.Net.Webhook.xml"
       ]
     },
-    "Discord.Net.WebSocket/3.15.2": {
-      "sha512": "OmaDEPrqmW69dzKxvOKFioFunZYpP0dwrECa0pJn9RaDUQo86l/ToUjolUJ3imjJ2XaMKcRwJ95D5QfDe4KXXg==",
+    "Discord.Net.WebSocket/3.15.3": {
+      "sha512": "sR7Apa1I0IgpDG4TgJZ6Amd35FQIzbpN+W6+1XpnXOo58KcrSM3v1hODrKr/wkYHtm1zpeBqBbKfZCvLIsdRww==",
       "type": "package",
-      "path": "discord.net.websocket/3.15.2",
+      "path": "discord.net.websocket/3.15.3",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "NUGET_README.md",
         "PackageLogo.png",
-        "discord.net.websocket.3.15.2.nupkg.sha512",
+        "discord.net.websocket.3.15.3.nupkg.sha512",
         "discord.net.websocket.nuspec",
         "lib/net461/Discord.Net.WebSocket.dll",
         "lib/net461/Discord.Net.WebSocket.xml",
@@ -822,10 +822,10 @@
         "lib/netstandard2.1/Discord.Net.WebSocket.xml"
       ]
     },
-    "Microsoft.AspNetCore.Connections.Abstractions/8.0.6": {
-      "sha512": "jL+LCoAJT4iE959gr/hPdWy0xG6QgomOw7EilSydJi57ivse6KOYjoDePrz5EfCG4D7ww/3Gv/VsNETLhvcn2w==",
+    "Microsoft.AspNetCore.Connections.Abstractions/8.0.7": {
+      "sha512": "pC+gXphE1PQN7VDf+h6NDrQM78ral6vs77AMI1he9E9gCJU1R/djR1EMB6TzJeQwEhKZ4vg1CS3yYdNCbKJDiw==",
       "type": "package",
-      "path": "microsoft.aspnetcore.connections.abstractions/8.0.6",
+      "path": "microsoft.aspnetcore.connections.abstractions/8.0.7",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -839,14 +839,14 @@
         "lib/netstandard2.0/Microsoft.AspNetCore.Connections.Abstractions.xml",
         "lib/netstandard2.1/Microsoft.AspNetCore.Connections.Abstractions.dll",
         "lib/netstandard2.1/Microsoft.AspNetCore.Connections.Abstractions.xml",
-        "microsoft.aspnetcore.connections.abstractions.8.0.6.nupkg.sha512",
+        "microsoft.aspnetcore.connections.abstractions.8.0.7.nupkg.sha512",
         "microsoft.aspnetcore.connections.abstractions.nuspec"
       ]
     },
-    "Microsoft.AspNetCore.Http.Connections.Client/8.0.6": {
-      "sha512": "aVKaErzuSnEoF1uk+rcB8lG3e/SN4qGMX2CmNPM7Z6ah8mAxugOt05WX4+y28hj9rt0jZnjRTrvpNUyh44Ezlw==",
+    "Microsoft.AspNetCore.Http.Connections.Client/8.0.7": {
+      "sha512": "BBpi7p+yMhvt1puBWmWyEaI5hDhWEJyRFuoZ79L+p/oHH5Y7Ela6eaQUHK1YGFEao3Tt1tkZUPNwwXr5Wtq3dA==",
       "type": "package",
-      "path": "microsoft.aspnetcore.http.connections.client/8.0.6",
+      "path": "microsoft.aspnetcore.http.connections.client/8.0.7",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -860,14 +860,14 @@
         "lib/netstandard2.0/Microsoft.AspNetCore.Http.Connections.Client.xml",
         "lib/netstandard2.1/Microsoft.AspNetCore.Http.Connections.Client.dll",
         "lib/netstandard2.1/Microsoft.AspNetCore.Http.Connections.Client.xml",
-        "microsoft.aspnetcore.http.connections.client.8.0.6.nupkg.sha512",
+        "microsoft.aspnetcore.http.connections.client.8.0.7.nupkg.sha512",
         "microsoft.aspnetcore.http.connections.client.nuspec"
       ]
     },
-    "Microsoft.AspNetCore.Http.Connections.Common/8.0.6": {
-      "sha512": "T8W95obc6NDkkh9TE4d5sAlX4lZB3b4BxddYSsV9Sqmss/udVVoVVjI6AcuPpP7m4/UrtmHqj1uKS7Jz5XVVvg==",
+    "Microsoft.AspNetCore.Http.Connections.Common/8.0.7": {
+      "sha512": "tGEDK4KArofTm623pPeWaUA4Dm7NgtISDlPeOXribyVLHmHv/1uXp5j/nOjAN4nd/oihzDEuguaIUsoWu/Bxnw==",
       "type": "package",
-      "path": "microsoft.aspnetcore.http.connections.common/8.0.6",
+      "path": "microsoft.aspnetcore.http.connections.common/8.0.7",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -879,14 +879,14 @@
         "lib/net8.0/Microsoft.AspNetCore.Http.Connections.Common.xml",
         "lib/netstandard2.0/Microsoft.AspNetCore.Http.Connections.Common.dll",
         "lib/netstandard2.0/Microsoft.AspNetCore.Http.Connections.Common.xml",
-        "microsoft.aspnetcore.http.connections.common.8.0.6.nupkg.sha512",
+        "microsoft.aspnetcore.http.connections.common.8.0.7.nupkg.sha512",
         "microsoft.aspnetcore.http.connections.common.nuspec"
       ]
     },
-    "Microsoft.AspNetCore.SignalR.Client/8.0.6": {
-      "sha512": "d6Xaisubjk/aolKN1c+o9DCHz7gKB0Os1QXcy+I8J0dK/ZrS58OG5zw3TnXFCfZfSaHMeoqaBdiIlICypPdNmA==",
+    "Microsoft.AspNetCore.SignalR.Client/8.0.7": {
+      "sha512": "NKg0u9FMwIFMB6ZCZy78tfuHCWAM9bnGUQ0UpcN9wCYPnWTySEKJjX0D0nwfG11ZAipZMDYxRq2mcRF9l409UA==",
       "type": "package",
-      "path": "microsoft.aspnetcore.signalr.client/8.0.6",
+      "path": "microsoft.aspnetcore.signalr.client/8.0.7",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -898,14 +898,14 @@
         "lib/net8.0/Microsoft.AspNetCore.SignalR.Client.xml",
         "lib/netstandard2.0/Microsoft.AspNetCore.SignalR.Client.dll",
         "lib/netstandard2.0/Microsoft.AspNetCore.SignalR.Client.xml",
-        "microsoft.aspnetcore.signalr.client.8.0.6.nupkg.sha512",
+        "microsoft.aspnetcore.signalr.client.8.0.7.nupkg.sha512",
         "microsoft.aspnetcore.signalr.client.nuspec"
       ]
     },
-    "Microsoft.AspNetCore.SignalR.Client.Core/8.0.6": {
-      "sha512": "pqeysPhAThnZJ1Eo5mVoPn4F67ScFp1sZVRO5chSAQCp0DheJUiOwDkI8AQYMXP9lBLU6NFAuo4E8HGv3BOOEA==",
+    "Microsoft.AspNetCore.SignalR.Client.Core/8.0.7": {
+      "sha512": "YMuhYv5U5RXyhsDHM1d6T+blItpZULNk84TmNK7kZ3q8cO11Eo1Cp1iDx0W3fVo5Z1m5DAOiENv9KC+G76MG/Q==",
       "type": "package",
-      "path": "microsoft.aspnetcore.signalr.client.core/8.0.6",
+      "path": "microsoft.aspnetcore.signalr.client.core/8.0.7",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -919,14 +919,14 @@
         "lib/netstandard2.0/Microsoft.AspNetCore.SignalR.Client.Core.xml",
         "lib/netstandard2.1/Microsoft.AspNetCore.SignalR.Client.Core.dll",
         "lib/netstandard2.1/Microsoft.AspNetCore.SignalR.Client.Core.xml",
-        "microsoft.aspnetcore.signalr.client.core.8.0.6.nupkg.sha512",
+        "microsoft.aspnetcore.signalr.client.core.8.0.7.nupkg.sha512",
         "microsoft.aspnetcore.signalr.client.core.nuspec"
       ]
     },
-    "Microsoft.AspNetCore.SignalR.Common/8.0.6": {
-      "sha512": "86q0mIzxnNdJGxrTIU82iuNDUqeWyjbP6UsSFUAhrb5AOn4hhgWh8XckkY/TOSLIbVqFl+VvJ6sPSBcM5KNxhA==",
+    "Microsoft.AspNetCore.SignalR.Common/8.0.7": {
+      "sha512": "ZvnsR+vFjP/XgK0Xa9n71N5qeQn4+uzB8UTsS+nEh+KPbxQScAGf6xrifLNJMQUuPqrZF6kJchtpoRET2v+KDw==",
       "type": "package",
-      "path": "microsoft.aspnetcore.signalr.common/8.0.6",
+      "path": "microsoft.aspnetcore.signalr.common/8.0.7",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -938,14 +938,14 @@
         "lib/net8.0/Microsoft.AspNetCore.SignalR.Common.xml",
         "lib/netstandard2.0/Microsoft.AspNetCore.SignalR.Common.dll",
         "lib/netstandard2.0/Microsoft.AspNetCore.SignalR.Common.xml",
-        "microsoft.aspnetcore.signalr.common.8.0.6.nupkg.sha512",
+        "microsoft.aspnetcore.signalr.common.8.0.7.nupkg.sha512",
         "microsoft.aspnetcore.signalr.common.nuspec"
       ]
     },
-    "Microsoft.AspNetCore.SignalR.Protocols.Json/8.0.6": {
-      "sha512": "JT6q1RPkGClC8gzzHzIlc3kxBM58G0Fw4M2EogEkqRiAD95eHtuK09Lctw72BZ6xeflwIzLLpajIdKXxuU9EnQ==",
+    "Microsoft.AspNetCore.SignalR.Protocols.Json/8.0.7": {
+      "sha512": "A7f54ujaJi1SHK3SRxg4fAp0dswnsCo1QYLDxJEdzlQF7PV4AGB0h8NhrPYGmV9AVXg84WCoA7p9eFRkci7OQA==",
       "type": "package",
-      "path": "microsoft.aspnetcore.signalr.protocols.json/8.0.6",
+      "path": "microsoft.aspnetcore.signalr.protocols.json/8.0.7",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -957,7 +957,7 @@
         "lib/net8.0/Microsoft.AspNetCore.SignalR.Protocols.Json.xml",
         "lib/netstandard2.0/Microsoft.AspNetCore.SignalR.Protocols.Json.dll",
         "lib/netstandard2.0/Microsoft.AspNetCore.SignalR.Protocols.Json.xml",
-        "microsoft.aspnetcore.signalr.protocols.json.8.0.6.nupkg.sha512",
+        "microsoft.aspnetcore.signalr.protocols.json.8.0.7.nupkg.sha512",
         "microsoft.aspnetcore.signalr.protocols.json.nuspec"
       ]
     },
@@ -1046,10 +1046,10 @@
         "useSharedDesignerContext.txt"
       ]
     },
-    "Microsoft.Extensions.Features/8.0.6": {
-      "sha512": "NNzPR1heo+L2dd/cm/0p9zcpajpEXw4aIFrAwciHBzn+G8jiyHyq/WggF3vdzG4pQEI5WpnIevMQpASkOx9Eug==",
+    "Microsoft.Extensions.Features/8.0.7": {
+      "sha512": "807p0VEIqDArkcAtfNGjFA565pGphcdR6a8nqD0+0A7e/dvODc7T7DsumKr/hGQ55AyH4nETxsNIP1aNVBH1ag==",
       "type": "package",
-      "path": "microsoft.extensions.features/8.0.6",
+      "path": "microsoft.extensions.features/8.0.7",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -1061,7 +1061,7 @@
         "lib/net8.0/Microsoft.Extensions.Features.xml",
         "lib/netstandard2.0/Microsoft.Extensions.Features.dll",
         "lib/netstandard2.0/Microsoft.Extensions.Features.xml",
-        "microsoft.extensions.features.8.0.6.nupkg.sha512",
+        "microsoft.extensions.features.8.0.7.nupkg.sha512",
         "microsoft.extensions.features.nuspec"
       ]
     },
@@ -1316,10 +1316,10 @@
         "sixlabors.fonts.nuspec"
       ]
     },
-    "SixLabors.ImageSharp/3.1.4": {
-      "sha512": "lFIdxgGDA5iYkUMRFOze7BGLcdpoLFbR+a20kc1W7NepvzU7ejtxtWOg9RvgG7kb9tBoJ3ONYOK6kLil/dgF1w==",
+    "SixLabors.ImageSharp/3.1.5": {
+      "sha512": "lNtlq7dSI/QEbYey+A0xn48z5w4XHSffF8222cC4F4YwTXfEImuiBavQcWjr49LThT/pRmtWJRcqA/PlL+eJ6g==",
       "type": "package",
-      "path": "sixlabors.imagesharp/3.1.4",
+      "path": "sixlabors.imagesharp/3.1.5",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -1328,14 +1328,14 @@
         "lib/net6.0/SixLabors.ImageSharp.dll",
         "lib/net6.0/SixLabors.ImageSharp.xml",
         "sixlabors.imagesharp.128.png",
-        "sixlabors.imagesharp.3.1.4.nupkg.sha512",
+        "sixlabors.imagesharp.3.1.5.nupkg.sha512",
         "sixlabors.imagesharp.nuspec"
       ]
     },
-    "SixLabors.ImageSharp.Drawing/2.1.3": {
-      "sha512": "Bo8MeLEhKlZTSV29lh1iZmKVnLFvp+lNPVIo6X1Nu/G3xVwYuhPBjTuxUNhO6bxsVR9tLDuWZULxHSJAXu6LFw==",
+    "SixLabors.ImageSharp.Drawing/2.1.4": {
+      "sha512": "p4VwtAABggDUhUS5zXldCZHVGfjJl76+SrBHY4biNQ8+890igFK6RL87qIv9GqvEjMcYOar1sPkf2iMQ6uq9/g==",
       "type": "package",
-      "path": "sixlabors.imagesharp.drawing/2.1.3",
+      "path": "sixlabors.imagesharp.drawing/2.1.4",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -1343,7 +1343,7 @@
         "lib/net6.0/SixLabors.ImageSharp.Drawing.dll",
         "lib/net6.0/SixLabors.ImageSharp.Drawing.xml",
         "sixlabors.imagesharp.drawing.128.png",
-        "sixlabors.imagesharp.drawing.2.1.3.nupkg.sha512",
+        "sixlabors.imagesharp.drawing.2.1.4.nupkg.sha512",
         "sixlabors.imagesharp.drawing.nuspec"
       ]
     },
@@ -1738,14 +1738,14 @@
   },
   "projectFileDependencyGroups": {
     "net8.0": [
-      "Discord.Net >= 3.15.2",
-      "Discord.Net.Core >= 3.15.2",
-      "Microsoft.AspNetCore.SignalR.Client >= 8.0.6",
+      "Discord.Net >= 3.15.3",
+      "Discord.Net.Core >= 3.15.3",
+      "Microsoft.AspNetCore.SignalR.Client >= 8.0.7",
       "Microsoft.Extensions.DependencyInjection >= 8.0.0",
       "NLog >= 5.3.2",
       "SixLabors.Fonts >= 2.0.4",
-      "SixLabors.ImageSharp >= 3.1.4",
-      "SixLabors.ImageSharp.Drawing >= 2.1.3",
+      "SixLabors.ImageSharp >= 3.1.5",
+      "SixLabors.ImageSharp.Drawing >= 2.1.4",
       "System.Text.Json >= 8.0.4",
       "TwitchLib.Client >= 3.3.1"
     ]
@@ -1801,15 +1801,15 @@
         "dependencies": {
           "Discord.Net": {
             "target": "Package",
-            "version": "[3.15.2, )"
+            "version": "[3.15.3, )"
           },
           "Discord.Net.Core": {
             "target": "Package",
-            "version": "[3.15.2, )"
+            "version": "[3.15.3, )"
           },
           "Microsoft.AspNetCore.SignalR.Client": {
             "target": "Package",
-            "version": "[8.0.6, )"
+            "version": "[8.0.7, )"
           },
           "Microsoft.Extensions.DependencyInjection": {
             "target": "Package",
@@ -1825,11 +1825,11 @@
           },
           "SixLabors.ImageSharp": {
             "target": "Package",
-            "version": "[3.1.4, )"
+            "version": "[3.1.5, )"
           },
           "SixLabors.ImageSharp.Drawing": {
             "target": "Package",
-            "version": "[2.1.3, )"
+            "version": "[2.1.4, )"
           },
           "System.Text.Json": {
             "target": "Package",

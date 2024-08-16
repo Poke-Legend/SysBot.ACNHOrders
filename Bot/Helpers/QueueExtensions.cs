@@ -12,56 +12,54 @@ namespace SysBot.ACNHOrders
 {
     public static class QueueExtensions
     {
-        const int ArriveTime = 90;
-        const int SetupTime = 95;
+        private const int ArriveTime = 90;
+        private const int SetupTime = 95;
 
         public static async Task AddToQueueAsync(this SocketCommandContext context, OrderRequest<Item> itemReq, string player, SocketUser trader)
         {
             try
             {
-                var helperEmbed = new EmbedBuilder()
-                    .WithTitle("Queue Notification")
-                    .WithDescription("I've added you to the queue! I'll message you here when your order is ready")
-                    .WithColor(Color.Blue)
-                    .Build();
-                await trader.SendMessageAsync(embed: helperEmbed).ConfigureAwait(false);
+                var helperEmbed = CreateEmbed(
+                    title: "🎉 Queue Notification",
+                    description: "You've been added to the queue! I'll message you here when your order is ready.",
+                    color: Color.Blue
+                ).WithFooter("Thank you for your patience!");
+
+                await trader.SendMessageAsync(embed: helperEmbed.Build()).ConfigureAwait(false);
             }
             catch (HttpException ex)
             {
-                var errorEmbed = new EmbedBuilder()
-                    .WithTitle("Error")
-                    .WithDescription($"{ex.HttpCode}: {ex.Reason}!")
-                    .WithColor(Color.Red)
-                    .Build();
-                await context.Channel.SendMessageAsync(embed: errorEmbed).ConfigureAwait(false);
+                var errorEmbed = CreateEmbed(
+                    title: "⚠️ Error",
+                    description: $"{ex.HttpCode}: {ex.Reason}!",
+                    color: Color.Red
+                ).WithFooter("Please try again later.");
+
+                await context.Channel.SendMessageAsync(embed: errorEmbed.Build()).ConfigureAwait(false);
 
                 var noAccessMsg = context.User == trader
-                    ? "You must enable private messages in order to be queued!"
-                    : $"{player} must enable private messages in order for them to be queued!";
-                var noAccessEmbed = new EmbedBuilder()
-                    .WithTitle("Private Message Disabled")
-                    .WithDescription(noAccessMsg)
-                    .WithColor(Color.Orange)
-                    .Build();
-                await context.Channel.SendMessageAsync(embed: noAccessEmbed).ConfigureAwait(false);
+                    ? "You must enable private messages to be queued!"
+                    : $"{player} must enable private messages to be queued!";
+                var noAccessEmbed = CreateEmbed(
+                    title: "🔒 Private Message Disabled",
+                    description: noAccessMsg,
+                    color: Color.Orange
+                ).WithFooter("Enable DMs in your privacy settings.");
+
+                await context.Channel.SendMessageAsync(embed: noAccessEmbed.Build()).ConfigureAwait(false);
                 return;
             }
 
             var result = AttemptAddToQueue(itemReq, trader.Mention, trader.Username, out var msg);
+            var color = result ? Color.Green : Color.Red;
+            var queueUpdateEmbed = CreateEmbed(
+                title: "📋 Queue Update",
+                description: msg,
+                color: color
+            ).WithFooter("We'll notify you when it's your turn!");
 
-            var channelEmbed = new EmbedBuilder()
-                .WithTitle("Queue Update")
-                .WithDescription(msg)
-                .WithColor(result ? Color.Green : Color.Red)
-                .Build();
-            await context.Channel.SendMessageAsync(embed: channelEmbed).ConfigureAwait(false);
-
-            var pmEmbed = new EmbedBuilder()
-                .WithTitle("Queue Update")
-                .WithDescription(msg)
-                .WithColor(result ? Color.Green : Color.Red)
-                .Build();
-            await trader.SendMessageAsync(embed: pmEmbed).ConfigureAwait(false);
+            await context.Channel.SendMessageAsync(embed: queueUpdateEmbed.Build()).ConfigureAwait(false);
+            await trader.SendMessageAsync(embed: queueUpdateEmbed.Build()).ConfigureAwait(false);
 
             if (result && !context.IsPrivate)
             {
@@ -76,35 +74,34 @@ namespace SysBot.ACNHOrders
 
         private static bool AttemptAddToQueue(IACNHOrderNotifier<Item> itemReq, string traderMention, string traderDispName, out string msg)
         {
-            var orders = Globals.Hub.Orders;
-            var orderArray = orders.ToArray();
-            var order = Array.Find(orderArray, x => x.UserGuid == itemReq.UserGuid);
+            var orders = Globals.Hub.Orders.ToArray();
+            var order = orders.FirstOrDefault(x => x.UserGuid == itemReq.UserGuid);
 
             if (order != null)
             {
                 msg = order.SkipRequested
-                    ? $"{traderMention} - You have been recently removed from the queue. Please wait a while before attempting to enter the queue again."
-                    : $"{traderMention} - Sorry, you are already in the queue.";
+                    ? $"{traderMention} - You were recently removed from the queue. Please wait a while before trying again."
+                    : $"{traderMention} - You are already in the queue.";
                 return false;
             }
 
             if (Globals.Bot.CurrentUserName == traderDispName)
             {
-                msg = $"{traderMention} - Report this error to DeVry if you have been waiting more than 15 minutes and are still getting this error. Most likely the bot is down for everyone. Error: Failed to queue your order as it is the current processing order. Please wait a few seconds for the queue to clear if you've already completed it.";
+                msg = $"{traderMention} - Error: Your order could not be queued as it is currently being processed. Please wait a few seconds for the queue to clear.";
                 return false;
             }
 
-            var position = orderArray.Length + 1;
+            var position = orders.Length + 1;
             var idToken = Globals.Bot.Config.OrderConfig.ShowIDs ? $" (ID {itemReq.OrderID})" : string.Empty;
-            msg = $"{traderMention} - Added you to the order queue{idToken}. Your position is: **{position}**";
+            msg = $"{traderMention} - You've been added to the order queue{idToken}. Your position is: **{position}**";
 
             if (position > 1)
-                msg += $". Your predicted ETA is {GetETA(position)}";
+                msg += $". Estimated wait time: {GetETA(position)}";
             else
                 msg += ". Your order will start after the current order is complete!";
 
             if (itemReq.VillagerOrder != null)
-                msg += $". {GameInfo.Strings.GetVillager(itemReq.VillagerOrder.GameName)} will be waiting for you on the island. Ensure you can collect them within the order timeframe.";
+                msg += $". Villager {GameInfo.Strings.GetVillager(itemReq.VillagerOrder.GameName)} will be waiting for you on the island.";
 
             Globals.Hub.Orders.Enqueue(itemReq);
 
@@ -113,33 +110,29 @@ namespace SysBot.ACNHOrders
 
         public static int GetPosition(this ulong id, out OrderRequest<Item>? order)
         {
-            var orders = Globals.Hub.Orders;
-            var orderArray = orders.ToArray().Where(x => !x.SkipRequested).ToArray();
-            var orderFound = Array.Find(orderArray, x => x.UserGuid == id);
+            var orders = Globals.Hub.Orders.ToArray().Where(x => !x.SkipRequested).ToArray();
+            var orderFound = Array.Find(orders, x => x.UserGuid == id);
 
             if (orderFound != null && !orderFound.SkipRequested && orderFound is OrderRequest<Item> oreq)
             {
                 order = oreq;
-                return Array.IndexOf(orderArray, orderFound) + 1;
+                return Array.IndexOf(orders, orderFound) + 1;
             }
 
             order = null;
             return -1;
         }
 
-        public static string GetETA(int pos)
+        public static string GetETA(this int pos)
         {
             int minSeconds = ArriveTime + SetupTime + Globals.Bot.Config.OrderConfig.UserTimeAllowed + Globals.Bot.Config.OrderConfig.WaitForArriverTime;
             int addSeconds = ArriveTime + Globals.Bot.Config.OrderConfig.UserTimeAllowed + Globals.Bot.Config.OrderConfig.WaitForArriverTime;
             var timeSpan = TimeSpan.FromSeconds(minSeconds + (addSeconds * (pos - 1)));
 
             return timeSpan.Hours > 0
-                ? string.Format("{0:D2}h:{1:D2}m:{2:D2}s", timeSpan.Hours, timeSpan.Minutes, timeSpan.Seconds)
-                : string.Format("{0:D2}m:{1:D2}s", timeSpan.Minutes, timeSpan.Seconds);
+                ? $"{timeSpan.Hours:D2}h:{timeSpan.Minutes:D2}m:{timeSpan.Seconds:D2}s"
+                : $"{timeSpan.Minutes:D2}m:{timeSpan.Seconds:D2}s";
         }
-
-        private static ulong ID = 0;
-        private static readonly object IDAccessor = new();
 
         public static ulong GetNextID()
         {
@@ -151,14 +144,32 @@ namespace SysBot.ACNHOrders
 
         public static void ClearQueue<T>(this ConcurrentQueue<T> queue)
         {
-            while (queue.TryDequeue(out _)) { } // do nothing
+            while (queue.TryDequeue(out _)) { }
         }
 
         public static string GetQueueString()
         {
-            var orders = Globals.Hub.Orders;
-            var orderArray = orders.ToArray().Where(x => !x.SkipRequested).ToArray();
-            return string.Join("\r\n", orderArray.Select(ord => ord.VillagerName));
+            var orders = Globals.Hub.Orders.ToArray().Where(x => !x.SkipRequested).Select(ord => ord.VillagerName);
+            return string.Join("\r\n", orders);
         }
+
+        private static EmbedBuilder CreateEmbed(string title, string description, Color color)
+        {
+            return new EmbedBuilder()
+                .WithTitle(title)
+                .WithDescription(description)
+                .WithColor(color)
+                .WithTimestamp(DateTimeOffset.Now)
+                .WithFooter(footer =>
+                {
+                    footer
+                        .WithText("ACNH Order System")
+                        .WithIconUrl("https://i.etsystatic.com/21657813/r/il/e83aef/2330819308/il_794xN.2330819308_c9ym.jpg"); // Replace with your actual icon URL
+                })
+                .WithThumbnailUrl("https://www.kindpng.com/picc/m/13-134663_animal-crossing-tom-nook-png-transparent-png.png"); // Replace with your actual thumbnail URL
+        }
+
+        private static ulong ID = 0;
+        private static readonly object IDAccessor = new();
     }
 }

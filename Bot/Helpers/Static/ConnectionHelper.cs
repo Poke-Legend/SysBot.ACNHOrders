@@ -33,14 +33,13 @@ namespace SysBot.ACNHOrders
             _client = new DiscordSocketClient(new DiscordSocketConfig
             {
                 GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.GuildMembers,
-                LogLevel = LogSeverity.Info,
                 AlwaysDownloadUsers = true,
             });
 
             _client.Log += LogAsync;
             _client.Disconnected += async (exception) =>
             {
-                Console.WriteLine($"Discord disconnected: {exception.Message}");
+                
                 await ReconnectAsync();
             };
 

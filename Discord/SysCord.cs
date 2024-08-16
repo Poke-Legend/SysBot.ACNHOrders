@@ -8,161 +8,152 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using SysBot.Base;
-using static Discord.GatewayIntents;
 
 namespace SysBot.ACNHOrders
 {
     public sealed class SysCord
     {
         private readonly DiscordSocketClient _client;
-        private readonly CrossBot Bot;
-        public ulong Owner = ulong.MaxValue;
-        public bool Ready = false;
-
+        private readonly CrossBot _bot;
         private readonly CommandService _commands;
         private readonly IServiceProvider _services;
 
+        public ulong Owner { get; private set; } = ulong.MaxValue;
+        public bool Ready { get; private set; } = false;
+
         public SysCord(CrossBot bot)
         {
-            Bot = bot;
+            _bot = bot;
+
             _client = new DiscordSocketClient(new DiscordSocketConfig
             {
-                LogLevel = LogSeverity.Info,
-                GatewayIntents = Guilds | GuildMessages | DirectMessages | GuildMembers | MessageContent,
+                GatewayIntents = GatewayIntents.Guilds | GatewayIntents.GuildMessages | GatewayIntents.DirectMessages | GatewayIntents.GuildMembers | GatewayIntents.MessageContent
             });
 
             _commands = new CommandService(new CommandServiceConfig
             {
-                LogLevel = LogSeverity.Info,
                 DefaultRunMode = RunMode.Sync,
-                CaseSensitiveCommands = false,
+                CaseSensitiveCommands = false
             });
 
-            _client.Log += Log;
-            _commands.Log += Log;
+            _client.Log += LogAsync;
+            _commands.Log += LogAsync;
 
             _services = ConfigureServices();
         }
 
         private static IServiceProvider ConfigureServices()
         {
-            var map = new ServiceCollection()
-                .AddSingleton<CrossBot>(); // Example service
-
-            return map.BuildServiceProvider();
+            return new ServiceCollection()
+                .AddSingleton<CrossBot>()
+                .BuildServiceProvider();
         }
 
-        private static Task Log(LogMessage msg)
+        private static Task LogAsync(LogMessage msg)
         {
             Console.ForegroundColor = msg.Severity switch
             {
-                LogSeverity.Critical => ConsoleColor.Red,
-                LogSeverity.Error => ConsoleColor.Red,
+                LogSeverity.Critical or LogSeverity.Error => ConsoleColor.Red,
                 LogSeverity.Warning => ConsoleColor.Yellow,
                 LogSeverity.Info => ConsoleColor.White,
-                LogSeverity.Verbose => ConsoleColor.DarkGray,
-                LogSeverity.Debug => ConsoleColor.DarkGray,
+                LogSeverity.Verbose or LogSeverity.Debug => ConsoleColor.DarkGray,
                 _ => Console.ForegroundColor
             };
 
-            var text = $"[{msg.Severity,8}] {msg.Source}: {msg.Message} {msg.Exception}";
-            Console.WriteLine($"{DateTime.Now,-19} {text}");
+            var logText = $"[{msg.Severity,8}] {msg.Source}: {msg.Message} {msg.Exception}";
+            Console.WriteLine($"{DateTime.Now,-19} {logText}");
             Console.ResetColor();
 
-            LogUtil.LogText($"SysCord: {text}");
+            LogUtil.LogText($"SysCord: {logText}");
 
             return Task.CompletedTask;
         }
 
         public async Task MainAsync(string apiToken, CancellationToken token)
         {
-            await InitCommands().ConfigureAwait(false);
+            await InitCommandsAsync().ConfigureAwait(false);
 
             await _client.LoginAsync(TokenType.Bot, apiToken).ConfigureAwait(false);
             await _client.StartAsync().ConfigureAwait(false);
-            _client.Ready += ClientReady;
+            _client.Ready += OnClientReadyAsync;
 
-            await Task.Delay(5_000, token).ConfigureAwait(false);
+            await Task.Delay(5000, token).ConfigureAwait(false);
 
-            var game = Bot.Config.Name;
-            if (!string.IsNullOrWhiteSpace(game))
-                await _client.SetGameAsync(game).ConfigureAwait(false);
+            if (!string.IsNullOrWhiteSpace(_bot.Config.Name))
+            {
+                await _client.SetGameAsync(_bot.Config.Name).ConfigureAwait(false);
+            }
 
-            var app = await _client.GetApplicationInfoAsync().ConfigureAwait(false);
-            Owner = app.Owner.Id;
+            var appInfo = await _client.GetApplicationInfoAsync().ConfigureAwait(false);
+            Owner = appInfo.Owner.Id;
 
             await MonitorStatusAsync(token).ConfigureAwait(false);
         }
 
-        private async Task ClientReady()
+        private async Task OnClientReadyAsync()
         {
-            if (Ready)
-                return;
+            if (Ready) return;
             Ready = true;
 
-            await Task.Delay(1_000).ConfigureAwait(false);
+            await Task.Delay(1000).ConfigureAwait(false);
 
-            foreach (var cid in Bot.Config.LoggingChannels)
+            foreach (var channelId in _bot.Config.LoggingChannels)
             {
-                var c = (ISocketMessageChannel)_client.GetChannel(cid);
-                if (c == null)
+                if (_client.GetChannel(channelId) is not ISocketMessageChannel channel)
                 {
-                    Console.WriteLine($"{cid} is null or couldn't be found.");
+                    Console.WriteLine($"{channelId} is null or couldn't be found.");
                     continue;
                 }
-                static string GetMessage(string msg, string identity) => $"> [{DateTime.Now:hh:mm:ss}] - {identity}: {msg}";
-                void Logger(string msg, string identity) => c.SendMessageAsync(GetMessage(msg, identity));
-                Action<string, string> l = Logger;
-                LogUtil.Forwarders.Add(l);
+
+                void Logger(string msg, string identity) => channel.SendMessageAsync($"> [{DateTime.Now:hh:mm:ss}] - {identity}: {msg}");
+                LogUtil.Forwarders.Add(Logger);
             }
 
             await Task.Delay(100, CancellationToken.None).ConfigureAwait(false);
         }
 
-        public async Task InitCommands()
+        public async Task InitCommandsAsync()
         {
-            var assembly = Assembly.GetExecutingAssembly();
-            await _commands.AddModulesAsync(assembly, _services).ConfigureAwait(false);
+            await _commands.AddModulesAsync(Assembly.GetExecutingAssembly(), _services).ConfigureAwait(false);
             _client.MessageReceived += HandleMessageAsync;
         }
 
-        public async Task<bool> TrySpeakMessage(ulong id, string message, bool noDoublePost = false)
+        public async Task<bool> TrySpeakMessageAsync(ulong channelId, string message, bool noDoublePost = false)
         {
             try
             {
-                if (_client.ConnectionState != ConnectionState.Connected)
-                    return false;
-                var channel = _client.GetChannel(id);
-                if (noDoublePost && channel is IMessageChannel msgChannel)
-                {
-                    var lastMsg = await msgChannel.GetMessagesAsync(1).FlattenAsync();
-                    if (lastMsg != null && lastMsg.Any())
-                        if (lastMsg.ElementAt(0).Content == message)
-                            return true;
-                }
+                if (_client.ConnectionState != ConnectionState.Connected) return false;
 
-                if (channel is IMessageChannel textChannel)
-                    await textChannel.SendMessageAsync(message).ConfigureAwait(false);
-                return true;
+                if (_client.GetChannel(channelId) is IMessageChannel channel)
+                {
+                    if (noDoublePost)
+                    {
+                        var lastMessage = (await channel.GetMessagesAsync(1).FlattenAsync()).FirstOrDefault();
+                        if (lastMessage?.Content == message) return true;
+                    }
+
+                    await channel.SendMessageAsync(message).ConfigureAwait(false);
+                    return true;
+                }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                await Log(new LogMessage(LogSeverity.Error, "Exception", ex.Message, ex)).ConfigureAwait(false);
+                // Optionally log the exception here.
             }
 
             return false;
         }
 
-        public async Task<bool> TrySpeakMessage(ISocketMessageChannel channel, string message)
+        public static async Task<bool> TrySpeakMessageAsync(ISocketMessageChannel channel, string message)
         {
             try
             {
                 await channel.SendMessageAsync(message).ConfigureAwait(false);
                 return true;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                await Log(new LogMessage(LogSeverity.Error, "Exception", ex.Message, ex)).ConfigureAwait(false);
+                // Optionally log the exception here.
             }
 
             return false;
@@ -170,128 +161,93 @@ namespace SysBot.ACNHOrders
 
         private async Task HandleMessageAsync(SocketMessage arg)
         {
-            if (arg is not SocketUserMessage msg)
-                return;
+            if (arg is not SocketUserMessage msg || msg.Author.Id == _client.CurrentUser.Id || (!_bot.Config.IgnoreAllPermissions && msg.Author.IsBot)) return;
 
-            if (msg.Author.Id == _client.CurrentUser.Id || (!Bot.Config.IgnoreAllPermissions && msg.Author.IsBot))
-                return;
+            int argPos = 0;
 
-            int pos = 0;
-            if (msg.HasStringPrefix(Bot.Config.Prefix, ref pos))
+            if (msg.HasStringPrefix(_bot.Config.Prefix, ref argPos))
             {
-                bool handled = await TryHandleCommandAsync(msg, pos).ConfigureAwait(false);
-                if (handled)
-                    return;
+                if (await TryHandleCommandAsync(msg, argPos).ConfigureAwait(false)) return;
             }
-            else
-            {
-                bool handled = await CheckMessageDeletion(msg).ConfigureAwait(false);
-                if (handled)
-                    return;
-            }
+            else if (await CheckMessageDeletionAsync(msg).ConfigureAwait(false)) return;
 
             await TryHandleMessageAsync(msg).ConfigureAwait(false);
         }
 
-        private async Task<bool> CheckMessageDeletion(SocketUserMessage msg)
+        private async Task<bool> CheckMessageDeletionAsync(SocketUserMessage msg)
         {
             var context = new SocketCommandContext(_client, msg);
 
-            var usrId = msg.Author.Id;
-            if (!Globals.Bot.Config.DeleteNonCommands || context.IsPrivate || msg.Author.IsBot || Globals.Bot.Config.CanUseSudo(usrId) || msg.Author.Id == Owner)
-                return false;
-            if (Globals.Bot.Config.Channels.Count < 1 || !Globals.Bot.Config.Channels.Contains(context.Channel.Id))
+            if (!Globals.Bot.Config.DeleteNonCommands || context.IsPrivate || msg.Author.IsBot || Globals.Bot.Config.CanUseSudo(msg.Author.Id) || msg.Author.Id == Owner)
                 return false;
 
-            var msgText = msg.Content;
-            var mention = msg.Author.Mention;
-
-            var guild = msg.Channel is SocketGuildChannel g ? g.Guild.Name : "Unknown Guild";
-            await Log(new LogMessage(LogSeverity.Info, "Command", $"Possible spam detected in {guild}#{msg.Channel.Name}:@{msg.Author.Username}. Content: {msg}")).ConfigureAwait(false);
+            if (!Globals.Bot.Config.Channels.Contains(context.Channel.Id))
+                return false;
 
             await msg.DeleteAsync(RequestOptions.Default).ConfigureAwait(false);
-            await msg.Channel.SendMessageAsync($"{mention} - The order channels are for bot commands only.\nDeleted Message:```\n{msgText}\n```").ConfigureAwait(false);
+            await msg.Channel.SendMessageAsync($"{msg.Author.Mention} - The order channels are for bot commands only.\nDeleted Message:```\n{msg.Content}\n```").ConfigureAwait(false);
 
             return true;
         }
 
-        private static async Task TryHandleMessageAsync(SocketMessage msg)
+        private static Task TryHandleMessageAsync(SocketMessage msg)
         {
-            if (msg.Attachments.Count > 0)
-            {
-                await Task.CompletedTask.ConfigureAwait(false);
-            }
+            // Placeholder for handling messages with attachments.
+            return Task.CompletedTask;
         }
 
-        private async Task<bool> TryHandleCommandAsync(SocketUserMessage msg, int pos)
+        private async Task<bool> TryHandleCommandAsync(SocketUserMessage msg, int argPos)
         {
             var context = new SocketCommandContext(_client, msg);
 
-            var mgr = Bot.Config;
-            if (!Bot.Config.IgnoreAllPermissions)
+            if (!_bot.Config.IgnoreAllPermissions)
             {
-                if (!mgr.CanUseCommandUser(msg.Author.Id))
+                if (!_bot.Config.CanUseCommandUser(msg.Author.Id))
                 {
                     await msg.Channel.SendMessageAsync("You are not permitted to use this command.").ConfigureAwait(false);
                     return true;
                 }
-                if (!mgr.CanUseCommandChannel(msg.Channel.Id) && msg.Author.Id != Owner && !mgr.CanUseSudo(msg.Author.Id))
+
+                if (!_bot.Config.CanUseCommandChannel(msg.Channel.Id) && msg.Author.Id != Owner && !_bot.Config.CanUseSudo(msg.Author.Id))
                 {
                     await msg.Channel.SendMessageAsync("You can't use that command here.").ConfigureAwait(false);
                     return true;
                 }
             }
 
-            var guild = msg.Channel is SocketGuildChannel g ? g.Guild.Name : "Unknown Guild";
-            await Log(new LogMessage(LogSeverity.Info, "Command", $"Executing command from {guild}#{msg.Channel.Name}:@{msg.Author.Username}. Content: {msg}")).ConfigureAwait(false);
-            var result = await _commands.ExecuteAsync(context, pos, _services).ConfigureAwait(false);
-
-            if (result.Error == CommandError.UnknownCommand)
-                return false;
+            var result = await _commands.ExecuteAsync(context, argPos, _services).ConfigureAwait(false);
 
             if (!result.IsSuccess)
+            {
                 await msg.Channel.SendMessageAsync(result.ErrorReason).ConfigureAwait(false);
-            return true;
+            }
+
+            return result.Error != CommandError.UnknownCommand;
         }
 
         private async Task MonitorStatusAsync(CancellationToken token)
         {
-            const int Interval = 20;
-            UserStatus state = UserStatus.Idle;
+            const int intervalSeconds = 20;
+            UserStatus currentState = UserStatus.Idle;
 
             while (!token.IsCancellationRequested)
             {
-                var time = DateTime.Now;
-                var lastLogged = LogUtil.LastLogged;
-                var delta = time - lastLogged;
-                var gap = TimeSpan.FromSeconds(Interval) - delta;
+                var timeSinceLastLog = DateTime.Now - LogUtil.LastLogged;
+                var delay = TimeSpan.FromSeconds(intervalSeconds) - timeSinceLastLog;
 
-                if (gap <= TimeSpan.Zero)
+                var newStatus = _bot.Config.AcceptingCommands ? UserStatus.Online : UserStatus.DoNotDisturb;
+                if (newStatus != currentState)
                 {
-                    var idle = !Bot.Config.AcceptingCommands ? UserStatus.DoNotDisturb : UserStatus.Idle;
-                    if (idle != state)
-                    {
-                        state = idle;
-                        await _client.SetStatusAsync(state).ConfigureAwait(false);
-                    }
-
-                    if (Bot.Config.DodoModeConfig.LimitedDodoRestoreOnlyMode && Bot.Config.DodoModeConfig.SetStatusAsDodoCode)
-                    {
-                        await _client.SetGameAsync($"Dodo code: {Bot.DodoCode}").ConfigureAwait(false);
-                    }
-
-                    await Task.Delay(2000, token).ConfigureAwait(false);
-                    continue;
+                    currentState = newStatus;
+                    await _client.SetStatusAsync(currentState).ConfigureAwait(false);
                 }
 
-                var active = !Bot.Config.AcceptingCommands ? UserStatus.DoNotDisturb : UserStatus.Online;
-                if (active != state)
+                if (_bot.Config.DodoModeConfig.LimitedDodoRestoreOnlyMode && _bot.Config.DodoModeConfig.SetStatusAsDodoCode)
                 {
-                    state = active;
-                    await _client.SetStatusAsync(active).ConfigureAwait(false);
+                    await _client.SetGameAsync($"Dodo code: {_bot.DodoCode}").ConfigureAwait(false);
                 }
 
-                await Task.Delay(gap, token).ConfigureAwait(false);
+                await Task.Delay(delay <= TimeSpan.Zero ? TimeSpan.FromSeconds(intervalSeconds) : delay, token).ConfigureAwait(false);
             }
         }
     }

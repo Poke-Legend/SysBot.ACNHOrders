@@ -105,7 +105,7 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
                         await Context.User.SendFileAsync($"{MapFile}");
                     }
                     await ReplyAsync($"`{MesUser}`: Sent you the dodo code via DM");
-                    await Globals.Self.TrySpeakMessage(Globals.Bot.Config.DodoModeConfig.SentDodoChannels, $"[{DateTime.Now:MM-dd hh:mm:ss tt}] The Dodo code was sent to <@{Context.User.Id}> - {Context.User.Id}  from `{Context.Guild.Name}` server.").ConfigureAwait(false);
+                    await Globals.Self.TrySpeakMessageAsync(Globals.Bot.Config.DodoModeConfig.SentDodoChannels, $"[{DateTime.Now:MM-dd hh:mm:ss tt}] The Dodo code was sent to <@{Context.User.Id}> - {Context.User.Id}  from `{Context.Guild.Name}` server.").ConfigureAwait(false);
                 }
                 else
                 {

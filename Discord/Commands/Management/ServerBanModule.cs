@@ -8,22 +8,17 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
 {
     public static class ServerBan
     {
-        private static readonly HashSet<string> BannedServerIds = new HashSet<string>();
+        private static readonly HashSet<string> BannedServerIds = new();
 
-        // Checks if a server is banned.
         public static bool IsServerBanned(string serverId) => BannedServerIds.Contains(serverId);
 
-        // Adds a server to the ban list.
         public static void BanServer(string serverId) => BannedServerIds.Add(serverId);
 
-        // Removes a server from the ban list.
         public static void UnbanServer(string serverId) => BannedServerIds.Remove(serverId);
     }
 
-    // Module for ban commands.
     public class ServerBanModule : ModuleBase<SocketCommandContext>
     {
-        // Ensure the server is not banned before processing any commands.
         protected override void BeforeExecute(CommandInfo command)
         {
             if (ServerBan.IsServerBanned(Context.Guild.Id.ToString()))
@@ -33,7 +28,7 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
             base.BeforeExecute(command);
         }
 
-        [Command("unbls")]
+        [Command("ubls")]
         [Summary("Unbans a server by its server ID.")]
         [RequireOwner]
         public async Task UnbanServerAsync(string serverId)
@@ -45,7 +40,7 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
             }
             else
             {
-                await ReplyAsync($"Server {serverId} could not be found in the ban list.").ConfigureAwait(false);
+                await ReplyAsync($"Server {serverId} is not in the ban list.").ConfigureAwait(false);
             }
         }
 
@@ -63,17 +58,12 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
                 ServerBan.BanServer(serverId);
                 await ReplyAsync($"Server {serverId} has been banned.").ConfigureAwait(false);
 
-                // Check if the bot is in the server and kick it if necessary.
                 if (ulong.TryParse(serverId, out var guildId))
                 {
                     var guild = Context.Client.GetGuild(guildId);
-                    if (guild != null)
+                    if (guild?.GetBotMember() is not null)
                     {
-                        var botMember = guild.GetBotMember();
-                        if (botMember != null)
-                        {
-                            await guild.LeaveAsync().ConfigureAwait(false);
-                        }
+                        await guild.LeaveAsync().ConfigureAwait(false);
                     }
                 }
             }
@@ -84,14 +74,15 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
         [RequireOwner]
         public async Task CheckServerBanAsync(string serverId)
         {
-            var message = ServerBan.IsServerBanned(serverId) ? $"Server {serverId} is banned." : $"Server {serverId} is not banned.";
+            var message = ServerBan.IsServerBanned(serverId)
+                ? $"Server {serverId} is banned."
+                : $"Server {serverId} is not banned.";
             await ReplyAsync(message).ConfigureAwait(false);
         }
     }
 
-    // Extension method to retrieve the bot member from a guild.
     public static class GuildExtensions
     {
-        public static SocketGuildUser? GetBotMember(this SocketGuild guild) => guild.GetUser(guild.CurrentUser.Id);
+        public static SocketGuildUser? GetBotMember(this SocketGuild guild) => guild.CurrentUser;
     }
 }

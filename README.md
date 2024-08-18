@@ -1,35 +1,27 @@
-# Pokemon Legends Animal Crossing New Horizons Sysbot
+# Pokémon Legends Animal Crossing New Horizons Sysbot
 
-## Features Added to This Fork
+## Overview
 
-- **Server Banned System**
-- **Broadcasting System**
-- **Ping System**
-- **MysteryOrder System**
-- **Embeds System**
+**SysBot.ACNHOrders** is a fully automated, queue-based order bot designed to inject item orders directly onto your island's map in *Animal Crossing: New Horizons*. Players can queue their orders, pick them up, and leave. All processes—including dodo fetching, gate management, and even handling Tom Nook's or Isabelle's morning announcements—are fully automated. The bot also provides advanced connection logging, item dropping, map refreshing, and session restoration after network disruptions.
 
-## SysBot.ACNHOrders
+## Features
 
-SysBot.ACNHOrders is a fully automated, queue-based order bot designed to inject item orders directly onto your island's map. Players can queue their orders, pick them up, and leave, with all processes, including dodo fetching, gate opening and closing, and even Tom Nook's or Isabelle's morning announcements, being fully automated.
+- **Server Ban System**: Manage banned users effortlessly with an integrated server ban system.
+- **Broadcasting System**: Broadcast important messages to users.
+- **Ping System**: Allow users to ping the bot and receive quick responses.
+- **MysteryOrder System**: Randomize item orders for users.
+- **Embeds System**: Enhance the bot's communication with rich embeds.
 
-Additionally, this bot serves as an advanced tool for connection logging, item dropping, map refreshing, and restoring online sessions after network or online crashes/disconnects.
+## Getting Started
 
-## License
+### Prerequisites
 
-This project is licensed under the terms specified in the [License.md](./License.md) file.
+- **sys-botbase client**: Enables remote control automation of Nintendo Switch consoles.
+- **Discord.Net**: A .NET library for interacting with Discord, managed via NuGet.
+- **Animal Crossing API logic**: Provided by NHSE for integration with game data.
 
-## See Also
-
-### SysBot.AnimalCrossing
+## Acknowledgments
 
 Special thanks to:
-- **kwsch** for the original project and foundational work.
-- **Red** for the original Dodo-fetch code, pointer logic, and numerous contributions.
-
-## Dependencies
-
-- **sys-botbase client**: For remote control automation of Nintendo Switch consoles.
-- **Discord.Net**: Managed via NuGet.
-- **Animal Crossing API logic**: Provided by NHSE.
-
-For detailed licensing information, please refer to the [License.md](./License.md) file.
+- **kwsch**: For the original project and foundational work.
+- **Red**: For the original Dodo-fetch code, pointer logic, and numerous contributions.

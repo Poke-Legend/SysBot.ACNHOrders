@@ -39,13 +39,8 @@ namespace SysBot.ACNHOrders
             _client.Log += LogAsync;
             _commands.Log += LogAsync;
 
-            _services = ConfigureServices();
-        }
-
-        private static IServiceProvider ConfigureServices()
-        {
-            return new ServiceCollection()
-                .AddSingleton<CrossBot>()
+            _services = new ServiceCollection()
+                .AddSingleton(bot)
                 .BuildServiceProvider();
         }
 
@@ -71,31 +66,29 @@ namespace SysBot.ACNHOrders
 
         public async Task MainAsync(string apiToken, CancellationToken token)
         {
-            await InitCommandsAsync().ConfigureAwait(false);
+            await InitCommandsAsync();
 
-            await _client.LoginAsync(TokenType.Bot, apiToken).ConfigureAwait(false);
-            await _client.StartAsync().ConfigureAwait(false);
+            await _client.LoginAsync(TokenType.Bot, apiToken);
+            await _client.StartAsync();
             _client.Ready += OnClientReadyAsync;
 
-            await Task.Delay(5000, token).ConfigureAwait(false);
 
             if (!string.IsNullOrWhiteSpace(_bot.Config.Name))
             {
-                await _client.SetGameAsync(_bot.Config.Name).ConfigureAwait(false);
+                await _client.SetGameAsync(_bot.Config.Name);
             }
 
-            var appInfo = await _client.GetApplicationInfoAsync().ConfigureAwait(false);
+            var appInfo = await _client.GetApplicationInfoAsync();
             Owner = appInfo.Owner.Id;
 
-            await MonitorStatusAsync(token).ConfigureAwait(false);
+            await MonitorStatusAsync(token);
         }
 
-        private async Task OnClientReadyAsync()
+        private Task OnClientReadyAsync()
         {
-            if (Ready) return;
+            if (Ready)
+                return Task.CompletedTask;
             Ready = true;
-
-            await Task.Delay(1000).ConfigureAwait(false);
 
             foreach (var channelId in _bot.Config.LoggingChannels)
             {
@@ -109,36 +102,29 @@ namespace SysBot.ACNHOrders
                 LogUtil.Forwarders.Add(Logger);
             }
 
-            await Task.Delay(100, CancellationToken.None).ConfigureAwait(false);
+            return Task.CompletedTask;
         }
 
         public async Task InitCommandsAsync()
         {
-            await _commands.AddModulesAsync(Assembly.GetExecutingAssembly(), _services).ConfigureAwait(false);
+            await _commands.AddModulesAsync(Assembly.GetExecutingAssembly(), _services);
             _client.MessageReceived += HandleMessageAsync;
         }
 
         public async Task<bool> TrySpeakMessageAsync(ulong channelId, string message, bool noDoublePost = false)
         {
-            try
-            {
-                if (_client.ConnectionState != ConnectionState.Connected) return false;
+            if (_client.ConnectionState != ConnectionState.Connected) return false;
 
-                if (_client.GetChannel(channelId) is IMessageChannel channel)
+            if (_client.GetChannel(channelId) is IMessageChannel channel)
+            {
+                if (noDoublePost)
                 {
-                    if (noDoublePost)
-                    {
-                        var lastMessage = (await channel.GetMessagesAsync(1).FlattenAsync()).FirstOrDefault();
-                        if (lastMessage?.Content == message) return true;
-                    }
-
-                    await channel.SendMessageAsync(message).ConfigureAwait(false);
-                    return true;
+                    var lastMessage = (await channel.GetMessagesAsync(1).FlattenAsync()).FirstOrDefault();
+                    if (lastMessage?.Content == message) return true;
                 }
-            }
-            catch (Exception)
-            {
-                // Optionally log the exception here.
+
+                await channel.SendMessageAsync(message);
+                return true;
             }
 
             return false;
@@ -148,7 +134,7 @@ namespace SysBot.ACNHOrders
         {
             try
             {
-                await channel.SendMessageAsync(message).ConfigureAwait(false);
+                await channel.SendMessageAsync(message);
                 return true;
             }
             catch (Exception)
@@ -167,11 +153,11 @@ namespace SysBot.ACNHOrders
 
             if (msg.HasStringPrefix(_bot.Config.Prefix, ref argPos))
             {
-                if (await TryHandleCommandAsync(msg, argPos).ConfigureAwait(false)) return;
+                if (await TryHandleCommandAsync(msg, argPos)) return;
             }
-            else if (await CheckMessageDeletionAsync(msg).ConfigureAwait(false)) return;
+            else if (await CheckMessageDeletionAsync(msg)) return;
 
-            await TryHandleMessageAsync(msg).ConfigureAwait(false);
+            await TryHandleMessageAsync(msg);
         }
 
         private async Task<bool> CheckMessageDeletionAsync(SocketUserMessage msg)
@@ -184,8 +170,8 @@ namespace SysBot.ACNHOrders
             if (!Globals.Bot.Config.Channels.Contains(context.Channel.Id))
                 return false;
 
-            await msg.DeleteAsync(RequestOptions.Default).ConfigureAwait(false);
-            await msg.Channel.SendMessageAsync($"{msg.Author.Mention} - The order channels are for bot commands only.\nDeleted Message:```\n{msg.Content}\n```").ConfigureAwait(false);
+            await msg.DeleteAsync(RequestOptions.Default);
+            await msg.Channel.SendMessageAsync($"{msg.Author.Mention} - The order channels are for bot commands only.\nDeleted Message:```\n{msg.Content}\n```");
 
             return true;
         }
@@ -204,22 +190,22 @@ namespace SysBot.ACNHOrders
             {
                 if (!_bot.Config.CanUseCommandUser(msg.Author.Id))
                 {
-                    await msg.Channel.SendMessageAsync("You are not permitted to use this command.").ConfigureAwait(false);
+                    await msg.Channel.SendMessageAsync("You are not permitted to use this command.");
                     return true;
                 }
 
                 if (!_bot.Config.CanUseCommandChannel(msg.Channel.Id) && msg.Author.Id != Owner && !_bot.Config.CanUseSudo(msg.Author.Id))
                 {
-                    await msg.Channel.SendMessageAsync("You can't use that command here.").ConfigureAwait(false);
+                    await msg.Channel.SendMessageAsync("You can't use that command here.");
                     return true;
                 }
             }
 
-            var result = await _commands.ExecuteAsync(context, argPos, _services).ConfigureAwait(false);
+            var result = await _commands.ExecuteAsync(context, argPos, _services);
 
             if (!result.IsSuccess)
             {
-                await msg.Channel.SendMessageAsync(result.ErrorReason).ConfigureAwait(false);
+                await msg.Channel.SendMessageAsync(result.ErrorReason);
             }
 
             return result.Error != CommandError.UnknownCommand;
@@ -239,15 +225,15 @@ namespace SysBot.ACNHOrders
                 if (newStatus != currentState)
                 {
                     currentState = newStatus;
-                    await _client.SetStatusAsync(currentState).ConfigureAwait(false);
+                    await _client.SetStatusAsync(currentState);
                 }
 
                 if (_bot.Config.DodoModeConfig.LimitedDodoRestoreOnlyMode && _bot.Config.DodoModeConfig.SetStatusAsDodoCode)
                 {
-                    await _client.SetGameAsync($"Dodo code: {_bot.DodoCode}").ConfigureAwait(false);
+                    await _client.SetGameAsync($"Dodo code: {_bot.DodoCode}");
                 }
 
-                await Task.Delay(delay <= TimeSpan.Zero ? TimeSpan.FromSeconds(intervalSeconds) : delay, token).ConfigureAwait(false);
+                await Task.Delay(delay <= TimeSpan.Zero ? TimeSpan.FromSeconds(intervalSeconds) : delay, token);
             }
         }
     }

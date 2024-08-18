@@ -10,25 +10,27 @@ namespace SysBot.ACNHOrders
     {
         private const string DefaultConfigPath = "config.json";
         private const string DefaultTwitchPath = "twitch.json";
-		private const string DefaultSocketServerAPIPath = "server.json";
+        private const string DefaultSocketServerAPIPath = "server.json";
 
         private static async Task Main(string[] args)
         {
             string configPath;
 
-			Console.WriteLine("Starting up...");
-            if (args.Length > 0) 
+            Console.WriteLine("Starting up...");
+            if (args.Length > 0)
             {
-                if (args.Length > 1) 
+                if (args.Length > 1)
                 {
                     Console.WriteLine("Too many arguments supplied and will be ignored.");
                     configPath = DefaultConfigPath;
                 }
-                else {
+                else
+                {
                     configPath = args[0];
                 }
             }
-            else {
+            else
+            {
                 configPath = DefaultConfigPath;
             }
 
@@ -41,10 +43,10 @@ namespace SysBot.ACNHOrders
             if (!File.Exists(DefaultTwitchPath))
                 SaveConfig(new TwitchConfig(), DefaultTwitchPath);
 
-			if (!File.Exists(DefaultSocketServerAPIPath))
-				SaveConfig(new SocketAPI.SocketAPIServerConfig(), DefaultSocketServerAPIPath);
+            if (!File.Exists(DefaultSocketServerAPIPath))
+                SaveConfig(new SocketAPI.SocketAPIServerConfig(), DefaultSocketServerAPIPath);
 
-			var json = File.ReadAllText(configPath);
+            var json = File.ReadAllText(configPath);
             var config = JsonSerializer.Deserialize<CrossBotConfig>(json);
             if (config == null)
             {
@@ -62,37 +64,37 @@ namespace SysBot.ACNHOrders
                 return;
             }
 
-			json = File.ReadAllText(DefaultSocketServerAPIPath);
-			var serverConfig = JsonSerializer.Deserialize<SocketAPI.SocketAPIServerConfig>(json);
+            json = File.ReadAllText(DefaultSocketServerAPIPath);
+            var serverConfig = JsonSerializer.Deserialize<SocketAPI.SocketAPIServerConfig>(json);
             if (serverConfig == null)
             {
-				Console.WriteLine("Failed to deserialize Socket API Server configuration file.");
-				WaitKeyExit();
-				return;
+                Console.WriteLine("Failed to deserialize Socket API Server configuration file.");
+                WaitKeyExit();
+                return;
             }
 
-			SaveConfig(config, configPath);
+            SaveConfig(config, configPath);
             SaveConfig(twitchConfig, DefaultTwitchPath);
-			SaveConfig(serverConfig, DefaultSocketServerAPIPath);
-            
-			SocketAPI.SocketAPIServer server = SocketAPI.SocketAPIServer.Shared;
-			_ = server.Start(serverConfig);
+            SaveConfig(serverConfig, DefaultSocketServerAPIPath);
 
-			await BotRunner.RunFrom(config, CancellationToken.None, twitchConfig).ConfigureAwait(false);
+            SocketAPI.SocketAPIServer server = SocketAPI.SocketAPIServer.shared;
+            _ = server.Start(serverConfig);
 
-			WaitKeyExit();
+            await BotRunner.RunFrom(config, CancellationToken.None, twitchConfig).ConfigureAwait(false);
+
+            WaitKeyExit();
         }
 
         private static void SaveConfig<T>(T config, string path)
         {
-            var options = new JsonSerializerOptions {WriteIndented = true};
+            var options = new JsonSerializerOptions { WriteIndented = true };
             var json = JsonSerializer.Serialize(config, options);
             File.WriteAllText(path, json);
         }
 
         private static void CreateConfigQuit(string configPath)
         {
-            SaveConfig(new CrossBotConfig {IP = "192.168.0.1", Port = 6000}, configPath);
+            SaveConfig(new CrossBotConfig { IP = "192.168.0.1", Port = 6000 }, configPath);
             Console.WriteLine("Created blank config file. Please configure it and restart the program.");
             WaitKeyExit();
         }

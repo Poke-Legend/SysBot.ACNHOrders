@@ -8,6 +8,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using SysBot.Base;
+using Discord.Net;
 
 namespace SysBot.ACNHOrders
 {
@@ -72,7 +73,6 @@ namespace SysBot.ACNHOrders
             await _client.StartAsync();
             _client.Ready += OnClientReadyAsync;
 
-
             if (!string.IsNullOrWhiteSpace(_bot.Config.Name))
             {
                 await _client.SetGameAsync(_bot.Config.Name);
@@ -123,8 +123,19 @@ namespace SysBot.ACNHOrders
                     if (lastMessage?.Content == message) return true;
                 }
 
-                await channel.SendMessageAsync(message);
-                return true;
+                try
+                {
+                    await channel.SendMessageAsync(message);
+                    return true;
+                }
+                catch (HttpException ex)
+                {
+                    Console.WriteLine($"Failed to send message in {channel.Name} (ID: {channel.Id}) due to: {ex.Message}");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"An unexpected error occurred: {ex.Message}");
+                }
             }
 
             return false;
@@ -137,9 +148,13 @@ namespace SysBot.ACNHOrders
                 await channel.SendMessageAsync(message);
                 return true;
             }
-            catch (Exception)
+            catch (HttpException ex)
             {
-                // Optionally log the exception here.
+                Console.WriteLine($"Failed to send message in {channel.Name} (ID: {channel.Id}) due to: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An unexpected error occurred: {ex.Message}");
             }
 
             return false;
@@ -170,8 +185,19 @@ namespace SysBot.ACNHOrders
             if (!Globals.Bot.Config.Channels.Contains(context.Channel.Id))
                 return false;
 
-            await msg.DeleteAsync(RequestOptions.Default);
-            await msg.Channel.SendMessageAsync($"{msg.Author.Mention} - The order channels are for bot commands only.\nDeleted Message:```\n{msg.Content}\n```");
+            try
+            {
+                await msg.DeleteAsync(RequestOptions.Default);
+                await msg.Channel.SendMessageAsync($"{msg.Author.Mention} - The order channels are for bot commands only.\nDeleted Message:```\n{msg.Content}\n```");
+            }
+            catch (HttpException ex)
+            {
+                Console.WriteLine($"Failed to delete message in {context.Channel.Name} (ID: {context.Channel.Id}) due to: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An unexpected error occurred: {ex.Message}");
+            }
 
             return true;
         }

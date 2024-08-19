@@ -6,50 +6,40 @@ namespace SysBot.ACNHOrders
 {
     public static class InventoryValidator
     {
-        private const int pocket = Item.SIZE * 20;
-        private const int size = (pocket + 0x18) * 2;
-        private const int shift = -0x18 - (Item.SIZE * 20);
+        private const int PocketSize = Item.SIZE * 20;
+        private const int TotalSize = (PocketSize + 0x18) * 2;
+        private const int OffsetShift = -0x18 - PocketSize;
 
-        public static (uint, int) GetOffsetLength(uint slot1) => ((uint)((int)slot1 + shift), size);
+        public static (uint Offset, int Length) GetOffsetLength(uint slot1) =>
+            ((uint)((int)slot1 + OffsetShift), TotalSize);
 
         public static bool ValidateItemBinary(byte[] data)
         {
-            // Check the unlocked slot count -- expect 0,10,20
-            var bagCount = BitConverter.ToUInt32(data, pocket);
-            if (bagCount > 20 || bagCount % 10 != 0) // pouch21-39 count
+            // Validate unlocked slot count: should be 0, 10, or 20
+            var bagCount = BitConverter.ToUInt32(data, PocketSize);
+            if (bagCount > 20 || bagCount % 10 != 0)
                 return false;
 
-            var pocketCount = BitConverter.ToUInt32(data, pocket + 0x18 + pocket);
-            if (pocketCount != 20) // pouch0-19 count should be 20.
+            // Validate pocket count: should be 20
+            var pocketCount = BitConverter.ToUInt32(data, PocketSize + 0x18 + PocketSize);
+            if (pocketCount != 20)
                 return false;
 
-            // Check the item wheel binding -- expect -1 or [0,7]
-            // Disallow duplicate binds!
-            // Don't bother checking that bind[i] (when ! -1) is not NONE at items[i]. We don't need to check everything!
-            var bound = new List<byte>();
-            if (!ValidateBindList(data, pocket + 4, bound))
-                return false;
-            if (!ValidateBindList(data, pocket + 4 + (pocket + 0x18), bound))
-                return false;
-
-            return true;
+            // Validate item wheel bindings and check for duplicates
+            var boundItems = new HashSet<byte>();
+            return ValidateBindList(data, PocketSize + 4, boundItems) &&
+                   ValidateBindList(data, PocketSize + 4 + (PocketSize + 0x18), boundItems);
         }
 
-        private static bool ValidateBindList(byte[] data, int bindStart, ICollection<byte> bound)
+        private static bool ValidateBindList(byte[] data, int bindStart, HashSet<byte> boundItems)
         {
             for (int i = 0; i < 20; i++)
             {
                 var bind = data[bindStart + i];
-                if (bind == 0xFF)
-                    continue;
-                if (bind > 7)
+                if (bind == 0xFF) continue;
+                if (bind > 7 || !boundItems.Add(bind))
                     return false;
-                if (bound.Contains(bind))
-                    return false;
-
-                bound.Add(bind);
             }
-
             return true;
         }
     }

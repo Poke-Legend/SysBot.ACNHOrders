@@ -1,15 +1,12 @@
-﻿using Discord;
-using Discord.WebSocket;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading.Tasks;
 
 namespace SysBot.ACNHOrders
 {
     public class Penalty
     {
-        public string ID { get; protected set; }
+        public string ID { get; private set; }
         public uint PenaltyCount { get; private set; }
 
         public Penalty(string id, uint pcount)
@@ -18,10 +15,7 @@ namespace SysBot.ACNHOrders
             PenaltyCount = pcount;
         }
 
-        public void IncrementPenaltyCount()
-        {
-            PenaltyCount++;
-        }
+        public void IncrementPenaltyCount() => PenaltyCount++;
 
         public override string ToString() => ID;
     }
@@ -31,21 +25,18 @@ namespace SysBot.ACNHOrders
         private const string UserBanFilePath = "userban.txt";
         private const string ServerBanFilePath = "serverban.txt";
 
-        private static int PenaltyCountBan = 0;
+        private static int PenaltyCountBan;
         private static readonly List<Penalty> PenaltyList = new();
-
         private static readonly object UserMapAccessor = new();
         private static readonly object ServerMapAccessor = new();
-
-        // User Bans
         private static readonly List<string> BannedUsers = new();
-
-        // Server Bans
         private static readonly List<string> BannedServers = new();
 
         public static void UpdateConfiguration(CrossBotConfig config)
         {
             PenaltyCountBan = config.OrderConfig.PenaltyBanCount;
+            EnsureFileExists(UserBanFilePath);
+            EnsureFileExists(ServerBanFilePath);
             LoadBannedUsers();
             LoadBannedServers();
         }
@@ -54,15 +45,14 @@ namespace SysBot.ACNHOrders
         {
             lock (UserMapAccessor)
             {
-                var pen = PenaltyList.Find(x => x.ID == id);
-                if (pen != null)
+                var pen = PenaltyList.Find(x => x.ID == id) ?? new Penalty(id, 1);
+                if (!PenaltyList.Contains(pen))
                 {
-                    pen.IncrementPenaltyCount();
+                    PenaltyList.Add(pen);
                 }
                 else
                 {
-                    pen = new Penalty(id, 1);
-                    PenaltyList.Add(pen);
+                    pen.IncrementPenaltyCount();
                 }
 
                 if (pen.PenaltyCount >= PenaltyCountBan)
@@ -71,7 +61,6 @@ namespace SysBot.ACNHOrders
                 }
 
                 SaveBannedUsers();
-                
                 return pen.PenaltyCount >= PenaltyCountBan;
             }
         }
@@ -92,22 +81,6 @@ namespace SysBot.ACNHOrders
             }
         }
 
-        private static void LoadBannedUsers()
-        {
-            lock (UserMapAccessor)
-            {
-                BannedUsers.Clear();
-                if (!File.Exists(UserBanFilePath))
-                {
-                    File.Create(UserBanFilePath).Dispose();
-                }
-                else
-                {
-                    BannedUsers.AddRange(File.ReadAllLines(UserBanFilePath));
-                }
-            }
-        }
-
         public static void Ban(string userId)
         {
             lock (UserMapAccessor)
@@ -124,27 +97,9 @@ namespace SysBot.ACNHOrders
         {
             lock (UserMapAccessor)
             {
-                if (!BannedUsers.Contains(userId))
+                if (BannedUsers.Remove(userId))
                 {
-                    return;
-                }
-                BannedUsers.Remove(userId);
-                SaveBannedUsers();
-            }
-        }
-
-        private static void LoadBannedServers()
-        {
-            lock (ServerMapAccessor)
-            {
-                BannedServers.Clear();
-                if (!File.Exists(ServerBanFilePath))
-                {
-                    File.Create(ServerBanFilePath).Dispose();
-                }
-                else
-                {
-                    BannedServers.AddRange(File.ReadAllLines(ServerBanFilePath));
+                    SaveBannedUsers();
                 }
             }
         }
@@ -165,12 +120,28 @@ namespace SysBot.ACNHOrders
         {
             lock (ServerMapAccessor)
             {
-                if (!BannedServers.Contains(serverId))
+                if (BannedServers.Remove(serverId))
                 {
-                    return;
+                    SaveBannedServers();
                 }
-                BannedServers.Remove(serverId);
-                SaveBannedServers();
+            }
+        }
+
+        private static void LoadBannedUsers()
+        {
+            lock (UserMapAccessor)
+            {
+                BannedUsers.Clear();
+                BannedUsers.AddRange(File.ReadAllLines(UserBanFilePath));
+            }
+        }
+
+        private static void LoadBannedServers()
+        {
+            lock (ServerMapAccessor)
+            {
+                BannedServers.Clear();
+                BannedServers.AddRange(File.ReadAllLines(ServerBanFilePath));
             }
         }
 
@@ -187,6 +158,14 @@ namespace SysBot.ACNHOrders
             lock (ServerMapAccessor)
             {
                 File.WriteAllLines(ServerBanFilePath, BannedServers);
+            }
+        }
+
+        private static void EnsureFileExists(string filePath)
+        {
+            if (!File.Exists(filePath))
+            {
+                File.Create(filePath).Dispose();
             }
         }
     }

@@ -1,29 +1,28 @@
 ﻿using System;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.Fonts;
-using SixLabors.ImageSharp.Drawing.Processing;
-using SixLabors.ImageSharp.Processing;
 using System.IO;
+using SixLabors.Fonts;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Drawing.Processing;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
 
 namespace SysBot.ACNHOrders
 {
     public class DodoDraw
     {
-        private string ImagePathTemplate { get; set; } = "dodo.png";
-        private string FontPath { get; set; } = "dodo.ttf";
-        private string ImagePathOutput => "current_" + ImagePathTemplate;
-
-        private readonly FontCollection FontCollection = new();
-        private readonly FontFamily DodoFontFamily;
+        private readonly string ImagePathTemplate = "dodo.png";
+        private readonly string FontPath = "dodo.ttf";
+        private readonly string ImagePathOutput;
         private readonly Font DodoFont;
         private readonly Image<Rgba32> BaseImage;
 
         public DodoDraw(float fontPercentage = 100)
         {
-            DodoFontFamily = FontCollection.Add(FontPath);
+            var fontCollection = new FontCollection();
+            var dodoFontFamily = fontCollection.Add(FontPath);
             BaseImage = Image.Load<Rgba32>(ImagePathTemplate);
-            DodoFont = DodoFontFamily.CreateFont(BaseImage.Height * 0.4f * (fontPercentage / 100f), FontStyle.Regular);
+            DodoFont = dodoFontFamily.CreateFont(BaseImage.Height * 0.4f * (fontPercentage / 100f), FontStyle.Regular);
+            ImagePathOutput = $"current_{ImagePathTemplate}";
         }
 
         public string Draw(string dodo)
@@ -53,12 +52,6 @@ namespace SysBot.ACNHOrders
             return ImagePathOutput;
         }
 
-        public string? GetProcessedDodoImagePath()
-        {
-            if (File.Exists(ImagePathOutput))
-                return ImagePathOutput;
-
-            return null;
-        }
+        public string? GetProcessedDodoImagePath() => File.Exists(ImagePathOutput) ? ImagePathOutput : null;
     }
 }

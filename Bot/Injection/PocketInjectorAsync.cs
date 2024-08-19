@@ -10,7 +10,7 @@ namespace SysBot.ACNHOrders
 {
     public class PocketInjectorAsync
     {
-        public readonly Item DroppableOnlyItem = new Item(0x9C9); // Gold nugget
+        public readonly Item DroppableOnlyItem = new(0x9C9); // Gold nugget
 
         private readonly ISwitchConnectionAsync Bot;
         public bool Connected => Bot.Connected;

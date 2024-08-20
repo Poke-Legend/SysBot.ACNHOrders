@@ -13,14 +13,8 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
     {
         private class Config
         {
-            public Config()
-            {
-                Channels = new List<ulong>();
-                Sudo = new List<ulong>();
-            }
-
-            public List<ulong> Channels { get; set; }
-            public List<ulong> Sudo { get; set; }
+            public List<ulong> Channels { get; set; } = new List<ulong>();
+            public List<ulong> Sudo { get; set; } = new List<ulong>();
         }
 
         [Command("broadcast")]
@@ -28,25 +22,16 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
         [RequireSudo]
         public async Task BroadcastAsync([Remainder] string message)
         {
-            if (Context?.Client == null)
+            if (Context.Client == null)
             {
-                Console.WriteLine("Context or Client is null");
+                Console.WriteLine("Client is null");
                 return;
             }
 
-            var client = Context.Client;
-            var configJson = File.ReadAllText("config.json");
-            var config = JsonConvert.DeserializeObject<Config>(configJson);
-
+            var config = JsonConvert.DeserializeObject<Config>(File.ReadAllText("config.json"));
             if (config == null)
             {
                 await ReplyAsync("Configuration error, please ensure config.json is properly configured.");
-                return;
-            }
-
-            if (Context?.User?.Id == null)
-            {
-                Console.WriteLine("Context or User or Id is null");
                 return;
             }
 
@@ -58,36 +43,30 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
 
             foreach (var channelId in config.Channels)
             {
-                var channel = client.GetChannel(channelId) as IMessageChannel;
+                var channel = Context.Client.GetChannel(channelId) as IMessageChannel;
                 if (channel == null)
                 {
-                    Console.WriteLine($"Channel with ID {channelId} is null");
+                    Console.WriteLine($"Channel with ID {channelId} not found.");
                     continue;
                 }
 
-                if (Context.Channel is IGuildChannel)
+                if (Context.Channel is IGuildChannel guildChannel)
                 {
-                    if (Context?.Guild?.CurrentUser == null)
+                    var botPermissions = Context.Guild?.CurrentUser?.GetPermissions(guildChannel);
+                    if (botPermissions?.SendMessages != true)
                     {
-                        Console.WriteLine("Context or Guild or CurrentUser is null");
-                        return;
-                    }
-
-                    var botPermission = (Context.Guild.CurrentUser as IGuildUser)?.GetPermissions(channel as IGuildChannel);
-                    if (botPermission?.SendMessages != true)
-                    {
-                        continue; // If bot doesn't have permission, skip this channel
+                        Console.WriteLine($"Bot lacks permission to send messages in channel ID {channelId}.");
+                        continue;
                     }
                 }
 
-                // Create an EmbedBuilder and construct the embedded message
-                var embed = new EmbedBuilder();
-                embed.WithTitle("Announcement");
-                embed.WithDescription(message);
-                embed.WithThumbnailUrl("https://media.giphy.com/media/T87BZ7cyOH7TwDBgwy/giphy.gif");
-                var broadcastMessage = embed.Build();
+                var embed = new EmbedBuilder()
+                    .WithTitle("Announcement")
+                    .WithDescription(message)
+                    .WithThumbnailUrl("https://media.giphy.com/media/T87BZ7cyOH7TwDBgwy/giphy.gif")
+                    .Build();
 
-                await channel.SendMessageAsync(null, false, broadcastMessage);
+                await channel.SendMessageAsync(embed: embed);
             }
         }
     }

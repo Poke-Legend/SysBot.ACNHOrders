@@ -14,25 +14,27 @@ namespace SysBot.ACNHOrders
     {
         private const int ArriveTime = 90;
         private const int SetupTime = 95;
+        private static ulong ID = 0;
+        private static readonly object IDAccessor = new();
 
         public static async Task AddToQueueAsync(this SocketCommandContext context, OrderRequest<Item> itemReq, string player, SocketUser trader)
         {
             try
             {
-                var helperEmbed = CreateEmbed(
-                    title: "🎉 Queue Notification",
-                    description: "You've been added to the queue! I'll message you here when your order is ready.",
-                    color: Color.Blue
+                var notificationEmbed = CreateEmbed(
+                    "🎉 Queue Notification",
+                    "You've been added to the queue! I'll message you here when your order is ready.",
+                    Color.Blue
                 ).WithFooter("Thank you for your patience!");
 
-                await trader.SendMessageAsync(embed: helperEmbed.Build()).ConfigureAwait(false);
+                await trader.SendMessageAsync(embed: notificationEmbed.Build()).ConfigureAwait(false);
             }
             catch (HttpException ex)
             {
                 var errorEmbed = CreateEmbed(
-                    title: "⚠️ Error",
-                    description: $"{ex.HttpCode}: {ex.Reason}!",
-                    color: Color.Red
+                    "⚠️ Error",
+                    $"{ex.HttpCode}: {ex.Reason}!",
+                    Color.Red
                 ).WithFooter("Please try again later.");
 
                 await context.Channel.SendMessageAsync(embed: errorEmbed.Build()).ConfigureAwait(false);
@@ -41,9 +43,9 @@ namespace SysBot.ACNHOrders
                     ? "You must enable private messages to be queued!"
                     : $"{player} must enable private messages to be queued!";
                 var noAccessEmbed = CreateEmbed(
-                    title: "🔒 Private Message Disabled",
-                    description: noAccessMsg,
-                    color: Color.Orange
+                    "🔒 Private Message Disabled",
+                    noAccessMsg,
+                    Color.Orange
                 ).WithFooter("Enable DMs in your privacy settings.");
 
                 await context.Channel.SendMessageAsync(embed: noAccessEmbed.Build()).ConfigureAwait(false);
@@ -53,9 +55,9 @@ namespace SysBot.ACNHOrders
             var result = AttemptAddToQueue(itemReq, trader.Mention, trader.Username, out var msg);
             var color = result ? Color.Green : Color.Red;
             var queueUpdateEmbed = CreateEmbed(
-                title: "📋 Queue Update",
-                description: msg,
-                color: color
+                "📋 Queue Update",
+                msg,
+                color
             ).WithFooter("We'll notify you when it's your turn!");
 
             await context.Channel.SendMessageAsync(embed: queueUpdateEmbed.Build()).ConfigureAwait(false);
@@ -87,7 +89,7 @@ namespace SysBot.ACNHOrders
 
             if (Globals.Bot.CurrentUserName == traderDispName)
             {
-                msg = $"{traderMention} - Error: Your order could not be queued as it is currently being processed. Please wait a few seconds for the queue to clear.";
+                msg = $"{traderMention} - Report this error to @DeVry if you've been waiting more than 15 minutes and are still getting this error. The bot is likely down for everyone. Error: Failed to queue your order as it is the current processing order. Please wait a few seconds for the queue to clear if you've already completed it.";
                 return false;
             }
 
@@ -123,7 +125,7 @@ namespace SysBot.ACNHOrders
             return -1;
         }
 
-        public static string GetETA(this int pos)
+        public static string GetETA(int pos)
         {
             int minSeconds = ArriveTime + SetupTime + Globals.Bot.Config.OrderConfig.UserTimeAllowed + Globals.Bot.Config.OrderConfig.WaitForArriverTime;
             int addSeconds = ArriveTime + Globals.Bot.Config.OrderConfig.UserTimeAllowed + Globals.Bot.Config.OrderConfig.WaitForArriverTime;
@@ -168,8 +170,5 @@ namespace SysBot.ACNHOrders
                 })
                 .WithThumbnailUrl("https://www.kindpng.com/picc/m/13-134663_animal-crossing-tom-nook-png-transparent-png.png"); // Replace with your actual thumbnail URL
         }
-
-        private static ulong ID = 0;
-        private static readonly object IDAccessor = new();
     }
 }

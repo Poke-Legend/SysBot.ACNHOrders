@@ -6,11 +6,36 @@
 
 ## Features
 
-- **Server Ban System**: Manage banned users effortlessly with an integrated server ban system.
-- **Broadcasting System**: Broadcast important messages to users.
-- **Ping System**: Allow users to ping the bot and receive quick responses.
-- **MysteryOrder System**: Randomize item orders for users.
-- **Embeds System**: Enhance the bot's communication with rich embeds.
+### New Systems
+
+1. **Server Ban System**: 
+   - Manage banned users with an integrated system that handles bans across the server.
+
+2. **Broadcasting System**: 
+   - Send important messages to all users or specific channels.
+
+3. **Ping System**: 
+   - Users can ping the bot, and it will respond quickly to confirm it’s active.
+
+4. **MysteryOrder System**: 
+   - Allows users to receive randomized item orders, adding an element of surprise.
+
+5. **Embeds System**: 
+   - Enhance bot messages with rich, visually appealing embeds for better communication.
+
+### New Commands
+
+1. **LeaveGuild**: 
+   - Command for the bot to leave a specific Discord server.
+
+2. **LeaveAll**: 
+   - Command for the bot to leave all Discord servers it is part of.
+
+3. **Leave**: 
+   - Command to make the bot leave the current Discord server.
+
+4. **ListGuild**: 
+   - Sends a list of all servers the bot is in directly to the user’s DM.
 
 ## Getting Started
 
@@ -23,5 +48,8 @@
 ## Acknowledgments
 
 Special thanks to:
+
 - **kwsch**: For the original project and foundational work.
 - **Red**: For the original Dodo-fetch code, pointer logic, and numerous contributions.
+- **CodeHedge**: For Order Embeds Logic System.
+- **Berichan**: For providing the source code and numerous contributions.

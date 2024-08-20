@@ -51,5 +51,5 @@ Special thanks to:
 
 - **kwsch**: For the original project and foundational work.
 - **Red**: For the original Dodo-fetch code, pointer logic, and numerous contributions.
-- **CodeHedge**: For Order Embeds Logic System.
+- **CodeHedge**: For Order Embeds Logic System, Broadcasting System, and MysteryOrder System.
 - **Berichan**: For providing the source code and numerous contributions.

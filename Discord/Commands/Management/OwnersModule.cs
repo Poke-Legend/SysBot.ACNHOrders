@@ -7,6 +7,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Color = System.Drawing.Color;
 using DiscordColor = Discord.Color;
+using Discord.WebSocket;
+using System.Net.Http;
 
 namespace SysBot.ACNHOrders.Discord.Commands.Management
 {
@@ -90,6 +92,52 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
             foreach (var guild in Context.Client.Guilds)
             {
                 await guild.LeaveAsync().ConfigureAwait(false);
+            }
+        }
+        [Command("dm")]
+        [Summary("Sends a direct message to a specified user.")]
+        [RequireOwner]
+        public async Task DMUserAsync(SocketUser user, [Remainder] string message)
+        {
+            var attachments = Context.Message.Attachments;
+            var hasAttachments = attachments.Count != 0;
+
+            var embed = new EmbedBuilder
+            {
+                Title = "Private Message from the Bot Owner",
+                Description = message,
+                Color = (DiscordColor?)Color.Gold,
+                Timestamp = DateTimeOffset.Now,
+                ThumbnailUrl = "https://raw.githubusercontent.com/Poke-Legend/ACNH-Images/main/Images/Mail/MailBox.png"
+            };
+
+            try
+            {
+                var dmChannel = await user.CreateDMChannelAsync();
+
+                if (hasAttachments)
+                {
+                    foreach (var attachment in attachments)
+                    {
+                        using var httpClient = new HttpClient();
+                        var stream = await httpClient.GetStreamAsync(attachment.Url);
+                        var file = new FileAttachment(stream, attachment.Filename);
+                        await dmChannel.SendFileAsync(file, embed: embed.Build());
+                    }
+                }
+                else
+                {
+                    await dmChannel.SendMessageAsync(embed: embed.Build());
+                }
+
+                var confirmationMessage = await ReplyAsync($"Message successfully sent to {user.Username}.");
+                await Context.Message.DeleteAsync();
+                await Task.Delay(TimeSpan.FromSeconds(10));
+                await confirmationMessage.DeleteAsync();
+            }
+            catch (Exception ex)
+            {
+                await ReplyAsync($"Failed to send message to {user.Username}. Error: {ex.Message}");
             }
         }
     }

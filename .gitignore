@@ -12,3 +12,8 @@
 *.v2
 /.vs/SysBot.ACNHOrders/v17/.suo
 /.vs/SysBot.ACNHOrders/v17/DocumentLayout.json
+/bin/Release/net8.0
+/.gitignore
+/Properties/PublishProfiles
+/.gitignore
+/.gitignore

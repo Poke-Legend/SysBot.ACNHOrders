@@ -5,3 +5,10 @@
 /.vs/SysBot.ACNHOrders/FileContentIndex/28295a9c-3cb8-40ec-9ca6-255a5a28aac0.vsidx
 /.vs/SysBot.ACNHOrders/FileContentIndex/3e424426-e2fd-450e-8509-8ba2d9efa1b4.vsidx
 /.vs/SysBot.ACNHOrders/FileContentIndex/22c9ffce-d6df-4373-9376-b03b68e8833f.vsidx
+*.vsidx
+/.vs/ProjectEvaluation/sysbot.acnhorders.metadata.v8.bin
+/.vs/ProjectEvaluation
+/.vs/SysBot.ACNHOrders/DesignTimeBuild
+*.v2
+/.vs/SysBot.ACNHOrders/v17/.suo
+/.vs/SysBot.ACNHOrders/v17/DocumentLayout.json

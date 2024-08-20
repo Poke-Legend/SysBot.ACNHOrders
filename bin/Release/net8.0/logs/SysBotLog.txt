@@ -33,3 +33,11 @@
    at Discord.ConnectionManager.<>c__DisplayClass29_0.<<StartAsync>b__0>d.MoveNext()
 2024-08-19 01:59:40.9781|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Disconnecting 
 2024-08-19 01:59:40.9781|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Disconnected 
+2024-08-19 21:27:33.5039|INFO|SysBot.Base.LogUtil|192.168.0.1 Starting Discord.
+2024-08-19 21:27:33.5784|INFO|SysBot.Base.LogUtil|192.168.0.1 Starting bot loop.
+2024-08-19 21:27:33.5784|INFO|SysBot.Base.LogUtil|192.168.0.1 Connecting to device...
+2024-08-19 21:27:33.8328|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Discord: Discord.Net v3.15.3 (API v10) 
+2024-08-19 21:27:33.8594|INFO|SysBot.Base.LogUtil|SysCord: [ Warning] Discord: A supplied token was invalid. System.ArgumentException: A Bot token must be at least 58 characters in length. Ensure that the Bot Token provided is not an OAuth client secret. (Parameter 'token')
+   at Discord.TokenUtils.ValidateToken(TokenType tokenType, String token)
+   at Discord.Rest.BaseDiscordClient.LoginInternalAsync(TokenType tokenType, String token, Boolean validateToken)
+2024-08-19 21:27:33.8699|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Connecting 

@@ -2,11 +2,17 @@
 using Discord.WebSocket;
 using NHSE.Core;
 using System;
+using System.Text;
 
 namespace SysBot.ACNHOrders
 {
     public class OrderRequest<T> : IACNHOrderNotifier<T> where T : Item, new()
     {
+        private const string CancelThumbnailUrl = "https://media0.giphy.com/media/J63ixMPVSJJzW/giphy.gif?cid=ecf05e477363n6jj6pqcbs8x87o302xugjy344l7j1gyiypw&ep=v1_gifs_search&rid=giphy.gif&ct=g";
+        private const string InitThumbnailUrl = "https://media1.giphy.com/media/WIwvGzMSd8jGU/giphy.gif?cid=ecf05e47k1y4kugcu7pkucoa27kx4ae7sw85igsmk66ym44y&ep=v1_gifs_related&rid=giphy.gif&ct=g";
+        private const string ReadyThumbnailUrl = "https://media4.giphy.com/media/gwVQ7vG6KODYd8u0aK/giphy.gif?cid=ecf05e47qhgyguqq74428jh9fr8bvj7ig4phjkyeabsf1ncw&ep=v1_gifs_search&rid=giphy.gif&ct=g";
+        private const string FinishedThumbnailUrl = "https://media0.giphy.com/media/zZsqxlIovBl9S/giphy.gif?cid=ecf05e47qhgyguqq74428jh9fr8bvj7ig4phjkyeabsf1ncw&ep=v1_gifs_search&rid=giphy.gif&ct=g";
+
         public MultiItem ItemOrderData { get; }
         public ulong UserGuid { get; }
         public ulong OrderID { get; }
@@ -30,7 +36,7 @@ namespace SysBot.ACNHOrders
             VillagerOrder = vil;
         }
 
-        private static async void SendMessageWithEmbed(SocketUser user, string title, string description, string? thumbnailUrl = null)
+        private async void SendMessageWithEmbed(string title, string description, string? thumbnailUrl = null)
         {
             var embedBuilder = new EmbedBuilder()
                 .WithColor(Color.DarkBlue)
@@ -43,7 +49,7 @@ namespace SysBot.ACNHOrders
             }
 
             var embed = embedBuilder.Build();
-            await user.SendMessageAsync(embed: embed);
+            await Trader.SendMessageAsync(embed: embed);
         }
 
         public void OrderCancelled(CrossBot routine, string msg, bool faulted)
@@ -51,31 +57,31 @@ namespace SysBot.ACNHOrders
             OnFinish?.Invoke(routine);
 
             var cancelMessage = $"Oops! Something has happened with your order: {msg}";
-            var cancelThumbnail = "https://media0.giphy.com/media/J63ixMPVSJJzW/giphy.gif?cid=ecf05e477363n6jj6pqcbs8x87o302xugjy344l7j1gyiypw&ep=v1_gifs_search&rid=giphy.gif&ct=g";
-
-            SendMessageWithEmbed(Trader, "Order Cancelled", cancelMessage, cancelThumbnail);
+            SendMessageWithEmbed("Order Cancelled", cancelMessage, CancelThumbnailUrl);
 
             if (!faulted)
             {
                 var mentionMessage = $"{Trader.Mention} - Your order has been cancelled: {msg}";
-                SendMessageWithEmbed(Trader, "Order Cancelled", mentionMessage, cancelThumbnail);
+                SendMessageWithEmbed("Order Cancelled", mentionMessage, CancelThumbnailUrl);
             }
         }
 
         public void OrderInitializing(CrossBot routine, string msg)
         {
-            var initMessage = $"Your order is starting, please **ensure your inventory is __empty__**, then go talk to Orville and stay on the Dodo code entry screen. I will send you the Dodo code shortly. {msg}";
-            var initThumbnail = "https://media1.giphy.com/media/WIwvGzMSd8jGU/giphy.gif?cid=ecf05e47k1y4kugcu7pkucoa27kx4ae7sw85igsmk66ym44y&ep=v1_gifs_related&rid=giphy.gif&ct=g";
+            var initMessage = new StringBuilder()
+                .Append("Your order is starting, please **ensure your inventory is __empty__**, ")
+                .Append("then go talk to Orville and stay on the Dodo code entry screen. ")
+                .Append("I will send you the Dodo code shortly. ")
+                .Append(msg)
+                .ToString();
 
-            SendMessageWithEmbed(Trader, "Order Initializing", initMessage, initThumbnail);
+            SendMessageWithEmbed("Order Initializing", initMessage, InitThumbnailUrl);
         }
 
         public void OrderReady(CrossBot routine, string msg, string dodo)
         {
             var readyMessage = $"I'm waiting for you {GetDisplayName()}! {msg}. Your Dodo code is **{dodo}**";
-            var readyThumbnail = "https://media4.giphy.com/media/gwVQ7vG6KODYd8u0aK/giphy.gif?cid=ecf05e47qhgyguqq74428jh9fr8bvj7ig4phjkyeabsf1ncw&ep=v1_gifs_search&rid=giphy.gif&ct=g";
-
-            SendMessageWithEmbed(Trader, "Order Ready", readyMessage, readyThumbnail);
+            SendMessageWithEmbed("Order Ready", readyMessage, ReadyThumbnailUrl);
         }
 
         public void OrderFinished(CrossBot routine, string msg)
@@ -83,9 +89,7 @@ namespace SysBot.ACNHOrders
             OnFinish?.Invoke(routine);
 
             var finishedMessage = $"Your order is complete, Thanks for your order! {msg}";
-            var finishedThumbnail = "https://media0.giphy.com/media/zZsqxlIovBl9S/giphy.gif?cid=ecf05e47qhgyguqq74428jh9fr8bvj7ig4phjkyeabsf1ncw&ep=v1_gifs_search&rid=giphy.gif&ct=g";
-
-            SendMessageWithEmbed(Trader, "Order Finished", finishedMessage, finishedThumbnail);
+            SendMessageWithEmbed("Order Finished", finishedMessage, FinishedThumbnailUrl);
         }
 
         public void SendNotification(CrossBot routine, string msg)

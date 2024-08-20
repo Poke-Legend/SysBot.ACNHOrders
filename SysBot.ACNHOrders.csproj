@@ -6,8 +6,11 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="SysBot\**" />
     <Compile Remove="Tests\**" />
+    <EmbeddedResource Remove="SysBot\**" />
     <EmbeddedResource Remove="Tests\**" />
+    <None Remove="SysBot\**" />
     <None Remove="Tests\**" />
   </ItemGroup>
   <ItemGroup>
@@ -43,7 +46,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Bot\Injection\" />
-    <Folder Include="SysBot\" />
   </ItemGroup>
   <ItemGroup>
     <None Update="Resources\InternalHexListValid.txt">

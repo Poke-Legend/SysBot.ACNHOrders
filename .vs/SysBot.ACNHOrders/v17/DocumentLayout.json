@@ -3,12 +3,8 @@
   "WorkspaceRootPath": "C:\\Users\\brand\\source\\repos\\SysBot.ACNHOrders\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\brand\\source\\repos\\SysBot.ACNHOrders\\Bot\\CrossBot.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Bot\\CrossBot.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\brand\\source\\repos\\SysBot.ACNHOrders\\Discord\\Commands\\Bots\\OrderModule.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Discord\\Commands\\Bots\\OrderModule.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{EF7676A2-DF5A-49E8-BF8E-F522CE5FCAC3}|SysBot.ACNHOrders.csproj|c:\\users\\brand\\source\\repos\\sysbot.acnhorders\\.gitignore||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{EF7676A2-DF5A-49E8-BF8E-F522CE5FCAC3}|SysBot.ACNHOrders.csproj|solutionrelative:.gitignore||{3B902123-F8A7-4915-9F01-361F908088D0}"
     }
   ],
   "DocumentGroupContainers": [
@@ -18,8 +14,21 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 11,
+          "SelectedChildIndex": 0,
           "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": ".gitignore",
+              "DocumentMoniker": "C:\\Users\\brand\\source\\repos\\SysBot.ACNHOrders\\.gitignore",
+              "RelativeDocumentMoniker": ".gitignore",
+              "ToolTip": "C:\\Users\\brand\\source\\repos\\SysBot.ACNHOrders\\.gitignore",
+              "RelativeToolTip": ".gitignore",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAIAAABQAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2024-08-20T01:32:55.239Z",
+              "EditorCaption": ""
+            },
             {
               "$type": "Bookmark",
               "Name": "ST:129:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
@@ -65,29 +74,8 @@
               "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
             },
             {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "CrossBot.cs",
-              "DocumentMoniker": "C:\\Users\\brand\\source\\repos\\SysBot.ACNHOrders\\Bot\\CrossBot.cs",
-              "RelativeDocumentMoniker": "Bot\\CrossBot.cs",
-              "ToolTip": "C:\\Users\\brand\\source\\repos\\SysBot.ACNHOrders\\Bot\\CrossBot.cs",
-              "RelativeToolTip": "Bot\\CrossBot.cs",
-              "ViewState": "AQIAANUBAAAAAAAAAAAAAOEBAABRAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-08-19T06:04:19.775Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "OrderModule.cs",
-              "DocumentMoniker": "C:\\Users\\brand\\source\\repos\\SysBot.ACNHOrders\\Discord\\Commands\\Bots\\OrderModule.cs",
-              "RelativeDocumentMoniker": "Discord\\Commands\\Bots\\OrderModule.cs",
-              "ToolTip": "C:\\Users\\brand\\source\\repos\\SysBot.ACNHOrders\\Discord\\Commands\\Bots\\OrderModule.cs",
-              "RelativeToolTip": "Discord\\Commands\\Bots\\OrderModule.cs",
-              "ViewState": "AQIAACgBAAAAAAAAAAAqwDYBAABvAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-08-19T05:52:53.521Z"
+              "$type": "Bookmark",
+              "Name": "ST:129:0:{75188d03-9892-4ae2-abf1-207126247ce5}"
             }
           ]
         }

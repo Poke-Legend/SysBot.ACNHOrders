@@ -11,7 +11,7 @@
         "projectName": "SysBot.ACNHOrders",
         "projectPath": "C:\\Users\\brand\\source\\repos\\SysBot.ACNHOrders\\SysBot.ACNHOrders.csproj",
         "packagesPath": "C:\\Users\\brand\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\brand\\Source\\Repos\\SysBot.ACNHOrders\\obj\\",
+        "outputPath": "C:\\Users\\brand\\source\\repos\\SysBot.ACNHOrders\\obj\\",
         "projectStyle": "PackageReference",
         "crossTargeting": true,
         "fallbackFolders": [

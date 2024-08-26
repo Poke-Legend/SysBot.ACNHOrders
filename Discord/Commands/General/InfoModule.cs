@@ -8,27 +8,29 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
-using TwitchLib.Communication.Models;
 
 namespace SysBot.ACNHOrders.Discord.Commands.General
 {
-    // src: https://github.com/foxbot/patek/blob/master/src/Patek/Modules/InfoModule.cs
-    // ISC License (ISC)
-    // Copyright 2017, Christopher F. <foxbot@protonmail.com>
-    // ReSharper disable once UnusedType.Global
     public class InfoModule : ModuleBase<SocketCommandContext>
     {
-        private const string Discord = "https://pokelegends.org";
-        private const string Contributor = "Kurt";
-        private const string Contributor1 = "Berichan";
-        private const string Contributor2 = "CodeHedge";
-        private const string Contributor3 = "DeVry";
-
+        private const string DiscordUrl = "https://pokelegends.org";
+        private static readonly string[] Contributors = { "Kurt", "Berichan", "CodeHedge", "DeVry" };
+        private static readonly ulong[] DisallowedUserIds =
+        {
+            195756980873199618, 263105481155936257, 807410947827826688, 291107598030340106,
+            330796509215850506, 202076667944894464, 476121600446693378, 1058105885844574321,
+            1065472784517574666, 778252332285689897, 510877708385910809
+        };
 
         [Command("info")]
         [Alias("about", "whoami", "owner")]
         public async Task InfoAsync()
         {
+            if (DisallowedUserIds.Contains(Context.User.Id))
+            {
+                await ReplyAsync("We don't let shady people use this command.").ConfigureAwait(false);
+                return;
+            }
 
             if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
             {
@@ -36,46 +38,42 @@ namespace SysBot.ACNHOrders.Discord.Commands.General
                 return;
             }
 
-          
-            
             var app = await Context.Client.GetApplicationInfoAsync().ConfigureAwait(false);
             var builder = new EmbedBuilder
             {
                 Color = new Color(114, 137, 218),
             };
 
-           builder.AddField("Info", $"- {Format.Bold("Contributions")}: {Contributor}, {Contributor1}\n {Contributor2}, {Contributor3}\n" +
-                                    $"- [Pokemon Legends]({Discord})\n" +
-                                    $"- {Format.Bold("Owner")}: {app.Owner} ({app.Owner.Id})\n" +
-                                    $"- {Format.Bold("Library")}: Discord.Net ({DiscordConfig.Version})\n" +
-                                    $"- {Format.Bold("Uptime")}: {GetUptime()}\n" +
-                                    $"- {Format.Bold("Runtime")}: {RuntimeInformation.FrameworkDescription} {RuntimeInformation.ProcessArchitecture} " +
-                                    $"({RuntimeInformation.OSDescription} {RuntimeInformation.OSArchitecture})\n" +
-                                    $"- {Format.Bold("Buildtime")}: {GetBuildTime()}\n");
+            var contributors = string.Join(", ", Contributors);
+            builder.AddField("Info",
+                $"- {Format.Bold("Contributions")}: {contributors}\n" +
+                $"- [Pokemon Legends]({DiscordUrl})\n" +
+                $"- {Format.Bold("Owner")}: {app.Owner} ({app.Owner.Id})\n" +
+                $"- {Format.Bold("Library")}: Discord.Net ({DiscordConfig.Version})\n" +
+                $"- {Format.Bold("Uptime")}: {GetUptime()}\n" +
+                $"- {Format.Bold("Runtime")}: {RuntimeInformation.FrameworkDescription} {RuntimeInformation.ProcessArchitecture} " +
+                $"({RuntimeInformation.OSDescription} {RuntimeInformation.OSArchitecture})\n" +
+                $"- {Format.Bold("Buildtime")}: {GetBuildTime()}\n");
 
-            builder.AddField("Stats", $"- {Format.Bold("Heap Size")}: {GetHeapSize()} MiB\n" +
-                                      $"- {Format.Bold("Guilds")}: {Context.Client.Guilds.Count}\n" +
-                                      $"- {Format.Bold("Channels")}: {Context.Client.Guilds.Sum(g => g.Channels.Count)}\n" +
-                                      $"- {Format.Bold("Users")}: {Context.Client.Guilds.Sum(g => g.Users.Count)}\n");
+            builder.AddField("Stats",
+                $"- {Format.Bold("Heap Size")}: {GetHeapSize()} MiB\n" +
+                $"- {Format.Bold("Guilds")}: {Context.Client.Guilds.Count}\n" +
+                $"- {Format.Bold("Channels")}: {Context.Client.Guilds.Sum(g => g.Channels.Count)}\n" +
+                $"- {Format.Bold("Users")}: {Context.Client.Guilds.Sum(g => g.Users.Count)}\n");
 
             await ReplyAsync("Here's a bit about me!", embed: builder.Build()).ConfigureAwait(false);
         }
 
         private static string GetUptime() => (DateTime.Now - Process.GetCurrentProcess().StartTime).ToString(@"dd\.hh\:mm\:ss");
 
-        private static string GetHeapSize() => Math.Round(GC.GetTotalMemory(true) / (1024.0 * 1024.0), 2).ToString(CultureInfo.CurrentCulture);
+        private static string GetHeapSize() => (GC.GetTotalMemory(true) / (1024.0 * 1024.0)).ToString("F2", CultureInfo.CurrentCulture);
 
         private static string GetBuildTime()
         {
-            var baseDirectory = AppContext.BaseDirectory;
-            var filePath = Path.Combine(baseDirectory, AppDomain.CurrentDomain.FriendlyName);
-
-            if (File.Exists(filePath))
-            {
-                return File.GetLastWriteTime(filePath).ToString(@"yy-MM-dd\.hh\:mm");
-            }
-
-            return DateTime.Now.ToString(@"yy-MM-dd\.hh\:mm");
+            var filePath = Path.Combine(AppContext.BaseDirectory, AppDomain.CurrentDomain.FriendlyName);
+            return File.Exists(filePath)
+                ? File.GetLastWriteTime(filePath).ToString("yy-MM-dd.HH:mm", CultureInfo.CurrentCulture)
+                : DateTime.Now.ToString("yy-MM-dd.HH:mm", CultureInfo.CurrentCulture);
         }
     }
 }

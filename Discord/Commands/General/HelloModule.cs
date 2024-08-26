@@ -1,11 +1,11 @@
-using Discord.Commands;
+﻿using Discord.Commands;
 using Discord;
 using System.Threading.Tasks;
 using Random = System.Random;
 
 namespace SysBot.ACNHOrders.Discord.Commands.General
 {
-    public class PingModule : ModuleBase<SocketCommandContext>
+    public class HelloModule : ModuleBase<SocketCommandContext>
     {
         private static readonly Random random = new();
 
@@ -21,10 +21,10 @@ namespace SysBot.ACNHOrders.Discord.Commands.General
             // Add as many as you want...
         };
 
-        [Command("ping")]
-        [Alias("hi", "yo", "sup", "hello", "hey")]
+        [Command("hi")]
+        [Alias("hello", "hey", "yo", "sup")]
         [Summary("Replies with pong.")]
-        public async Task PingAsync()
+        public async Task HiAsync()
         {
             if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
             {
@@ -35,9 +35,9 @@ namespace SysBot.ACNHOrders.Discord.Commands.General
             var randomImage = images[random.Next(images.Length)];
 
             var embed = new EmbedBuilder()
-                .WithTitle("Pong!")
-                .WithDescription("The bot program is running.")
-                .WithColor(Color.DarkTeal)
+                .WithTitle("Hi!")
+                .WithDescription($"Hello, {Context.User.Mention}!")
+                .WithColor(Color.DarkGreen)
                 .WithImageUrl(randomImage); // This is the image that will be displayed
 
             await ReplyAsync(embed: embed.Build()).ConfigureAwait(false);

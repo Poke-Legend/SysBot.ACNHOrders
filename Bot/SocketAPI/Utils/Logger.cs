@@ -5,38 +5,28 @@ namespace SocketAPI
 {
     public static class Logger
     {
-        /// <summary>
-        /// Whether logs are enabled or not.
-        /// </summary>
-        private static bool logsEnabled = true;
+        private static bool _logsEnabled = true;
 
-        public static void LogInfo(string message, bool ignoreDisabled = false)
+        public static void LogInfo(string message)
         {
-            if (!logsEnabled && !ignoreDisabled)
-                return;
-
-            LogUtil.LogInfo(message, nameof(SocketAPI));
+            if (_logsEnabled)
+                Console.WriteLine($"INFO: {message}");
         }
 
-        public static void LogWarning(string message, bool ignoreDisabled = false)
+        public static void LogError(string message)
         {
-            if (!logsEnabled && !ignoreDisabled)
-                return;
-
-            LogUtil.LogInfo(message, nameof(SocketAPI) + "Warning");
+            if (_logsEnabled)
+                Console.WriteLine($"ERROR: {message}");
         }
 
-        public static void LogError(string message, bool ignoreDisabled = false)
+        public static void DisableLogs()
         {
-            if (!logsEnabled && !ignoreDisabled)
-                return;
-
-            LogUtil.LogError(message, nameof(SocketAPI));
+            _logsEnabled = false;
         }
 
-        public static void disableLogs()
+        public static void EnableLogs()
         {
-            logsEnabled = false;
+            _logsEnabled = true;
         }
     }
 }

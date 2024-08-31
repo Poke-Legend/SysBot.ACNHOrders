@@ -8,6 +8,7 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using Discord.Rest;
 
 namespace SysBot.ACNHOrders.Discord.Commands.General
 {
@@ -26,7 +27,7 @@ namespace SysBot.ACNHOrders.Discord.Commands.General
         [Alias("about", "whoami", "owner")]
         public async Task InfoAsync()
         {
-            if (DisallowedUserIds.Contains(Context.User.Id))
+            if (IsUserDisallowed(Context.User.Id))
             {
                 await ReplyAsync("We don't let shady people use this command.").ConfigureAwait(false);
                 return;
@@ -38,21 +39,30 @@ namespace SysBot.ACNHOrders.Discord.Commands.General
                 return;
             }
 
-            var app = await Context.Client.GetApplicationInfoAsync().ConfigureAwait(false);
+            var appInfo = await Context.Client.GetApplicationInfoAsync().ConfigureAwait(false);
+            var embed = BuildInfoEmbed(appInfo);
+
+            await ReplyAsync("Here's a bit about me!", embed: embed).ConfigureAwait(false);
+        }
+
+        private bool IsUserDisallowed(ulong userId) => DisallowedUserIds.Contains(userId);
+
+        private Embed BuildInfoEmbed(RestApplication appInfo)
+        {
             var builder = new EmbedBuilder
             {
                 Color = new Color(114, 137, 218),
+                Title = "Bot Information"
             };
 
             var contributors = string.Join(", ", Contributors);
             builder.AddField("Info",
                 $"- {Format.Bold("Contributions")}: {contributors}\n" +
                 $"- [Pokemon Legends]({DiscordUrl})\n" +
-                $"- {Format.Bold("Owner")}: {app.Owner} ({app.Owner.Id})\n" +
+                $"- {Format.Bold("Owner")}: {appInfo.Owner} ({appInfo.Owner.Id})\n" +
                 $"- {Format.Bold("Library")}: Discord.Net ({DiscordConfig.Version})\n" +
                 $"- {Format.Bold("Uptime")}: {GetUptime()}\n" +
-                $"- {Format.Bold("Runtime")}: {RuntimeInformation.FrameworkDescription} {RuntimeInformation.ProcessArchitecture} " +
-                $"({RuntimeInformation.OSDescription} {RuntimeInformation.OSArchitecture})\n" +
+                $"- {Format.Bold("Runtime")}: {GetRuntimeInfo()}\n" +
                 $"- {Format.Bold("Buildtime")}: {GetBuildTime()}\n");
 
             builder.AddField("Stats",
@@ -61,14 +71,20 @@ namespace SysBot.ACNHOrders.Discord.Commands.General
                 $"- {Format.Bold("Channels")}: {Context.Client.Guilds.Sum(g => g.Channels.Count)}\n" +
                 $"- {Format.Bold("Users")}: {Context.Client.Guilds.Sum(g => g.Users.Count)}\n");
 
-            await ReplyAsync("Here's a bit about me!", embed: builder.Build()).ConfigureAwait(false);
+            return builder.Build();
         }
 
-        private static string GetUptime() => (DateTime.Now - Process.GetCurrentProcess().StartTime).ToString(@"dd\.hh\:mm\:ss");
+        private string GetUptime()
+            => (DateTime.Now - Process.GetCurrentProcess().StartTime).ToString(@"dd\.hh\:mm\:ss");
 
-        private static string GetHeapSize() => (GC.GetTotalMemory(true) / (1024.0 * 1024.0)).ToString("F2", CultureInfo.CurrentCulture);
+        private string GetHeapSize()
+            => (GC.GetTotalMemory(true) / (1024.0 * 1024.0)).ToString("F2", CultureInfo.CurrentCulture);
 
-        private static string GetBuildTime()
+        private string GetRuntimeInfo()
+            => $"{RuntimeInformation.FrameworkDescription} {RuntimeInformation.ProcessArchitecture} " +
+               $"({RuntimeInformation.OSDescription} {RuntimeInformation.OSArchitecture})";
+
+        private string GetBuildTime()
         {
             var filePath = Path.Combine(AppContext.BaseDirectory, AppDomain.CurrentDomain.FriendlyName);
             return File.Exists(filePath)

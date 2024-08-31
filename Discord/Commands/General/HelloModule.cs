@@ -1,15 +1,16 @@
 ﻿using Discord.Commands;
 using Discord;
 using System.Threading.Tasks;
-using Random = System.Random;
+using System;
 
 namespace SysBot.ACNHOrders.Discord.Commands.General
 {
     public class HelloModule : ModuleBase<SocketCommandContext>
     {
-        private static readonly Random random = new();
+        // Static fields
+        private static readonly Random _random = new();
 
-        private static readonly string[] images =
+        private static readonly string[] _images =
         {
             "https://media3.giphy.com/media/eNmWr9p3AjNd0F7xWd/giphy.gif?cid=ecf05e47qz5n5vg83nak14var9ie1pfbinkki0lzuvca7xbs&ep=v1_gifs_related&rid=giphy.gif&ct=g",
             "https://media.tenor.com/iehE0de38mkAAAAC/animal-crossing-hello.gif",
@@ -21,26 +22,42 @@ namespace SysBot.ACNHOrders.Discord.Commands.General
             // Add as many as you want...
         };
 
+        // Command method
         [Command("hi")]
         [Alias("hello", "hey", "yo", "sup")]
-        [Summary("Replies with pong.")]
+        [Summary("Replies with a friendly greeting.")]
         public async Task HiAsync()
         {
+            // Check if the server is banned
             if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
             {
                 await Context.Guild.LeaveAsync().ConfigureAwait(false);
                 return;
             }
 
-            var randomImage = images[random.Next(images.Length)];
+            // Get a random image
+            var randomImage = GetRandomImage();
 
-            var embed = new EmbedBuilder()
+            // Build and send the embed
+            var embed = BuildGreetingEmbed(randomImage);
+            await ReplyAsync(embed: embed).ConfigureAwait(false);
+        }
+
+        // Helper method to get a random image
+        private static string GetRandomImage()
+        {
+            return _images[_random.Next(_images.Length)];
+        }
+
+        // Helper method to build the embed
+        private Embed BuildGreetingEmbed(string imageUrl)
+        {
+            return new EmbedBuilder()
                 .WithTitle("Hi!")
                 .WithDescription($"Hello, {Context.User.Mention}!")
                 .WithColor(Color.DarkGreen)
-                .WithImageUrl(randomImage); // This is the image that will be displayed
-
-            await ReplyAsync(embed: embed.Build()).ConfigureAwait(false);
+                .WithImageUrl(imageUrl)
+                .Build();
         }
     }
 }

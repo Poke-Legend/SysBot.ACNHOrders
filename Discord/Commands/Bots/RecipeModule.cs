@@ -8,101 +8,99 @@ using NHSE.Core;
 
 namespace SysBot.ACNHOrders.Discord.Commands.Bots
 {
-    // ReSharper disable once UnusedType.Global
     public class RecipeModule : ModuleBase<SocketCommandContext>
     {
+        private const int MinSearchTermLength = 2;
+        private const int MaxResultLength = 500;
+        private readonly Color NoMatchColor = Color.Red;
+        private readonly Color MatchColor = Color.Green;
+        private readonly Color TruncatedMatchColor = Color.Blue;
+
         [Command("recipeLang")]
         [Alias("rl")]
         [Summary("Gets a list of DIY recipe IDs that contain the requested Item Name string.")]
         [RequireQueueRole(nameof(Globals.Bot.Config.RoleUseBot))]
-        public async Task SearchItemsAsync([Summary("Language code to search with")] string language, [Summary("Item name / item substring")][Remainder] string itemName)
+        public async Task SearchItemsByLanguageAsync(string language, [Remainder] string itemName)
         {
-            if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
-            {
-                await Context.Guild.LeaveAsync().ConfigureAwait(false);
-                return;
-            }
+            if (IsCommandInvalid()) return;
 
-            if (!Globals.Bot.Config.AllowLookup)
-            {
-                await ReplyAsync($"{Context.User.Mention} - Lookup commands are not accepted.");
-                return;
-            }
-
-            var strings = GameInfo.GetStrings(language).ItemDataSource;
-            await PrintItemsAsync(itemName, strings).ConfigureAwait(false);
+            var itemDataSource = GameInfo.GetStrings(language).ItemDataSource;
+            await ProcessItemSearchAsync(itemName, itemDataSource).ConfigureAwait(false);
         }
 
         [Command("recipe")]
         [Alias("ri", "searchDIY")]
         [Summary("Gets a list of DIY recipe IDs that contain the requested Item Name string.")]
         [RequireQueueRole(nameof(Globals.Bot.Config.RoleUseBot))]
-        public async Task SearchItemsAsync([Summary("Item name / item substring")][Remainder] string itemName)
+        public async Task SearchItemsAsync([Remainder] string itemName)
+        {
+            if (IsCommandInvalid()) return;
+
+            var itemDataSource = GameInfo.Strings.ItemDataSource;
+            await ProcessItemSearchAsync(itemName, itemDataSource).ConfigureAwait(false);
+        }
+
+        private bool IsCommandInvalid()
         {
             if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
             {
-                await Context.Guild.LeaveAsync().ConfigureAwait(false);
-                return;
+                _ = Context.Guild.LeaveAsync().ConfigureAwait(false);
+                return true;
             }
 
             if (!Globals.Bot.Config.AllowLookup)
             {
-                await ReplyAsync($"{Context.User.Mention} - Lookup commands are not accepted.");
-                return;
+                _ = ReplyAsync($"{Context.User.Mention} - Lookup commands are not accepted.").ConfigureAwait(false);
+                return true;
             }
 
-            var strings = GameInfo.Strings.ItemDataSource;
-            await PrintItemsAsync(itemName, strings).ConfigureAwait(false);
+            return false;
         }
 
-        private async Task PrintItemsAsync(string itemName, IReadOnlyList<ComboItem> strings)
+        private async Task ProcessItemSearchAsync(string itemName, IReadOnlyList<ComboItem> itemDataSource)
         {
-            const int minLength = 2;
-            if (itemName.Length <= minLength)
+            if (itemName.Length <= MinSearchTermLength)
             {
-                await ReplyAsync($"Please enter a search term longer than {minLength} characters.").ConfigureAwait(false);
+                await SendEmbedMessageAsync($"Please enter a search term longer than {MinSearchTermLength} characters.", NoMatchColor).ConfigureAwait(false);
                 return;
             }
 
-            foreach (var item in strings)
+            var matches = FindMatchingItems(itemName, itemDataSource);
+
+            if (!matches.Any())
             {
-                if (!string.Equals(item.Text, itemName, StringComparison.OrdinalIgnoreCase))
-                    continue;
-
-                if (!ItemParser.InvertedRecipeDictionary.TryGetValue((ushort)item.Value, out var recipeID))
-                {
-                    await ReplyAsync("Requested item is not a DIY recipe.").ConfigureAwait(false);
-                    return;
-                }
-
-                var msg = $"{item.Value:X4} {item.Text}: Recipe order code: {recipeID:X3}000016A2";
-                await ReplyAsync(Format.Code(msg)).ConfigureAwait(false);
+                await SendEmbedMessageAsync("No matches found.", NoMatchColor).ConfigureAwait(false);
                 return;
             }
 
-            var items = ItemParser.GetItemsMatching(itemName, strings).ToArray();
-            var matches = new List<string>();
-            foreach (var item in items)
-            {
-                if (!ItemParser.InvertedRecipeDictionary.TryGetValue((ushort)item.Value, out var recipeID))
-                    continue;
+            await SendMatchedItemsAsync(matches).ConfigureAwait(false);
+        }
 
-                var msg = $"{item.Value:X4} {item.Text}: Recipe order code: {recipeID:X3}000016A2";
-                matches.Add(msg);
-            }
+        private IEnumerable<string> FindMatchingItems(string itemName, IReadOnlyList<ComboItem> itemDataSource)
+        {
+            return itemDataSource
+                .Where(item => string.Equals(item.Text, itemName, StringComparison.OrdinalIgnoreCase) || item.Text.Contains(itemName, StringComparison.OrdinalIgnoreCase))
+                .Where(item => ItemParser.InvertedRecipeDictionary.TryGetValue((ushort)item.Value, out _))
+                .Select(item => $"{item.Value:X4} {item.Text}: Recipe order code: {ItemParser.InvertedRecipeDictionary[(ushort)item.Value]:X3}000016A2");
+        }
 
+        private async Task SendMatchedItemsAsync(IEnumerable<string> matches)
+        {
             var result = string.Join(Environment.NewLine, matches);
-            if (result.Length == 0)
-            {
-                await ReplyAsync("No matches found.").ConfigureAwait(false);
-                return;
-            }
+            if (result.Length > MaxResultLength)
+                result = result.Substring(0, MaxResultLength) + "...[truncated]";
 
-            const int maxLength = 500;
-            if (result.Length > maxLength)
-                result = result.Substring(0, maxLength) + "...[truncated]";
+            await SendEmbedMessageAsync(result, TruncatedMatchColor).ConfigureAwait(false);
+        }
 
-            await ReplyAsync(Format.Code(result)).ConfigureAwait(false);
+        private async Task SendEmbedMessageAsync(string description, Color color)
+        {
+            var embed = new EmbedBuilder()
+                .WithDescription(description)
+                .WithColor(color)
+                .Build();
+
+            await ReplyAsync(embed: embed).ConfigureAwait(false);
         }
     }
 }

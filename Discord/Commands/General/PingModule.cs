@@ -1,15 +1,15 @@
 using Discord.Commands;
 using Discord;
 using System.Threading.Tasks;
-using Random = System.Random;
+using System;
 
 namespace SysBot.ACNHOrders.Discord.Commands.General
 {
     public class PingModule : ModuleBase<SocketCommandContext>
     {
-        private static readonly Random random = new();
+        private static readonly Random RandomGenerator = new();
 
-        private static readonly string[] images =
+        private static readonly string[] PingImages =
         {
             "https://media3.giphy.com/media/eNmWr9p3AjNd0F7xWd/giphy.gif?cid=ecf05e47qz5n5vg83nak14var9ie1pfbinkki0lzuvca7xbs&ep=v1_gifs_related&rid=giphy.gif&ct=g",
             "https://media.tenor.com/iehE0de38mkAAAAC/animal-crossing-hello.gif",
@@ -18,7 +18,6 @@ namespace SysBot.ACNHOrders.Discord.Commands.General
             "https://media.tenor.com/X63peV172DwAAAAM/squeakoid-animal-crossing.gif",
             "https://media.tenor.com/aMTgGRQyqBUAAAAC/animal-crossing-tom-nook.gif",
             "https://gifdb.com/images/high/animal-crossing-anime-celeste-coffee-20sjdglh60pef1hx.gif"
-            // Add as many as you want...
         };
 
         [Command("ping")]
@@ -32,15 +31,21 @@ namespace SysBot.ACNHOrders.Discord.Commands.General
                 return;
             }
 
-            var randomImage = images[random.Next(images.Length)];
+            var randomImage = GetRandomImage();
 
-            var embed = new EmbedBuilder()
+            var embed = BuildPingEmbed(randomImage);
+
+            await ReplyAsync(embed: embed).ConfigureAwait(false);
+        }
+
+        private string GetRandomImage() => PingImages[RandomGenerator.Next(PingImages.Length)];
+
+        private Embed BuildPingEmbed(string imageUrl) =>
+            new EmbedBuilder()
                 .WithTitle("Pong!")
                 .WithDescription("The bot program is running.")
                 .WithColor(Color.DarkTeal)
-                .WithImageUrl(randomImage); // This is the image that will be displayed
-
-            await ReplyAsync(embed: embed.Build()).ConfigureAwait(false);
-        }
+                .WithImageUrl(imageUrl)
+                .Build();
     }
 }

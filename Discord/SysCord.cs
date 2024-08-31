@@ -5,10 +5,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using Discord.Net;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using SysBot.Base;
-using Discord.Net;
 
 namespace SysBot.ACNHOrders
 {
@@ -28,7 +28,11 @@ namespace SysBot.ACNHOrders
 
             _client = new DiscordSocketClient(new DiscordSocketConfig
             {
-                GatewayIntents = GatewayIntents.Guilds | GatewayIntents.GuildMessages | GatewayIntents.DirectMessages | GatewayIntents.GuildMembers | GatewayIntents.MessageContent
+                GatewayIntents = GatewayIntents.Guilds |
+                                 GatewayIntents.GuildMessages |
+                                 GatewayIntents.DirectMessages |
+                                 GatewayIntents.GuildMembers |
+                                 GatewayIntents.MessageContent
             });
 
             _commands = new CommandService(new CommandServiceConfig
@@ -56,21 +60,20 @@ namespace SysBot.ACNHOrders
                 _ => Console.ForegroundColor
             };
 
-            var logText = $"[{msg.Severity,8}] {msg.Source}: {msg.Message} {msg.Exception}";
+            string logText = $"[{msg.Severity,8}] {msg.Source}: {msg.Message} {msg.Exception}";
             Console.WriteLine($"{DateTime.Now,-19} {logText}");
             Console.ResetColor();
 
             LogUtil.LogText($"SysCord: {logText}");
-
             return Task.CompletedTask;
         }
 
         public async Task MainAsync(string apiToken, CancellationToken token)
         {
             await InitCommandsAsync();
-
             await _client.LoginAsync(TokenType.Bot, apiToken);
             await _client.StartAsync();
+
             _client.Ready += OnClientReadyAsync;
 
             if (!string.IsNullOrWhiteSpace(_bot.Config.Name))
@@ -86,8 +89,7 @@ namespace SysBot.ACNHOrders
 
         private Task OnClientReadyAsync()
         {
-            if (Ready)
-                return Task.CompletedTask;
+            if (Ready) return Task.CompletedTask;
             Ready = true;
 
             foreach (var channelId in _bot.Config.LoggingChannels)
@@ -105,7 +107,7 @@ namespace SysBot.ACNHOrders
             return Task.CompletedTask;
         }
 
-        public async Task InitCommandsAsync()
+        private async Task InitCommandsAsync()
         {
             await _commands.AddModulesAsync(Assembly.GetExecutingAssembly(), _services);
             _client.MessageReceived += HandleMessageAsync;
@@ -123,25 +125,18 @@ namespace SysBot.ACNHOrders
                     if (lastMessage?.Content == message) return true;
                 }
 
-                try
-                {
-                    await channel.SendMessageAsync(message);
-                    return true;
-                }
-                catch (HttpException ex)
-                {
-                    Console.WriteLine($"Failed to send message in {channel.Name} (ID: {channel.Id}) due to: {ex.Message}");
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"An unexpected error occurred: {ex.Message}");
-                }
+                return await TrySendMessageAsync(channel, message);
             }
 
             return false;
         }
 
         public static async Task<bool> TrySpeakMessageAsync(ISocketMessageChannel channel, string message)
+        {
+            return await TrySendMessageAsync(channel, message);
+        }
+
+        private static async Task<bool> TrySendMessageAsync(IMessageChannel channel, string message)
         {
             try
             {
@@ -204,6 +199,7 @@ namespace SysBot.ACNHOrders
 
         private static Task TryHandleMessageAsync(SocketMessage msg)
         {
+            ArgumentNullException.ThrowIfNull(msg);
             // Placeholder for handling messages with attachments.
             return Task.CompletedTask;
         }
@@ -244,10 +240,9 @@ namespace SysBot.ACNHOrders
 
             while (!token.IsCancellationRequested)
             {
-                var timeSinceLastLog = DateTime.Now - LogUtil.LastLogged;
-                var delay = TimeSpan.FromSeconds(intervalSeconds) - timeSinceLastLog;
-
+                var delay = TimeSpan.FromSeconds(intervalSeconds);
                 var newStatus = _bot.Config.AcceptingCommands ? UserStatus.Online : UserStatus.DoNotDisturb;
+
                 if (newStatus != currentState)
                 {
                     currentState = newStatus;
@@ -259,7 +254,7 @@ namespace SysBot.ACNHOrders
                     await _client.SetGameAsync($"Dodo code: {_bot.DodoCode}");
                 }
 
-                await Task.Delay(delay <= TimeSpan.Zero ? TimeSpan.FromSeconds(intervalSeconds) : delay, token);
+                await Task.Delay(delay, token);
             }
         }
     }

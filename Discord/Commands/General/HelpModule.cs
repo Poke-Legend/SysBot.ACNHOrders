@@ -6,7 +6,6 @@ using Discord.Commands;
 
 namespace SysBot.ACNHOrders.Discord.Commands.General
 {
-    // ReSharper disable once UnusedType.Global
     public class HelpModule : ModuleBase<SocketCommandContext>
     {
         private readonly CommandService _service;
@@ -21,62 +20,35 @@ namespace SysBot.ACNHOrders.Discord.Commands.General
         [RequireSudo]
         public async Task HelpAsync()
         {
-            if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
+            if (IsServerBanned())
             {
-                await Context.Guild.LeaveAsync().ConfigureAwait(false);
+                await LeaveServerAsync().ConfigureAwait(false);
                 return;
             }
 
-            var builder = new EmbedBuilder
-            {
-                Color = new Color(114, 137, 218),
-                Description = "These are the commands you can use:"
-            };
-
-            var app = await Context.Client.GetApplicationInfoAsync().ConfigureAwait(false);
-            var owner = app.Owner.Id;
-            var uid = Context.User.Id;
+            var builder = CreateEmbedBuilder("These are the commands you can use:");
+            var owner = (await GetApplicationOwnerAsync().ConfigureAwait(false)).Id;
+            var userId = Context.User.Id;
 
             foreach (var module in _service.Modules)
             {
-                string? description = null;
-                HashSet<string> mentioned = new();
-                foreach (var cmd in module.Commands)
+                var description = GetModuleCommandDescriptions(module, owner, userId);
+                if (!string.IsNullOrWhiteSpace(description))
                 {
-                    var name = cmd.Name;
-                    if (mentioned.Contains(name))
-                        continue;
-                    if (cmd.Attributes.Any(z => z is RequireOwnerAttribute) && owner != uid)
-                        continue;
-                    if (cmd.Attributes.Any(z => z is RequireSudoAttribute) && !Globals.Bot.Config.CanUseSudo(uid))
-                        continue;
-
-                    mentioned.Add(name);
-                    var result = await cmd.CheckPreconditionsAsync(Context).ConfigureAwait(false);
-                    if (result.IsSuccess)
-                        description += $"{cmd.Aliases[0]}\n";
+                    builder.AddField(module.Name, description, inline: false);
                 }
-                if (string.IsNullOrWhiteSpace(description))
-                    continue;
-
-                builder.AddField(x =>
-                {
-                    x.Name = module.Name;
-                    x.Value = description;
-                    x.IsInline = false;
-                });
             }
 
-            await ReplyAsync("Help has arrived!", false, builder.Build()).ConfigureAwait(false);
+            await SendHelpToDMAsync(builder.Build());
         }
 
         [Command("help")]
         [Summary("Lists information about a specific command.")]
         public async Task HelpAsync([Summary("The command you want help for")] string command)
         {
-            if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
+            if (IsServerBanned())
             {
-                await Context.Guild.LeaveAsync().ConfigureAwait(false);
+                await LeaveServerAsync().ConfigureAwait(false);
                 return;
             }
 
@@ -88,25 +60,61 @@ namespace SysBot.ACNHOrders.Discord.Commands.General
                 return;
             }
 
-            var builder = new EmbedBuilder
-            {
-                Color = new Color(114, 137, 218),
-                Description = $"Here are some commands like **{command}**:"
-            };
+            var builder = CreateEmbedBuilder($"Here are some commands like **{command}**:");
 
             foreach (var match in result.Commands)
             {
                 var cmd = match.Command;
-
-                builder.AddField(x =>
-                {
-                    x.Name = string.Join(", ", cmd.Aliases);
-                    x.Value = GetCommandSummary(cmd);
-                    x.IsInline = false;
-                });
+                builder.AddField(string.Join(", ", cmd.Aliases), GetCommandSummary(cmd), inline: false);
             }
 
-            await ReplyAsync("Help has arrived!", false, builder.Build()).ConfigureAwait(false);
+            await SendHelpToDMAsync(builder.Build());
+        }
+
+        private async Task<IUser> GetApplicationOwnerAsync()
+        {
+            var app = await Context.Client.GetApplicationInfoAsync().ConfigureAwait(false);
+            return app.Owner;
+        }
+
+        private EmbedBuilder CreateEmbedBuilder(string description)
+        {
+            return new EmbedBuilder
+            {
+                Color = new Color(114, 137, 218),
+                Description = description
+            };
+        }
+
+        private string GetModuleCommandDescriptions(ModuleInfo module, ulong owner, ulong userId)
+        {
+            var mentioned = new HashSet<string>();
+            var descriptions = module.Commands
+                .Where(cmd => !mentioned.Contains(cmd.Name))
+                .Where(cmd => !RequiresOwner(cmd, owner, userId) && !RequiresSudo(cmd, userId))
+                .Select(cmd => AddCommandIfValid(cmd, mentioned))
+                .Where(description => !string.IsNullOrEmpty(description));
+
+            return string.Join("\n", descriptions);
+        }
+
+        private static bool RequiresOwner(CommandInfo cmd, ulong owner, ulong userId)
+        {
+            return cmd.Attributes.Any(z => z is RequireOwnerAttribute) && owner != userId;
+        }
+
+        private static bool RequiresSudo(CommandInfo cmd, ulong userId)
+        {
+            return cmd.Attributes.Any(z => z is RequireSudoAttribute) && !Globals.Bot.Config.CanUseSudo(userId);
+        }
+
+        private string AddCommandIfValid(CommandInfo cmd, HashSet<string> mentioned)
+        {
+            var name = cmd.Name;
+            mentioned.Add(name);
+
+            var result = cmd.CheckPreconditionsAsync(Context).Result;
+            return result.IsSuccess ? cmd.Aliases[0] : string.Empty;
         }
 
         private static string GetCommandSummary(CommandInfo cmd)
@@ -114,19 +122,44 @@ namespace SysBot.ACNHOrders.Discord.Commands.General
             return $"Summary: {cmd.Summary}\nParameters: {GetParameterSummary(cmd.Parameters)}";
         }
 
-        private static string GetParameterSummary(IReadOnlyList<ParameterInfo> p)
+        private static string GetParameterSummary(IReadOnlyList<ParameterInfo> parameters)
         {
-            if (p.Count == 0)
+            if (parameters.Count == 0)
                 return "None";
-            return $"{p.Count}\n- " + string.Join("\n- ", p.Select(GetParameterSummary));
+
+            return $"{parameters.Count}\n- " + string.Join("\n- ", parameters.Select(GetParameterSummary));
         }
 
-        private static string GetParameterSummary(ParameterInfo z)
+        private static string GetParameterSummary(ParameterInfo parameter)
         {
-            var result = z.Name;
-            if (!string.IsNullOrWhiteSpace(z.Summary))
-                result += $" ({z.Summary})";
+            var result = parameter.Name;
+            if (!string.IsNullOrWhiteSpace(parameter.Summary))
+                result += $" ({parameter.Summary})";
+
             return result;
+        }
+
+        private bool IsServerBanned()
+        {
+            return GlobalBan.IsServerBanned(Context.Guild.Id.ToString());
+        }
+
+        private async Task LeaveServerAsync()
+        {
+            await Context.Guild.LeaveAsync().ConfigureAwait(false);
+        }
+
+        private async Task SendHelpToDMAsync(Embed embed)
+        {
+            try
+            {
+                await Context.User.SendMessageAsync(embed: embed).ConfigureAwait(false);
+                await ReplyAsync("Help information has been sent to your DM.").ConfigureAwait(false);
+            }
+            catch
+            {
+                await ReplyAsync("Failed to send a DM. Please make sure your DMs are open.").ConfigureAwait(false);
+            }
         }
     }
 }

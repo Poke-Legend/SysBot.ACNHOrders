@@ -16,8 +16,7 @@ namespace SysBot.ACNHOrders.Discord.Commands.General
         }
 
         [Command("help")]
-        [Summary("Lists available commands.")]
-        [RequireSudo]
+        [Summary("Lists available commands and sends them as neat embeds in DM.")]
         public async Task HelpAsync()
         {
             if (IsServerBanned())
@@ -26,49 +25,47 @@ namespace SysBot.ACNHOrders.Discord.Commands.General
                 return;
             }
 
-            var builder = CreateEmbedBuilder("These are the commands you can use:");
             var owner = (await GetApplicationOwnerAsync().ConfigureAwait(false)).Id;
             var userId = Context.User.Id;
 
+            var helpEmbeds = new List<Embed>();
+
+            // Collect all module and command descriptions with names, formatted into embeds.
             foreach (var module in _service.Modules)
             {
-                var description = GetModuleCommandDescriptions(module, owner, userId);
-                if (!string.IsNullOrWhiteSpace(description))
+                var embed = GetModuleCommandDescriptionsWithNames(module, owner, userId);
+                if (embed != null)
                 {
-                    builder.AddField(module.Name, description, inline: false);
+                    helpEmbeds.Add(embed);
                 }
             }
 
-            await SendHelpToDMAsync(builder.Build());
+            // If there's no information, notify the user
+            if (!helpEmbeds.Any())
+            {
+                await ReplyAsync("No commands found.").ConfigureAwait(false);
+                return;
+            }
+
+            // Send the help information as embeds in DM
+            await SendHelpEmbedsToDMAsync(helpEmbeds);
         }
 
-        [Command("help")]
-        [Summary("Lists information about a specific command.")]
-        public async Task HelpAsync([Summary("The command you want help for")] string command)
+        private async Task SendHelpEmbedsToDMAsync(List<Embed> embeds)
         {
-            if (IsServerBanned())
+            try
             {
-                await LeaveServerAsync().ConfigureAwait(false);
-                return;
+                foreach (var embed in embeds)
+                {
+                    await Context.User.SendMessageAsync(embed: embed).ConfigureAwait(false);
+                }
+
+                await ReplyAsync("Help information has been sent to your DM.").ConfigureAwait(false);
             }
-
-            var result = _service.Search(Context, command);
-
-            if (!result.IsSuccess)
+            catch
             {
-                await ReplyAsync($"Sorry, I couldn't find a command like **{command}**.").ConfigureAwait(false);
-                return;
+                await ReplyAsync("Failed to send a DM. Please make sure your DMs are open.").ConfigureAwait(false);
             }
-
-            var builder = CreateEmbedBuilder($"Here are some commands like **{command}**:");
-
-            foreach (var match in result.Commands)
-            {
-                var cmd = match.Command;
-                builder.AddField(string.Join(", ", cmd.Aliases), GetCommandSummary(cmd), inline: false);
-            }
-
-            await SendHelpToDMAsync(builder.Build());
         }
 
         private async Task<IUser> GetApplicationOwnerAsync()
@@ -77,25 +74,34 @@ namespace SysBot.ACNHOrders.Discord.Commands.General
             return app.Owner;
         }
 
-        private EmbedBuilder CreateEmbedBuilder(string description)
-        {
-            return new EmbedBuilder
-            {
-                Color = new Color(114, 137, 218),
-                Description = description
-            };
-        }
-
-        private string GetModuleCommandDescriptions(ModuleInfo module, ulong owner, ulong userId)
+        private Embed? GetModuleCommandDescriptionsWithNames(ModuleInfo module, ulong owner, ulong userId)
         {
             var mentioned = new HashSet<string>();
             var descriptions = module.Commands
                 .Where(cmd => !mentioned.Contains(cmd.Name))
                 .Where(cmd => !RequiresOwner(cmd, owner, userId) && !RequiresSudo(cmd, userId))
-                .Select(cmd => AddCommandIfValid(cmd, mentioned))
-                .Where(description => !string.IsNullOrEmpty(description));
+                .Select(cmd => AddCommandDescriptionWithNames(cmd, mentioned))
+                .Where(description => !string.IsNullOrEmpty(description.Item1) && !string.IsNullOrEmpty(description.Item2))
+                .ToList();
 
-            return string.Join("\n", descriptions);
+            if (!descriptions.Any())
+                return null;
+
+            // Create a neat embed for the module and its commands
+            var embedBuilder = new EmbedBuilder
+            {
+                Color = new Color(114, 137, 218),
+                Title = $"{module.Name} Commands",
+                Description = $"These are the available commands in the **{module.Name}** module:"
+            };
+
+            // Add each command's name and description to the embed
+            foreach (var (commandName, commandSummary) in descriptions)
+            {
+                embedBuilder.AddField(commandName, commandSummary, inline: false);
+            }
+
+            return embedBuilder.Build();
         }
 
         private static bool RequiresOwner(CommandInfo cmd, ulong owner, ulong userId)
@@ -108,35 +114,20 @@ namespace SysBot.ACNHOrders.Discord.Commands.General
             return cmd.Attributes.Any(z => z is RequireSudoAttribute) && !Globals.Bot.Config.CanUseSudo(userId);
         }
 
-        private string AddCommandIfValid(CommandInfo cmd, HashSet<string> mentioned)
+        private (string, string) AddCommandDescriptionWithNames(CommandInfo cmd, HashSet<string> mentioned)
         {
             var name = cmd.Name;
             mentioned.Add(name);
 
             var result = cmd.CheckPreconditionsAsync(Context).Result;
-            return result.IsSuccess ? cmd.Aliases[0] : string.Empty;
-        }
+            if (result.IsSuccess)
+            {
+                var commandName = string.Join(", ", cmd.Aliases);
+                var commandSummary = cmd.Summary ?? "No description available.";
+                return (commandName, commandSummary);
+            }
 
-        private static string GetCommandSummary(CommandInfo cmd)
-        {
-            return $"Summary: {cmd.Summary}\nParameters: {GetParameterSummary(cmd.Parameters)}";
-        }
-
-        private static string GetParameterSummary(IReadOnlyList<ParameterInfo> parameters)
-        {
-            if (parameters.Count == 0)
-                return "None";
-
-            return $"{parameters.Count}\n- " + string.Join("\n- ", parameters.Select(GetParameterSummary));
-        }
-
-        private static string GetParameterSummary(ParameterInfo parameter)
-        {
-            var result = parameter.Name;
-            if (!string.IsNullOrWhiteSpace(parameter.Summary))
-                result += $" ({parameter.Summary})";
-
-            return result;
+            return (string.Empty, string.Empty);
         }
 
         private bool IsServerBanned()
@@ -147,19 +138,6 @@ namespace SysBot.ACNHOrders.Discord.Commands.General
         private async Task LeaveServerAsync()
         {
             await Context.Guild.LeaveAsync().ConfigureAwait(false);
-        }
-
-        private async Task SendHelpToDMAsync(Embed embed)
-        {
-            try
-            {
-                await Context.User.SendMessageAsync(embed: embed).ConfigureAwait(false);
-                await ReplyAsync("Help information has been sent to your DM.").ConfigureAwait(false);
-            }
-            catch
-            {
-                await ReplyAsync("Failed to send a DM. Please make sure your DMs are open.").ConfigureAwait(false);
-            }
         }
     }
 }

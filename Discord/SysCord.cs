@@ -18,6 +18,7 @@ namespace SysBot.ACNHOrders
         private readonly CrossBot _bot;
         private readonly CommandService _commands;
         private readonly IServiceProvider _services;
+        private bool _isOffline;
 
         public ulong Owner { get; private set; } = ulong.MaxValue;
         public bool Ready { get; private set; } = false;
@@ -47,6 +48,24 @@ namespace SysBot.ACNHOrders
             _services = new ServiceCollection()
                 .AddSingleton(bot)
                 .BuildServiceProvider();
+
+            _isOffline = false;
+
+            // Handle program exit events to update the bot to offline before shutdown
+            AppDomain.CurrentDomain.ProcessExit += OnProcessExit;
+            Console.CancelKeyPress += OnConsoleCancelKeyPress;
+        }
+
+        // Define the missing methods for shutdown events:
+        private void OnProcessExit(object? sender, EventArgs e)
+        {
+            ShutdownAsync().Wait();
+        }
+
+        private void OnConsoleCancelKeyPress(object? sender, ConsoleCancelEventArgs e)
+        {
+            e.Cancel = true;
+            ShutdownAsync().Wait();
         }
 
         private static Task LogAsync(LogMessage msg)
@@ -87,9 +106,9 @@ namespace SysBot.ACNHOrders
             await MonitorStatusAsync(token);
         }
 
-        private Task OnClientReadyAsync()
+        private async Task OnClientReadyAsync()
         {
-            if (Ready) return Task.CompletedTask;
+            if (Ready) return;
             Ready = true;
 
             foreach (var channelId in _bot.Config.LoggingChannels)
@@ -104,104 +123,15 @@ namespace SysBot.ACNHOrders
                 LogUtil.Forwarders.Add(Logger);
             }
 
-            return Task.CompletedTask;
+            await UpdateChannelNameWithStatus("✅");
+
+            return;
         }
 
         private async Task InitCommandsAsync()
         {
             await _commands.AddModulesAsync(Assembly.GetExecutingAssembly(), _services);
             _client.MessageReceived += HandleMessageAsync;
-        }
-
-        public async Task<bool> TrySpeakMessageAsync(ulong channelId, string message, bool noDoublePost = false)
-        {
-            if (_client.ConnectionState != ConnectionState.Connected) return false;
-
-            if (_client.GetChannel(channelId) is IMessageChannel channel)
-            {
-                if (noDoublePost)
-                {
-                    var lastMessage = (await channel.GetMessagesAsync(1).FlattenAsync()).FirstOrDefault();
-                    if (lastMessage?.Content == message) return true;
-                }
-
-                return await TrySendMessageAsync(channel, message);
-            }
-
-            return false;
-        }
-
-        public static async Task<bool> TrySpeakMessageAsync(ISocketMessageChannel channel, string message)
-        {
-            return await TrySendMessageAsync(channel, message);
-        }
-
-        private static async Task<bool> TrySendMessageAsync(IMessageChannel channel, string message)
-        {
-            try
-            {
-                await channel.SendMessageAsync(message);
-                return true;
-            }
-            catch (HttpException ex)
-            {
-                Console.WriteLine($"Failed to send message in {channel.Name} (ID: {channel.Id}) due to: {ex.Message}");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"An unexpected error occurred: {ex.Message}");
-            }
-
-            return false;
-        }
-
-        private async Task HandleMessageAsync(SocketMessage arg)
-        {
-            if (arg is not SocketUserMessage msg || msg.Author.Id == _client.CurrentUser.Id || (!_bot.Config.IgnoreAllPermissions && msg.Author.IsBot)) return;
-
-            int argPos = 0;
-
-            if (msg.HasStringPrefix(_bot.Config.Prefix, ref argPos))
-            {
-                if (await TryHandleCommandAsync(msg, argPos)) return;
-            }
-            else if (await CheckMessageDeletionAsync(msg)) return;
-
-            await TryHandleMessageAsync(msg);
-        }
-
-        private async Task<bool> CheckMessageDeletionAsync(SocketUserMessage msg)
-        {
-            var context = new SocketCommandContext(_client, msg);
-
-            if (!Globals.Bot.Config.DeleteNonCommands || context.IsPrivate || msg.Author.IsBot || Globals.Bot.Config.CanUseSudo(msg.Author.Id) || msg.Author.Id == Owner)
-                return false;
-
-            if (!Globals.Bot.Config.Channels.Contains(context.Channel.Id))
-                return false;
-
-            try
-            {
-                await msg.DeleteAsync(RequestOptions.Default);
-                await msg.Channel.SendMessageAsync($"{msg.Author.Mention} - The order channels are for bot commands only.\nDeleted Message:```\n{msg.Content}\n```");
-            }
-            catch (HttpException ex)
-            {
-                Console.WriteLine($"Failed to delete message in {context.Channel.Name} (ID: {context.Channel.Id}) due to: {ex.Message}");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"An unexpected error occurred: {ex.Message}");
-            }
-
-            return true;
-        }
-
-        private static Task TryHandleMessageAsync(SocketMessage msg)
-        {
-            ArgumentNullException.ThrowIfNull(msg);
-            // Placeholder for handling messages with attachments.
-            return Task.CompletedTask;
         }
 
         private async Task<bool> TryHandleCommandAsync(SocketUserMessage msg, int argPos)
@@ -233,6 +163,114 @@ namespace SysBot.ACNHOrders
             return result.Error != CommandError.UnknownCommand;
         }
 
+        public async Task<bool> TrySpeakMessageAsync(ulong channelId, string message, bool noDoublePost = false)
+        {
+            if (_client.ConnectionState != ConnectionState.Connected) return false;
+
+            if (_client.GetChannel(channelId) is IMessageChannel channel)
+            {
+                if (noDoublePost)
+                {
+                    var lastMessage = (await channel.GetMessagesAsync(1).FlattenAsync()).FirstOrDefault();
+                    if (lastMessage?.Content == message) return true;
+                }
+
+                return await TrySendMessageAsync(channel, message);
+            }
+
+            return false;
+        }
+
+
+        // Single version of TrySendMessageAsync to avoid duplicate method error
+        public async Task<bool> TrySendMessageAsync(IMessageChannel channel, string message, bool noDoublePost = false)
+        {
+            try
+            {
+                if (noDoublePost)
+                {
+                    var lastMessage = (await channel.GetMessagesAsync(1).FlattenAsync()).FirstOrDefault();
+                    if (lastMessage?.Content == message) return true; // Avoid duplicate posts
+                }
+
+                await channel.SendMessageAsync(message);
+                return true;
+            }
+            catch (HttpException ex) when (ex.HttpCode == System.Net.HttpStatusCode.TooManyRequests)
+            {
+                // Handle rate limit by extracting the Retry-After value from the exception data
+                if (ex.Data.Contains("Retry-After"))
+                {
+                    var retryAfterMs = Convert.ToInt32(ex.Data["Retry-After"]);
+                    Console.WriteLine($"Rate limit hit. Retrying after {retryAfterMs} milliseconds...");
+                    await Task.Delay(retryAfterMs);
+                    await channel.SendMessageAsync(message); // Retry after delay
+                    return true;
+                }
+                Console.WriteLine($"Rate limit hit, but no Retry-After header found: {ex.Message}");
+            }
+            catch (HttpException ex)
+            {
+                Console.WriteLine($"Failed to send message in {channel.Name}: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An unexpected error occurred: {ex.Message}");
+            }
+
+            return false;
+        }
+
+
+
+        private async Task HandleMessageAsync(SocketMessage arg)
+        {
+            if (arg is not SocketUserMessage msg || msg.Author.Id == _client.CurrentUser.Id || (!_bot.Config.IgnoreAllPermissions && msg.Author.IsBot)) return;
+
+            int argPos = 0;
+
+            if (msg.HasStringPrefix(_bot.Config.Prefix, ref argPos))
+            {
+                if (await TryHandleCommandAsync(msg, argPos)) return;
+            }
+            else if (await CheckMessageDeletionAsync(msg)) return;
+
+            await TryHandleMessageAsync(msg);
+        }
+
+        private static Task TryHandleMessageAsync(SocketMessage msg)
+        {
+            ArgumentNullException.ThrowIfNull(msg);
+            return Task.CompletedTask;
+        }
+
+        private async Task<bool> CheckMessageDeletionAsync(SocketUserMessage msg)
+        {
+            var context = new SocketCommandContext(_client, msg);
+
+            if (!Globals.Bot.Config.DeleteNonCommands || context.IsPrivate || msg.Author.IsBot || Globals.Bot.Config.CanUseSudo(msg.Author.Id) || msg.Author.Id == Owner)
+                return false;
+
+            if (!Globals.Bot.Config.Channels.Contains(context.Channel.Id))
+                return false;
+
+            try
+            {
+                await msg.DeleteAsync(RequestOptions.Default);
+                await msg.Channel.SendMessageAsync($"{msg.Author.Mention} - The order channels are for bot commands only.\nDeleted Message:```\n{msg.Content}\n```");
+            }
+            catch (HttpException ex)
+            {
+                Console.WriteLine($"Failed to delete message in {context.Channel.Name} (ID: {context.Channel.Id}) due to: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An unexpected error occurred: {ex.Message}");
+            }
+
+            return true;
+        }
+
         private async Task MonitorStatusAsync(CancellationToken token)
         {
             const int intervalSeconds = 20;
@@ -256,6 +294,89 @@ namespace SysBot.ACNHOrders
 
                 await Task.Delay(delay, token);
             }
+        }
+
+        private async Task UpdateChannelNameWithStatus(string statusIcon)
+        {
+            var channelManager = new ChannelManager();
+            var availableChannels = channelManager.LoadChannels();
+
+            foreach (var channelId in availableChannels)
+            {
+                if (_client.GetChannel(channelId) is not SocketTextChannel channel)
+                    continue;
+
+                try
+                {
+                    string currentName = channel.Name;
+
+                    if (currentName.StartsWith("✅") || currentName.StartsWith("❌"))
+                    {
+                        currentName = currentName.Substring(1).Trim();
+                    }
+
+                    string newChannelName = $"{statusIcon}{currentName}";
+
+                    try
+                    {
+                        await channel.ModifyAsync(prop => prop.Name = newChannelName);
+                        Console.WriteLine($"Channel name updated to: {newChannelName} in {channel.Guild.Name}");
+                    }
+                    catch (HttpException ex) when (ex.HttpCode == System.Net.HttpStatusCode.TooManyRequests)
+                    {
+                        // Handle rate limit
+                        if (ex.Data.Contains("Retry-After"))
+                        {
+                            var retryAfterMs = Convert.ToInt32(ex.Data["Retry-After"]);
+                            Console.WriteLine($"Rate limit hit. Retrying after {retryAfterMs} milliseconds...");
+                            await Task.Delay(retryAfterMs);
+                            await channel.ModifyAsync(prop => prop.Name = newChannelName);
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Rate limit hit, but no Retry-After header found: {ex.Message}");
+                        }
+                    }
+                    catch (HttpException ex)
+                    {
+                        Console.WriteLine($"Failed to modify channel name: {ex.Message}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Failed to update channel name in {channel.Name}: {ex.Message}");
+                }
+            }
+        }
+
+
+
+        private async Task ShutdownAsync()
+        {
+            SetOfflineMode(true);
+            await UpdateChannelNameWithStatus("❌");
+            await _client.StopAsync();
+            Environment.Exit(0);
+        }
+
+        public async Task StopBotAsync()
+        {
+            SetOfflineMode(true);
+            await UpdateChannelNameWithStatus("❌");
+            await _client.StopAsync();
+        }
+
+        public async Task RestartBotAsync(string apiToken)
+        {
+            SetOfflineMode(false);
+            await _client.LoginAsync(TokenType.Bot, apiToken);
+            await _client.StartAsync();
+            await UpdateChannelNameWithStatus("✅");
+        }
+
+        public void SetOfflineMode(bool isOffline)
+        {
+            _isOffline = isOffline;
         }
     }
 }

@@ -8,6 +8,7 @@ using Discord.Commands;
 using Discord.Net;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
+using SysBot.ACNHOrders.Discord.Helpers;
 using SysBot.Base;
 
 namespace SysBot.ACNHOrders

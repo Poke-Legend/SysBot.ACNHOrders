@@ -1,8 +1,9 @@
 ﻿using Discord.Commands;
 using Discord;
 using System.Threading.Tasks;
+using SysBot.ACNHOrders.Discord.Helpers;
 
-namespace SysBot.ACNHOrders.Discord.Commands.General
+namespace SysBot.ACNHOrders.Discord.Commands.Helpers
 {
     public class ChannelModule : ModuleBase<SocketCommandContext>
     {

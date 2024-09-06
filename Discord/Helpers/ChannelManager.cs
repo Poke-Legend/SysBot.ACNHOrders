@@ -2,7 +2,7 @@
 using System.IO;
 using Newtonsoft.Json;
 
-namespace SysBot.ACNHOrders
+namespace SysBot.ACNHOrders.Discord.Helpers
 {
     public class ChannelManager
     {

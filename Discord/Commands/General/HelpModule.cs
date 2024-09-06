@@ -30,17 +30,17 @@ namespace SysBot.ACNHOrders.Discord.Commands.General
 
             var helpEmbeds = new List<Embed>();
 
-            // Collect all module and command descriptions with names, formatted into embeds.
+            // Collect all commands and descriptions, format them into neat embeds.
             foreach (var module in _service.Modules)
             {
-                var embed = GetModuleCommandDescriptionsWithNames(module, owner, userId);
+                var embed = GetCommandDescriptions(module, owner, userId);
                 if (embed != null)
                 {
                     helpEmbeds.Add(embed);
                 }
             }
 
-            // If there's no information, notify the user
+            // If no commands were found, notify the user.
             if (!helpEmbeds.Any())
             {
                 await ReplyAsync("No commands found.").ConfigureAwait(false);
@@ -74,7 +74,7 @@ namespace SysBot.ACNHOrders.Discord.Commands.General
             return app.Owner;
         }
 
-        private Embed? GetModuleCommandDescriptionsWithNames(ModuleInfo module, ulong owner, ulong userId)
+        private Embed? GetCommandDescriptions(ModuleInfo module, ulong owner, ulong userId)
         {
             var mentioned = new HashSet<string>();
             var descriptions = module.Commands
@@ -87,12 +87,12 @@ namespace SysBot.ACNHOrders.Discord.Commands.General
             if (!descriptions.Any())
                 return null;
 
-            // Create a neat embed for the module and its commands
+            // Create a clean embed with commands and descriptions
             var embedBuilder = new EmbedBuilder
             {
                 Color = new Color(114, 137, 218),
-                Title = $"{module.Name} Commands",
-                Description = $"These are the available commands in the **{module.Name}** module:"
+                Title = $"{module.Name}", // Module name serves as a category title
+                Description = $"Here are the available commands:"
             };
 
             // Add each command's name and description to the embed
@@ -122,7 +122,7 @@ namespace SysBot.ACNHOrders.Discord.Commands.General
             var result = cmd.CheckPreconditionsAsync(Context).Result;
             if (result.IsSuccess)
             {
-                var commandName = string.Join(", ", cmd.Aliases);
+                var commandName = string.Join(", ", cmd.Aliases); // Show aliases as part of the command names
                 var commandSummary = cmd.Summary ?? "No description available.";
                 return (commandName, commandSummary);
             }

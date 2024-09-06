@@ -8,6 +8,17 @@ namespace SysBot.ACNHOrders
     [Serializable]
     public sealed record CrossBotConfig : SwitchConnectionConfig
     {
+
+        // List of global sudo user IDs
+        public HashSet<ulong> GlobalSudoList { get; set; } = new HashSet<ulong>();
+
+        // Method to check if a user can use sudo based on their ID
+        public bool CanUseSudo(ulong userId)
+        {
+            // Logic to check if the user ID is in the sudo list
+            return GlobalSudoList.Contains(userId);
+        }
+
         #region Discord
 
         /// <summary> When enabled, the bot will accept commands from users via Discord. </summary>
@@ -28,8 +39,7 @@ namespace SysBot.ACNHOrders
         // 64bit numbers white-listing certain channels/users for permission
         public List<ulong> Channels { get; set; } = new();
         public List<ulong> Users { get; set; } = new();
-        public List<ulong> Sudo { get; set; } = new();
-
+     
         public List<ulong> LoggingChannels { get; set; } = new();
 
         // Should we ignore all permissions for commands and allow inter-bot talk? This should only be used for debug/apps that layer on top of the acnh bot through discord.
@@ -146,7 +156,6 @@ namespace SysBot.ACNHOrders
 
         public bool CanUseCommandUser(ulong authorId) => Users.Count == 0 || Users.Contains(authorId);
         public bool CanUseCommandChannel(ulong channelId) => Channels.Count == 0 || Channels.Contains(channelId);
-        public bool CanUseSudo(ulong userId) => Sudo.Contains(userId);
 
         public bool GetHasRole(string roleName, IEnumerable<string> roles)
         {

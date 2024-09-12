@@ -26,7 +26,6 @@ namespace SysBot.ACNHOrders
 
         [Command("order")]
         [Summary(OrderItemSummary)]
-        [RequireQueueRole(nameof(Globals.Bot.Config.RoleUseBot))]
         public async Task RequestOrderAsync([Summary(OrderItemSummary)][Remainder] string request)
         {
             if (IsUserBanned() || IsServerBanned()) return;
@@ -69,7 +68,6 @@ namespace SysBot.ACNHOrders
 
         [Command("ordercat")]
         [Summary("Orders a catalogue of items created by an order tool such as ACNHMobileSpawner, does not duplicate any items.")]
-        [RequireQueueRole(nameof(Globals.Bot.Config.RoleUseBot))]
         public async Task RequestCatalogueOrderAsync([Summary(OrderItemSummary)][Remainder] string request)
         {
             if (IsUserBanned() || IsServerBanned()) return;
@@ -106,7 +104,6 @@ namespace SysBot.ACNHOrders
 
         [Command("order")]
         [Summary("Requests the bot an order of items in the NHI format.")]
-        [RequireQueueRole(nameof(Globals.Bot.Config.RoleUseBot))]
         public async Task RequestNHIOrderAsync()
         {
             if (IsUserBanned() || IsServerBanned()) return;
@@ -131,7 +128,6 @@ namespace SysBot.ACNHOrders
         [Command("lastorder")]
         [Alias("lo", "lasto", "lorder")]
         [Summary("Requests the last order placed by the user.")]
-        [RequireQueueRole(nameof(Globals.Bot.Config.RoleUseBot))]
         public async Task RequestLastOrderAsync()
         {
             if (IsUserBanned() || IsServerBanned()) return;
@@ -180,7 +176,6 @@ namespace SysBot.ACNHOrders
         [Command("checkitems")]
         [Alias("checkitem")]
         [Summary("Check the item ids to find items that will not allow an order to happen.")]
-        [RequireQueueRole(nameof(Globals.Bot.Config.RoleUseBot))]
         public async Task CheckItemAsync([Summary(OrderItemSummary)][Remainder] string request)
         {
             if (IsUserBanned() || IsServerBanned()) return;
@@ -201,7 +196,6 @@ namespace SysBot.ACNHOrders
 
         [Command("preset")]
         [Summary("Requests the bot to order a preset created by the bot host.")]
-        [RequireQueueRole(nameof(Globals.Bot.Config.RoleUseBot))]
         public async Task RequestPresetOrderAsync([Remainder] string presetName)
         {
             if (IsUserBanned() || IsServerBanned()) return;
@@ -257,8 +251,6 @@ namespace SysBot.ACNHOrders
         [Command("uploadpreset")]
         [Alias("UpPre", "UP")]
         [Summary("Uploads a file to add to the preset folder.")]
-        [RequireQueueRole(nameof(Globals.Bot.Config.RoleUseBot))]
-        [RequireSudo]
         public async Task RequestUploadPresetAsync()
         {
             if (IsUserBanned() || IsServerBanned()) return;
@@ -281,7 +273,6 @@ namespace SysBot.ACNHOrders
         [Command("queue")]
         [Alias("qs", "qp", "position")]
         [Summary("View your position in the queue.")]
-        [RequireQueueRole(nameof(Globals.Bot.Config.RoleUseBot))]
         public async Task ViewQueuePositionAsync()
         {
             if (IsUserBanned() || IsServerBanned()) return;
@@ -312,7 +303,6 @@ namespace SysBot.ACNHOrders
         [Command("remove")]
         [Alias("qc", "delete", "removeMe", "cancel")]
         [Summary("Remove yourself from the queue.")]
-        [RequireQueueRole(nameof(Globals.Bot.Config.RoleUseBot))]
         public async Task RemoveFromQueueAsync()
         {
             if (IsUserBanned() || IsServerBanned()) return;
@@ -356,7 +346,6 @@ namespace SysBot.ACNHOrders
         [Command("visitorList")]
         [Alias("visitors")]
         [Summary("Print the list of visitors on the island (dodo restore mode only).")]
-        [RequireQueueRole(nameof(Globals.Bot.Config.RoleUseBot))]
         public async Task ShowVisitorList()
         {
             if (IsUserBanned() || IsServerBanned()) return;
@@ -414,7 +403,6 @@ namespace SysBot.ACNHOrders
         [Command("gameTime")]
         [Alias("gt")]
         [Summary("Prints the last checked (current) in-game time.")]
-        [RequireQueueRole(nameof(Globals.Bot.Config.RoleUseBot))]
         public async Task GetGameTime()
         {
             if (IsUserBanned() || IsServerBanned()) return;

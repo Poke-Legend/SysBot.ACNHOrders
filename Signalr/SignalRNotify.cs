@@ -2,7 +2,6 @@
 using SysBot.Base;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,74 +16,100 @@ namespace SysBot.ACNHOrders.Signalr
         private string URI { get; }
         private bool Connected { get; set; }
 
-        private static readonly SemaphoreSlim asyncLock = new SemaphoreSlim(1, 1);
+        private static readonly SemaphoreSlim _asyncLock = new SemaphoreSlim(1, 1);
 
         public SignalRNotify(string authid, string authString, string uriEndpoint)
         {
-            AuthID = authid;
-            AuthString = authString;
-            URI = uriEndpoint;
+            AuthID = authid ?? throw new ArgumentNullException(nameof(authid));
+            AuthString = authString ?? throw new ArgumentNullException(nameof(authString));
+            URI = uriEndpoint ?? throw new ArgumentNullException(nameof(uriEndpoint));
+
             Connection = new HubConnectionBuilder()
                 .WithUrl(URI)
                 .WithAutomaticReconnect()
                 .Build();
 
-            Task.Run(AttemptConnection);
+            Task.Run(() => AttemptConnectionAsync());
         }
 
-        private async void AttemptConnection()
+        private async Task AttemptConnectionAsync()
         {
-            try
+            while (!Connected)
             {
-                await Connection.StartAsync();
-                LogUtil.LogInfo("Connected succesfully " + Connection.ConnectionId, "SignalR");
-                Connected = true;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
+                try
+                {
+                    await Connection.StartAsync();
+                    LogUtil.LogInfo($"Connected successfully. ConnectionId: {Connection.ConnectionId}", "SignalR");
+                    Connected = true;
+                }
+                catch (Exception ex)
+                {
+                    LogUtil.LogError($"Connection failed: {ex.Message}", "SignalR");
+                    await Task.Delay(5000); // Retry after 5 seconds if the connection fails
+                }
             }
         }
 
         public void NotifyServerOfState(GameState gs)
         {
-            var paramsToSend = new Dictionary<string, string>();
-            paramsToSend.Add("gs", gs.ToString().WebSafeBase64Encode());
-            Task.Run(() => NotifyServerEndpoint(paramsToSend.ToArray()));
+            var paramsToSend = new Dictionary<string, string>
+            {
+                { "gs", gs.ToString().WebSafeBase64Encode() }
+            };
+
+            Task.Run(() => NotifyServerEndpointAsync(paramsToSend));
         }
 
         public void NotifyServerOfDodoCode(string dodo)
         {
-            var paramsToSend = new Dictionary<string, string>();
-            paramsToSend.Add("dodo", dodo.ToString().WebSafeBase64Encode());
-            Task.Run(() => NotifyServerEndpoint(paramsToSend.ToArray()));
+            var paramsToSend = new Dictionary<string, string>
+            {
+                { "dodo", dodo.WebSafeBase64Encode() }
+            };
+
+            Task.Run(() => NotifyServerEndpointAsync(paramsToSend));
         }
 
-        private async void NotifyServerEndpoint(params KeyValuePair<string, string>[] urlParams)
+        private async Task NotifyServerEndpointAsync(Dictionary<string, string> urlParams)
         {
-            var authToken = string.Format("&{0}={1}", AuthID, AuthString);
-            var uriTry = encodeUriParams(URI, urlParams) + authToken;
-            await asyncLock.WaitAsync();
+            var authToken = $"&{AuthID}={AuthString}";
+            var uriTry = EncodeUriParams(URI, urlParams) + authToken;
+
+            await _asyncLock.WaitAsync();
             try
             {
-                await Connection.InvokeAsync("ReceiveViewMessage",
-                    AuthString, uriTry);
+                await Connection.InvokeAsync("ReceiveViewMessage", AuthString, uriTry);
             }
-            catch (Exception e) { LogUtil.LogText(e.Message); }
-            finally { asyncLock.Release(); }
+            catch (Exception e)
+            {
+                LogUtil.LogError(e.Message, "SignalR");
+            }
+            finally
+            {
+                _asyncLock.Release();
+            }
         }
 
-        private string encodeUriParams(string uriBase, params KeyValuePair<string, string>[] urlParams)
+        private string EncodeUriParams(string uriBase, Dictionary<string, string> urlParams)
         {
-            if (urlParams.Length < 1)
+            if (urlParams.Count == 0)
                 return uriBase;
-            if (uriBase[uriBase.Length - 1] != '?')
-                uriBase += "?";
-            foreach (var kvp in urlParams)
-                uriBase += string.Format("{0}={1}&", kvp.Key, kvp.Value);
 
-            // remove trailing &
-            return uriBase.Remove(uriBase.Length - 1, 1);
+            var sb = new StringBuilder(uriBase);
+            if (!uriBase.EndsWith("?"))
+            {
+                sb.Append("?");
+            }
+
+            foreach (var kvp in urlParams)
+            {
+                sb.AppendFormat("{0}={1}&", kvp.Key, kvp.Value);
+            }
+
+            // Remove trailing '&'
+            sb.Length -= 1;
+
+            return sb.ToString();
         }
     }
 }

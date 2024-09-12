@@ -1,4 +1,2 @@
 C:\Users\brand\OneDrive\Desktop\ACNH\SysBot.ACNHOrders.pdb
-C:\Users\brand\OneDrive\Desktop\ACNH\Resources\InternalHexListValid.txt
-C:\Users\brand\OneDrive\Desktop\ACNH\Resources\InternalHexList.txt
 C:\Users\brand\OneDrive\Desktop\ACNH\SysBot.ACNHOrders.exe

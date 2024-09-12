@@ -1,88 +1,41 @@
 namespace SocketAPI
 {
-    /// <summary>
-    /// Represents a serializable response to return to the client.
-    /// </summary>
     public class SocketAPIMessage
     {
+        private static readonly System.Text.Json.JsonSerializerOptions _jsonOptions = new System.Text.Json.JsonSerializerOptions
+        {
+            PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase,
+            DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull,
+            WriteIndented = false // Set to true if indented JSON is required for readability
+        };
+
         public SocketAPIMessage() { }
 
         public SocketAPIMessage(object? value, string? error)
         {
-            this.value = value;
-            this.error = error;
+            Value = value;
+            Error = error;
         }
 
+        public string Status => Error != null ? "error" : "okay";
+        public string? Id { get; set; }
+        public string? _Type => Type?.ToString().ToLower();
+        public SocketAPIMessageType? Type { get; set; }
+        public string? Error { get; set; }
+        public object? Value { get; set; }
+
         /// <summary>
-        /// Describes whether the request completed successfully or not.
+        /// Optimized serialization method with predefined options.
         /// </summary>
-        public string status
+        public string Serialize()
         {
-            get
-            {
-                if (this.error != null)
-                    return "error";
-                else
-                    return "okay";
-            }
-
-            private set { }
+            return System.Text.Json.JsonSerializer.Serialize(this, _jsonOptions);
         }
 
-        /// <summary>
-        /// The unique identifier of the associated request.
-        /// </summary>
-        public string? id { get; set; }
+        public static SocketAPIMessage FromValue(object? value) => new SocketAPIMessage(value, null);
+        public static SocketAPIMessage FromError(string errorMessage) => new SocketAPIMessage(null, errorMessage);
 
-        /// <summary>
-        /// Describes the type of response; i.e. event or response.
-        /// Wrapper property used for encoding purposes.
-        /// </summary>
-        public string? _type
-        {
-            get { return this.type?.ToString().ToLower(); }
-            private set { }
-        }
-
-        /// <summary>
-        /// Describes the type of response; i.e. event or response. 
-        /// </summary>
-        public SocketAPIMessageType? type;
-
-        /// <summary>
-        /// If an error occurred while processing the client's request, this property would contain the error message.
-        /// </summary>
-        public string? error { get; set; }
-
-        /// <summary>
-        /// The actual body of the response, if any.
-        /// </summary>
-        public object? value { get; set; }
-
-        public string? Serialize()
-        {
-            return System.Text.Json.JsonSerializer.Serialize(this);
-        }
-
-        /// <summary>
-        /// Creates a `SocketAPIResponse` populated with the supplied value object.
-        /// </summary>
-        public static SocketAPIMessage FromValue(object? value)
-        {
-            return new(value, null);
-        }
-
-        /// <summary>
-        /// Creates a `SocketAPIResponse` populated with the supplied error message.
-        /// </summary>
-        public static SocketAPIMessage FromError(string errorMessage)
-        {
-            return new(null, errorMessage);
-        }
-
-        public override string ToString()
-        {
-            return $"SocketAPI.SocketAPIMessage (id: {this.id}) - status: {this.status}, type: {this.type}, value: {this.value}, error: {this.error}";
-        }
+        public override string ToString() =>
+            $"SocketAPI.SocketAPIMessage (id: {Id}) - status: {Status}, type: {Type}, value: {Value}, error: {Error}";
     }
 }

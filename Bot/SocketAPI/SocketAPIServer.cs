@@ -15,7 +15,7 @@ namespace SocketAPI
     /// <summary>
     /// Acts as an API server, accepting requests and replying over TCP/IP.
     /// </summary>
-    public sealed class SocketAPIServer
+    public sealed class SocketAPIServer : IDisposable
     {
         private readonly CancellationTokenSource _tcpListenerCancellationSource = new();
         private CancellationToken TcpListenerCancellationToken => _tcpListenerCancellationSource.Token;
@@ -23,9 +23,12 @@ namespace SocketAPI
         private TcpListener? _listener;
         private readonly Dictionary<string, Delegate> _apiEndpoints = new();
         private readonly ConcurrentBag<TcpClient> _clients = new();
-
         private static readonly Lazy<SocketAPIServer> _instance = new(() => new SocketAPIServer());
         public static SocketAPIServer Instance => _instance.Value;
+
+        private Dictionary<string, Delegate>? _endpointCache = null;
+
+        private const int BufferSize = 8192; // Predefined buffer size for better memory management
 
         private SocketAPIServer() { }
 
@@ -66,7 +69,7 @@ namespace SocketAPI
                     var clientEP = client.Client.RemoteEndPoint as IPEndPoint;
                     Logger.LogInfo($"Client connected! IP: {clientEP?.Address}, Port: {clientEP?.Port}");
 
-                    HandleTcpClient(client);
+                    _ = HandleTcpClient(client);
                 }
                 catch (OperationCanceledException) when (TcpListenerCancellationToken.IsCancellationRequested)
                 {
@@ -76,66 +79,69 @@ namespace SocketAPI
                 catch (Exception ex)
                 {
                     Logger.LogError("An error occurred on the socket API server: " + ex.Message);
-
                 }
             }
         }
 
-        private async void HandleTcpClient(TcpClient client)
+        private async Task HandleTcpClient(TcpClient client)
         {
-            var stream = client.GetStream();
-            var buffer = new byte[client.ReceiveBufferSize];
-
-            while (true)
+            try
             {
-                int bytesRead = await stream.ReadAsync(buffer, 0, client.ReceiveBufferSize, TcpListenerCancellationToken);
-                if (bytesRead == 0)
+                var stream = client.GetStream();
+                var buffer = new byte[BufferSize];
+
+                while (!TcpListenerCancellationToken.IsCancellationRequested)
                 {
-                    Logger.LogInfo("Remote client closed the connection.");
-                    break;
+                    int bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length, TcpListenerCancellationToken);
+                    if (bytesRead == 0)
+                    {
+                        Logger.LogInfo("Remote client closed the connection.");
+                        break;
+                    }
+
+                    var rawMessage = Encoding.UTF8.GetString(buffer, 0, bytesRead).Trim();
+                    var request = SocketAPIProtocol.DecodeMessage(rawMessage);
+
+                    if (request == null)
+                    {
+                        await SendResponse(client, SocketAPIMessage.FromError("Error while JSON-parsing the request."));
+                        continue;
+                    }
+
+                    var response = InvokeEndpoint(request.Endpoint!, request.Args) ??
+                                   SocketAPIMessage.FromError("Endpoint not found.");
+                    response.Id = request.Id;
+                    await SendResponse(client, response);
                 }
-
-                var rawMessage = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-                rawMessage = Regex.Replace(rawMessage, @"\r\n?|\n|\0", "");
-
-                var request = SocketAPIProtocol.DecodeMessage(rawMessage);
-
-                if (request == null)
-                {
-                    SendResponse(client, SocketAPIMessage.FromError("Error while JSON-parsing the request."));
-                    continue;
-                }
-
-                var response = InvokeEndpoint(request.endpoint!, request.args) ??
-                               SocketAPIMessage.FromError("Endpoint not found.");
-
-                response.id = request.id;
-                SendResponse(client, response);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"Error in handling client: {ex.Message}");
             }
         }
 
-        public void SendResponse(TcpClient client, SocketAPIMessage message)
+        public async Task SendResponse(TcpClient client, SocketAPIMessage message)
         {
-            message.type = SocketAPIMessageType.Response;
-            SendMessage(client, message);
+            message.Type = SocketAPIMessageType.Response;
+            await SendMessage(client, message);
         }
 
-        public void SendEvent(TcpClient client, SocketAPIMessage message)
+        public async Task SendEvent(TcpClient client, SocketAPIMessage message)
         {
-            message.type = SocketAPIMessageType.Event;
-            SendMessage(client, message);
+            message.Type = SocketAPIMessageType.Event;
+            await SendMessage(client, message);
         }
 
-        public async void BroadcastEvent(SocketAPIMessage message)
+        public async Task BroadcastEvent(SocketAPIMessage message)
         {
             var tasks = _clients
                 .Where(client => client.Connected)
-                .Select(client => Task.Run(() => SendEvent(client, message)));
+                .Select(client => SendEvent(client, message));
 
             await Task.WhenAll(tasks);
         }
 
-        private async void SendMessage(TcpClient toClient, SocketAPIMessage message)
+        private async Task SendMessage(TcpClient toClient, SocketAPIMessage message)
         {
             var buffer = Encoding.UTF8.GetBytes(SocketAPIProtocol.EncodeMessage(message)!);
 
@@ -154,10 +160,20 @@ namespace SocketAPI
         {
             _listener?.Stop();
             _tcpListenerCancellationSource.Cancel();
+            ClearClients();
         }
 
         private int RegisterEndpoints()
         {
+            if (_endpointCache != null)
+            {
+                _apiEndpoints.Clear();
+                foreach (var endpoint in _endpointCache)
+                    _apiEndpoints[endpoint.Key] = endpoint.Value;
+
+                return _apiEndpoints.Count;
+            }
+
             var endpoints = AppDomain.CurrentDomain.GetAssemblies()
                 .Where(a => a.FullName?.Contains("SysBot.ACNHOrders") ?? false)
                 .SelectMany(a => a.GetTypes())
@@ -167,21 +183,16 @@ namespace SocketAPI
                 .Where(m => m.GetParameters().Length == 1 &&
                             m.IsStatic &&
                             m.GetParameters()[0].ParameterType == typeof(string) &&
-                            m.ReturnType == typeof(object));
+                            m.ReturnType == typeof(object))
+                .ToDictionary(m => m.Name, m => (Delegate)m.CreateDelegate(typeof(Func<string, object?>)));
 
+            _apiEndpoints.Clear();
             foreach (var endpoint in endpoints)
-            {
-                RegisterEndpoint(endpoint.Name, (Func<string, object?>)endpoint.CreateDelegate(typeof(Func<string, object?>)));
-            }
+                _apiEndpoints[endpoint.Key] = endpoint.Value;
 
-            return endpoints.Count();
-        }
+            _endpointCache = _apiEndpoints;
 
-        private bool RegisterEndpoint(string name, Func<string, object?> handler)
-        {
-            if (_apiEndpoints.ContainsKey(name)) return false;
-            _apiEndpoints[name] = handler;
-            return true;
+            return _apiEndpoints.Count;
         }
 
         private SocketAPIMessage? InvokeEndpoint(string endpointName, string? jsonArgs)
@@ -191,12 +202,12 @@ namespace SocketAPI
 
             try
             {
-                var response = handler.DynamicInvoke(jsonArgs);
+                var response = ((Func<string, object?>)handler)(jsonArgs!);
                 return SocketAPIMessage.FromValue(response);
             }
             catch (Exception ex)
             {
-                return SocketAPIMessage.FromError(ex.InnerException?.Message ?? "Exception thrown during endpoint invocation.");
+                return SocketAPIMessage.FromError(ex.Message ?? "Unknown error");
             }
         }
 
@@ -204,8 +215,21 @@ namespace SocketAPI
         {
             while (!_clients.IsEmpty)
             {
-                _clients.TryTake(out _);
+                if (_clients.TryTake(out var client))
+                {
+                    client?.Close();
+                }
             }
+        }
+
+        public void Dispose()
+        {
+            Stop();
+            foreach (var client in _clients)
+            {
+                client?.Dispose();
+            }
+            _tcpListenerCancellationSource.Dispose();
         }
     }
 }

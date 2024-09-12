@@ -9,95 +9,67 @@ namespace SysBot.ACNHOrders
     internal static class Program
     {
         private const string DefaultConfigPath = "config.json";
-        private const string DefaultTwitchPath = "twitch.json";
         private const string DefaultSocketServerAPIPath = "server.json";
 
         private static async Task Main(string[] args)
         {
-            string configPath;
-
             Console.WriteLine("Starting up...");
-            if (args.Length > 0)
-            {
-                if (args.Length > 1)
-                {
-                    Console.WriteLine("Too many arguments supplied and will be ignored.");
-                    configPath = DefaultConfigPath;
-                }
-                else
-                {
-                    configPath = args[0];
-                }
-            }
-            else
-            {
-                configPath = DefaultConfigPath;
-            }
 
-            if (!File.Exists(configPath))
+            string configPath = args.Length == 1 ? args[0] : DefaultConfigPath;
+
+            // Load or create configurations asynchronously
+            var config = await LoadOrCreateConfigAsync<CrossBotConfig>(configPath, CreateDefaultConfig);
+            var serverConfig = await LoadOrCreateConfigAsync<SocketAPI.SocketAPIServerConfig>(DefaultSocketServerAPIPath, () => new SocketAPI.SocketAPIServerConfig());
+
+            if (config == null || serverConfig == null)
             {
-                CreateConfigQuit(configPath);
-                return;
-            }
-
-            if (!File.Exists(DefaultTwitchPath))
-                SaveConfig(new TwitchConfig(), DefaultTwitchPath);
-
-            if (!File.Exists(DefaultSocketServerAPIPath))
-                SaveConfig(new SocketAPI.SocketAPIServerConfig(), DefaultSocketServerAPIPath);
-
-            var json = File.ReadAllText(configPath);
-            var config = JsonSerializer.Deserialize<CrossBotConfig>(json);
-            if (config == null)
-            {
-                Console.WriteLine("Failed to deserialize configuration file.");
+                Console.WriteLine("Configuration deserialization failed. Exiting.");
                 WaitKeyExit();
                 return;
             }
 
-            json = File.ReadAllText(DefaultTwitchPath);
-            var twitchConfig = JsonSerializer.Deserialize<TwitchConfig>(json);
-            if (twitchConfig == null)
-            {
-                Console.WriteLine("Failed to deserialize twitch configuration file.");
-                WaitKeyExit();
-                return;
-            }
-
-            json = File.ReadAllText(DefaultSocketServerAPIPath);
-            var serverConfig = JsonSerializer.Deserialize<SocketAPI.SocketAPIServerConfig>(json);
-            if (serverConfig == null)
-            {
-                Console.WriteLine("Failed to deserialize Socket API Server configuration file.");
-                WaitKeyExit();
-                return;
-            }
-
-            SaveConfig(config, configPath);
-            SaveConfig(twitchConfig, DefaultTwitchPath);
-            SaveConfig(serverConfig, DefaultSocketServerAPIPath);
-
-            SocketAPI.SocketAPIServer server = SocketAPI.SocketAPIServer.Instance;
-
+            // Start Socket API Server
+            var server = SocketAPI.SocketAPIServer.Instance;
             _ = server.Start(serverConfig);
 
-            await BotRunner.RunFrom(config, CancellationToken.None, twitchConfig).ConfigureAwait(false);
+            // Run the bot
+            await BotRunner.RunFrom(config, CancellationToken.None).ConfigureAwait(false);
 
             WaitKeyExit();
         }
 
-        private static void SaveConfig<T>(T config, string path)
+        private static async Task<T?> LoadOrCreateConfigAsync<T>(string path, Func<T> createDefault) where T : class
+        {
+            if (!File.Exists(path))
+            {
+                var defaultConfig = createDefault();
+                await SaveConfigAsync(defaultConfig, path);
+                Console.WriteLine($"Created default configuration at {path}. Please configure it and restart the program.");
+                return null;
+            }
+
+            try
+            {
+                var json = await File.ReadAllTextAsync(path).ConfigureAwait(false);
+                return JsonSerializer.Deserialize<T>(json);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error loading configuration from {path}: {ex.Message}");
+                return null;
+            }
+        }
+
+        private static async Task SaveConfigAsync<T>(T config, string path)
         {
             var options = new JsonSerializerOptions { WriteIndented = true };
             var json = JsonSerializer.Serialize(config, options);
-            File.WriteAllText(path, json);
+            await File.WriteAllTextAsync(path, json).ConfigureAwait(false);
         }
 
-        private static void CreateConfigQuit(string configPath)
+        private static CrossBotConfig CreateDefaultConfig()
         {
-            SaveConfig(new CrossBotConfig { IP = "192.168.0.1", Port = 6000 }, configPath);
-            Console.WriteLine("Created blank config file. Please configure it and restart the program.");
-            WaitKeyExit();
+            return new CrossBotConfig { IP = "192.168.0.1", Port = 6000 };
         }
 
         private static void WaitKeyExit()

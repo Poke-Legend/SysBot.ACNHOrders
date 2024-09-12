@@ -19,7 +19,6 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
         [Command("recipeLang")]
         [Alias("rl")]
         [Summary("Gets a list of DIY recipe IDs that contain the requested Item Name string.")]
-        [RequireQueueRole(nameof(Globals.Bot.Config.RoleUseBot))]
         public async Task SearchItemsByLanguageAsync(string language, [Remainder] string itemName)
         {
             if (IsCommandInvalid()) return;
@@ -31,7 +30,6 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
         [Command("recipe")]
         [Alias("ri", "searchDIY")]
         [Summary("Gets a list of DIY recipe IDs that contain the requested Item Name string.")]
-        [RequireQueueRole(nameof(Globals.Bot.Config.RoleUseBot))]
         public async Task SearchItemsAsync([Remainder] string itemName)
         {
             if (IsCommandInvalid()) return;

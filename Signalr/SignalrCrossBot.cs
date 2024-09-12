@@ -1,29 +1,30 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SysBot.ACNHOrders.Signalr
 {
     public class SignalrCrossBot
     {
-        internal static CrossBot Bot = default!;
+        private readonly CrossBot _bot;
+        private readonly string _uri;
+        private readonly string _authID;
+        private readonly string _authString;
 
-        private readonly string URI;
-        private readonly string AuthID, AuthString;
+        private readonly IDodoRestoreNotifier _webNotifierInstance;
 
-        private readonly IDodoRestoreNotifier WebNotifierInstance;
-
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SignalrCrossBot"/> class.
+        /// </summary>
+        /// <param name="settings">The configuration settings for the web connection.</param>
+        /// <param name="bot">The bot instance to be used.</param>
         public SignalrCrossBot(WebConfig settings, CrossBot bot)
         {
-            Bot = bot;
-            URI = settings.URIEndpoint;
-            AuthID = settings.AuthID;
-            AuthString = settings.AuthTokenOrString;
+            _bot = bot ?? throw new ArgumentNullException(nameof(bot));
+            _uri = settings?.URIEndpoint ?? throw new ArgumentNullException(nameof(settings.URIEndpoint));
+            _authID = settings.AuthID ?? throw new ArgumentNullException(nameof(settings.AuthID));
+            _authString = settings.AuthTokenOrString ?? throw new ArgumentNullException(nameof(settings.AuthTokenOrString));
 
-            WebNotifierInstance = new SignalRNotify(AuthID, AuthString, URI);
-            bot.DodoNotifiers.Add(WebNotifierInstance);
+            _webNotifierInstance = new SignalRNotify(_authID, _authString, _uri);
+            _bot.DodoNotifiers.Add(_webNotifierInstance);
         }
     }
 }

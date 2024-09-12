@@ -70,7 +70,6 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
         [Command("sendDodo")]
         [Alias("sd", "send")]
         [Summary("Prints the Dodo Code for the island. Only works in dodo restore mode.")]
-        [RequireQueueRole(nameof(Globals.Bot.Config.RoleUseBot))]
         public async Task RequestRestoreLoopDodoAsync()
         {
             if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
@@ -141,7 +140,6 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
         [Command("drop")]
         [Alias("dropItem")]
         [Summary("Drops a custom item (or items).")]
-        [RequireQueueRole(nameof(Globals.Bot.Config.RoleUseBot))]
         public async Task RequestDropAsync([Summary(DropItemSummary)][Remainder] string request)
         {
             if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
@@ -165,7 +163,6 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
         [Command("dropDIY")]
         [Alias("diy")]
         [Summary("Drops a DIY recipe with the requested recipe ID(s).")]
-        [RequireQueueRole(nameof(Globals.Bot.Config.RoleUseBot))]
         public async Task RequestDropDIYAsync([Summary(DropDIYSummary)][Remainder] string recipeIDs)
         {
             if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))

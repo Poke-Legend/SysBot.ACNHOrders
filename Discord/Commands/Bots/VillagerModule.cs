@@ -17,7 +17,6 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
 
         [Command("injectVillager"), Alias("iv")]
         [Summary("Injects a villager based on the internal name.")]
-        [RequireQueueRole(nameof(Globals.Bot.Config.RoleUseBot))]
         public async Task InjectVillagerAsync(int index, string internalName)
         {
             if (!await PreExecuteCheckAsync()) return;
@@ -27,7 +26,6 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
 
         [Command("injectVillager"), Alias("iv")]
         [Summary("Injects a villager based on the internal name.")]
-        [RequireQueueRole(nameof(Globals.Bot.Config.RoleUseBot))]
         public async Task InjectVillagerAsync(string internalName)
         {
             if (!await PreExecuteCheckAsync()) return;
@@ -37,7 +35,6 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
 
         [Command("multiVillager"), Alias("mvi", "injectVillagerMulti", "superUltraInjectionGiveMeMoreVillagers")]
         [Summary("Injects multiple villagers based on the internal names.")]
-        [RequireQueueRole(nameof(Globals.Bot.Config.RoleUseBot))]
         public async Task InjectVillagerMultiAsync([Remainder] string names)
         {
             if (!await PreExecuteCheckAsync()) return;
@@ -48,7 +45,6 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
 
         [Command("villagers"), Alias("vl", "villagerList")]
         [Summary("Prints the list of villagers currently on the island.")]
-        [RequireQueueRole(nameof(Globals.Bot.Config.RoleUseBot))]
         public async Task GetVillagerListAsync()
         {
             if (!await PreExecuteCheckAsync()) return;
@@ -72,7 +68,6 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
         [Command("villagerName")]
         [Alias("vn", "nv", "name")]
         [Summary("Gets the internal name of a villager.")]
-        [RequireQueueRole(nameof(Globals.Bot.Config.RoleUseBot))]
         public async Task GetVillagerInternalNameAsync(string language, [Remainder] string villagerName)
         {
             if (!await PreExecuteCheckAsync()) return;
@@ -84,7 +79,6 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
         [Command("villagerName")]
         [Alias("vn", "nv", "name")]
         [Summary("Gets the internal name of a villager.")]
-        [RequireQueueRole(nameof(Globals.Bot.Config.RoleUseBot))]
         public async Task GetVillagerInternalNameAsync([Remainder] string villagerName)
         {
             if (!await PreExecuteCheckAsync()) return;
@@ -106,12 +100,6 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
             if (IsServerBanned())
             {
                 await LeaveGuildAsync();
-                return false;
-            }
-
-            if (!Globals.Bot.Config.DodoModeConfig.LimitedDodoRestoreOnlyMode)
-            {
-                await ReplyErrorAsync("Villagers cannot be injected in order mode.");
                 return false;
             }
 
@@ -279,8 +267,9 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
                 return;
             }
 
+            var lookupKey = villagerName.Replace(" ", string.Empty);
             var result = strings.VillagerMap
-                .FirstOrDefault(z => string.Equals(villagerName.Replace(" ", string.Empty), z.Value, StringComparison.InvariantCultureIgnoreCase));
+                .FirstOrDefault(z => string.Equals(lookupKey, z.Value, StringComparison.InvariantCultureIgnoreCase));
 
             if (string.IsNullOrWhiteSpace(result.Key))
             {
@@ -301,7 +290,6 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
 
             await ReplyAsync(embed: nameEmbed).ConfigureAwait(false);
         }
-
         #endregion
     }
 }

@@ -389,7 +389,7 @@
           }
         }
       },
-      "NLog/5.3.3": {
+      "NLog/5.3.4": {
         "type": "package",
         "compile": {
           "lib/netstandard2.0/NLog.dll": {
@@ -1277,10 +1277,10 @@
         "packageIcon.png"
       ]
     },
-    "NLog/5.3.3": {
-      "sha512": "cy0+hlrUbYu+6mgUsILqCcqlJ2Csqyt2lm8y9T9kE8nhgwl8SvR+LM21QX4nmzFCPiowbrTFYxNF8+gWpy7/HQ==",
+    "NLog/5.3.4": {
+      "sha512": "gLy7+O1hEYJXIlcTr1/VWjGXrZTQFZzYNO18IWasD64pNwz0BreV+nHLxWKXWZzERRzoKnsk2XYtwLkTVk7J1A==",
       "type": "package",
-      "path": "nlog/5.3.3",
+      "path": "nlog/5.3.4",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -1297,7 +1297,7 @@
         "lib/netstandard1.5/NLog.xml",
         "lib/netstandard2.0/NLog.dll",
         "lib/netstandard2.0/NLog.xml",
-        "nlog.5.3.3.nupkg.sha512",
+        "nlog.5.3.4.nupkg.sha512",
         "nlog.nuspec"
       ]
     },
@@ -1742,7 +1742,7 @@
       "Discord.Net.Core >= 3.15.3",
       "Microsoft.AspNetCore.SignalR.Client >= 8.0.8",
       "Microsoft.Extensions.DependencyInjection >= 8.0.0",
-      "NLog >= 5.3.3",
+      "NLog >= 5.3.4",
       "SixLabors.Fonts >= 2.0.4",
       "SixLabors.ImageSharp >= 3.1.5",
       "SixLabors.ImageSharp.Drawing >= 2.1.4",
@@ -1757,11 +1757,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\brand\\Source\\Repos\\SysBot.ACNHOrders\\SysBot.ACNHOrders.csproj",
+      "projectUniqueName": "C:\\Users\\brand\\source\\repos\\SysBot.ACNHOrders\\SysBot.ACNHOrders.csproj",
       "projectName": "SysBot.ACNHOrders",
-      "projectPath": "C:\\Users\\brand\\Source\\Repos\\SysBot.ACNHOrders\\SysBot.ACNHOrders.csproj",
+      "projectPath": "C:\\Users\\brand\\source\\repos\\SysBot.ACNHOrders\\SysBot.ACNHOrders.csproj",
       "packagesPath": "C:\\Users\\brand\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\brand\\Source\\Repos\\SysBot.ACNHOrders\\obj\\",
+      "outputPath": "C:\\Users\\brand\\source\\repos\\SysBot.ACNHOrders\\obj\\",
       "projectStyle": "PackageReference",
       "crossTargeting": true,
       "fallbackFolders": [
@@ -1817,7 +1817,7 @@
           },
           "NLog": {
             "target": "Package",
-            "version": "[5.3.3, )"
+            "version": "[5.3.4, )"
           },
           "SixLabors.Fonts": {
             "target": "Package",

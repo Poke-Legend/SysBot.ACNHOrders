@@ -8,7 +8,7 @@ using NHSE.Core;
 
 namespace SysBot.ACNHOrders.Discord.Commands.Bots
 {
-    public class RecipeModule : ModuleBase<SocketCommandContext>
+    public class Recipe : ModuleBase<SocketCommandContext>
     {
         private const int MinSearchTermLength = 2;
         private const int MaxResultLength = 500;

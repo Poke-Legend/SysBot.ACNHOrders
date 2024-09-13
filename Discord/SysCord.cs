@@ -22,7 +22,7 @@ namespace SysBot.ACNHOrders
         private bool _isOffline;
 
         public ulong Owner { get; private set; } = ulong.MaxValue;
-        public bool Ready { get; private set; } = false;
+        public bool Ready { get; private set; }
 
         public SysCord(CrossBot bot)
         {
@@ -52,22 +52,21 @@ namespace SysBot.ACNHOrders
 
             _isOffline = false;
 
-            // Handle program exit events to update the bot to offline before shutdown
             AppDomain.CurrentDomain.ProcessExit += OnProcessExit;
             Console.CancelKeyPress += OnConsoleCancelKeyPress;
         }
 
-        // Define the missing methods for shutdown events:
-        private void OnProcessExit(object? sender, EventArgs e)
+        private void OnProcessExit(object? sender, EventArgs e) // Mark 'sender' as nullable
         {
             ShutdownAsync().Wait();
         }
 
-        private void OnConsoleCancelKeyPress(object? sender, ConsoleCancelEventArgs e)
+        private void OnConsoleCancelKeyPress(object? sender, ConsoleCancelEventArgs e) // Mark 'sender' as nullable
         {
             e.Cancel = true;
             ShutdownAsync().Wait();
         }
+
 
         private static Task LogAsync(LogMessage msg)
         {
@@ -97,9 +96,7 @@ namespace SysBot.ACNHOrders
             _client.Ready += OnClientReadyAsync;
 
             if (!string.IsNullOrWhiteSpace(_bot.Config.Name))
-            {
                 await _client.SetGameAsync(_bot.Config.Name);
-            }
 
             var appInfo = await _client.GetApplicationInfoAsync();
             Owner = appInfo.Owner.Id;
@@ -124,9 +121,7 @@ namespace SysBot.ACNHOrders
                 LogUtil.Forwarders.Add(Logger);
             }
 
-            await UpdateChannelNameWithStatus("✅");
-
-            return;
+            await UpdateChannelNameWithStatus("🟢");
         }
 
         private async Task InitCommandsAsync()
@@ -157,9 +152,7 @@ namespace SysBot.ACNHOrders
             var result = await _commands.ExecuteAsync(context, argPos, _services);
 
             if (!result.IsSuccess)
-            {
                 await msg.Channel.SendMessageAsync(result.ErrorReason);
-            }
 
             return result.Error != CommandError.UnknownCommand;
         }
@@ -169,21 +162,11 @@ namespace SysBot.ACNHOrders
             if (_client.ConnectionState != ConnectionState.Connected) return false;
 
             if (_client.GetChannel(channelId) is IMessageChannel channel)
-            {
-                if (noDoublePost)
-                {
-                    var lastMessage = (await channel.GetMessagesAsync(1).FlattenAsync()).FirstOrDefault();
-                    if (lastMessage?.Content == message) return true;
-                }
-
-                return await TrySendMessageAsync(channel, message);
-            }
+                return await TrySendMessageAsync(channel, message, noDoublePost);
 
             return false;
         }
 
-
-        // Single version of TrySendMessageAsync to avoid duplicate method error
         public async Task<bool> TrySendMessageAsync(IMessageChannel channel, string message, bool noDoublePost = false)
         {
             try
@@ -191,7 +174,7 @@ namespace SysBot.ACNHOrders
                 if (noDoublePost)
                 {
                     var lastMessage = (await channel.GetMessagesAsync(1).FlattenAsync()).FirstOrDefault();
-                    if (lastMessage?.Content == message) return true; // Avoid duplicate posts
+                    if (lastMessage?.Content == message) return true;
                 }
 
                 await channel.SendMessageAsync(message);
@@ -199,13 +182,12 @@ namespace SysBot.ACNHOrders
             }
             catch (HttpException ex) when (ex.HttpCode == System.Net.HttpStatusCode.TooManyRequests)
             {
-                // Handle rate limit by extracting the Retry-After value from the exception data
                 if (ex.Data.Contains("Retry-After"))
                 {
                     var retryAfterMs = Convert.ToInt32(ex.Data["Retry-After"]);
                     Console.WriteLine($"Rate limit hit. Retrying after {retryAfterMs} milliseconds...");
                     await Task.Delay(retryAfterMs);
-                    await channel.SendMessageAsync(message); // Retry after delay
+                    await channel.SendMessageAsync(message);
                     return true;
                 }
                 Console.WriteLine($"Rate limit hit, but no Retry-After header found: {ex.Message}");
@@ -221,8 +203,6 @@ namespace SysBot.ACNHOrders
 
             return false;
         }
-
-
 
         private async Task HandleMessageAsync(SocketMessage arg)
         {
@@ -310,37 +290,28 @@ namespace SysBot.ACNHOrders
                 try
                 {
                     string currentName = channel.Name;
+                    if (currentName.StartsWith("🟢") || currentName.StartsWith("🔴"))
+                        currentName = currentName.Substring(1).Trim(); // Remove existing status icon if present
 
-                    if (currentName.StartsWith("✅") || currentName.StartsWith("❌"))
-                    {
-                        currentName = currentName.Substring(1).Trim();
-                    }
-
+                    // Define 'newChannelName' here
                     string newChannelName = $"{statusIcon}{currentName}";
 
-                    try
+                    // Update the channel name
+                    await channel.ModifyAsync(prop => prop.Name = newChannelName);
+                    Console.WriteLine($"Channel name updated to: {newChannelName} in {channel.Guild.Name}");
+                }
+                catch (HttpException ex) when (ex.HttpCode == System.Net.HttpStatusCode.TooManyRequests)
+                {
+                    if (ex.Data.Contains("Retry-After"))
                     {
-                        await channel.ModifyAsync(prop => prop.Name = newChannelName);
-                        Console.WriteLine($"Channel name updated to: {newChannelName} in {channel.Guild.Name}");
+                        var retryAfterMs = Convert.ToInt32(ex.Data["Retry-After"]);
+                        Console.WriteLine($"Rate limit hit. Retrying after {retryAfterMs} milliseconds...");
+                        await Task.Delay(retryAfterMs);
+                        await channel.ModifyAsync(prop => prop.Name = $"{statusIcon}{channel.Name.Substring(1).Trim()}"); // Retry with a new name
                     }
-                    catch (HttpException ex) when (ex.HttpCode == System.Net.HttpStatusCode.TooManyRequests)
+                    else
                     {
-                        // Handle rate limit
-                        if (ex.Data.Contains("Retry-After"))
-                        {
-                            var retryAfterMs = Convert.ToInt32(ex.Data["Retry-After"]);
-                            Console.WriteLine($"Rate limit hit. Retrying after {retryAfterMs} milliseconds...");
-                            await Task.Delay(retryAfterMs);
-                            await channel.ModifyAsync(prop => prop.Name = newChannelName);
-                        }
-                        else
-                        {
-                            Console.WriteLine($"Rate limit hit, but no Retry-After header found: {ex.Message}");
-                        }
-                    }
-                    catch (HttpException ex)
-                    {
-                        Console.WriteLine($"Failed to modify channel name: {ex.Message}");
+                        Console.WriteLine($"Rate limit hit, but no Retry-After header found: {ex.Message}");
                     }
                 }
                 catch (Exception ex)
@@ -351,11 +322,10 @@ namespace SysBot.ACNHOrders
         }
 
 
-
         private async Task ShutdownAsync()
         {
             SetOfflineMode(true);
-            await UpdateChannelNameWithStatus("❌");
+            await UpdateChannelNameWithStatus("🔴");
             await _client.StopAsync();
             Environment.Exit(0);
         }
@@ -363,7 +333,7 @@ namespace SysBot.ACNHOrders
         public async Task StopBotAsync()
         {
             SetOfflineMode(true);
-            await UpdateChannelNameWithStatus("❌");
+            await UpdateChannelNameWithStatus("🔴");
             await _client.StopAsync();
         }
 
@@ -372,7 +342,7 @@ namespace SysBot.ACNHOrders
             SetOfflineMode(false);
             await _client.LoginAsync(TokenType.Bot, apiToken);
             await _client.StartAsync();
-            await UpdateChannelNameWithStatus("✅");
+            await UpdateChannelNameWithStatus("🟢");
         }
 
         public void SetOfflineMode(bool isOffline)

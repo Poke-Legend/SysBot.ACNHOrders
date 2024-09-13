@@ -5,7 +5,7 @@ using SysBot.ACNHOrders.Discord.Helpers;
 
 namespace SysBot.ACNHOrders.Discord.Commands.Helpers
 {
-    public class ChannelModule : ModuleBase<SocketCommandContext>
+    public class Channel : ModuleBase<SocketCommandContext>
     {
         [Command("addchannel")]
         [Summary("Adds the current channel to the list of channels for status updates.")]

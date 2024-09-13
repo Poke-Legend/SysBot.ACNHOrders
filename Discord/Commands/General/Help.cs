@@ -6,11 +6,11 @@ using Discord.Commands;
 
 namespace SysBot.ACNHOrders.Discord.Commands.General
 {
-    public class HelpModule : ModuleBase<SocketCommandContext>
+    public class Help : ModuleBase<SocketCommandContext>
     {
         private readonly CommandService _service;
 
-        public HelpModule(CommandService service)
+        public Help(CommandService service)
         {
             _service = service;
         }
@@ -44,20 +44,26 @@ namespace SysBot.ACNHOrders.Discord.Commands.General
 
             foreach (var module in _service.Modules)
             {
-                var embed = GetCommandDescriptions(module, owner, userId);
+                var embed = await GetCommandDescriptionsAsync(module, owner, userId).ConfigureAwait(false);
                 if (embed != null) embeds.Add(embed);
             }
 
             return embeds;
         }
 
-        private Embed? GetCommandDescriptions(ModuleInfo module, ulong owner, ulong userId)
+        private async Task<Embed?> GetCommandDescriptionsAsync(ModuleInfo module, ulong owner, ulong userId)
         {
-            var descriptions = module.Commands
-                .Where(cmd => IsCommandVisible(cmd, owner, userId))
-                .Select(cmd => (cmd.Aliases.FirstOrDefault(), cmd.Summary ?? "No description available."))
-                .Where(tuple => !string.IsNullOrEmpty(tuple.Item1))
-                .ToList();
+            var descriptions = new List<(string?, string)>();
+
+            foreach (var cmd in module.Commands)
+            {
+                if (await IsCommandVisibleAsync(cmd, owner, userId).ConfigureAwait(false))
+                {
+                    var alias = cmd.Aliases.FirstOrDefault();
+                    var summary = cmd.Summary ?? "No description available.";
+                    descriptions.Add((alias, summary));
+                }
+            }
 
             if (!descriptions.Any()) return null;
 
@@ -76,9 +82,10 @@ namespace SysBot.ACNHOrders.Discord.Commands.General
             return embedBuilder.Build();
         }
 
-        private bool IsCommandVisible(CommandInfo cmd, ulong owner, ulong userId)
+        private async Task<bool> IsCommandVisibleAsync(CommandInfo cmd, ulong owner, ulong userId)
         {
-            return cmd.CheckPreconditionsAsync(Context).Result.IsSuccess &&
+            var result = await cmd.CheckPreconditionsAsync(Context).ConfigureAwait(false);
+            return result.IsSuccess &&
                    !RequiresOwner(cmd, owner, userId) &&
                    !RequiresSudo(cmd, userId);
         }

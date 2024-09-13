@@ -10,7 +10,7 @@ using SysBot.Base;
 namespace SysBot.ACNHOrders.Discord.Commands.Management
 {
     // ReSharper disable once UnusedType.Global
-    public class ControlModule : ModuleBase<SocketCommandContext>
+    public class Control : ModuleBase<SocketCommandContext>
     {
         [Command("detach")]
         [Summary("Detaches the virtual controller so the operator can use their own handheld controller temporarily.")]

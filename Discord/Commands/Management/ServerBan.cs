@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace SysBot.ACNHOrders.Discord.Commands.Management
 {
-    public static class ServerBan
+    // Renamed static class for managing banned servers
+    public static class ServerBanManager
     {
         private static readonly HashSet<string> BannedServerIds = new();
 
@@ -17,11 +18,12 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
         public static void UnbanServer(string serverId) => BannedServerIds.Remove(serverId);
     }
 
-    public class ServerBanModule : ModuleBase<SocketCommandContext>
+    // Non-static class for bot command handling
+    public class ServerBan : ModuleBase<SocketCommandContext>
     {
         protected override void BeforeExecute(CommandInfo command)
         {
-            if (ServerBan.IsServerBanned(Context.Guild.Id.ToString()))
+            if (ServerBanManager.IsServerBanned(Context.Guild.Id.ToString()))
             {
                 throw new InvalidOperationException("This server has been banned from using the bot.");
             }
@@ -34,13 +36,13 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
         [RequireOwner]
         public async Task UnbanServerAsync(string serverId)
         {
-            if (!ServerBan.IsServerBanned(serverId))
+            if (!ServerBanManager.IsServerBanned(serverId))
             {
                 await ReplyAsync($"Server {serverId} is not in the ban list.").ConfigureAwait(false);
                 return;
             }
 
-            ServerBan.UnbanServer(serverId);
+            ServerBanManager.UnbanServer(serverId);
             await ReplyAsync($"Server {serverId} has been unbanned.").ConfigureAwait(false);
         }
 
@@ -49,13 +51,13 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
         [RequireOwner]
         public async Task BanServerAsync(string serverId)
         {
-            if (ServerBan.IsServerBanned(serverId))
+            if (ServerBanManager.IsServerBanned(serverId))
             {
                 await ReplyAsync($"Server {serverId} is already banned.").ConfigureAwait(false);
                 return;
             }
 
-            ServerBan.BanServer(serverId);
+            ServerBanManager.BanServer(serverId);
             await ReplyAsync($"Server {serverId} has been banned.").ConfigureAwait(false);
 
             if (ulong.TryParse(serverId, out var guildId))
@@ -75,13 +77,12 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
             }
         }
 
-
         [Command("checkbls")]
         [Summary("Checks a server's ban state by its server ID.")]
         [RequireOwner]
         public async Task CheckServerBanAsync(string serverId)
         {
-            var message = ServerBan.IsServerBanned(serverId)
+            var message = ServerBanManager.IsServerBanned(serverId)
                 ? $"Server {serverId} is banned."
                 : $"Server {serverId} is not banned.";
             await ReplyAsync(message).ConfigureAwait(false);

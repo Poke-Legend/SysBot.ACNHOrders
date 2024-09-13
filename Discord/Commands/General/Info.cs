@@ -12,7 +12,7 @@ using Discord.Rest;
 
 namespace SysBot.ACNHOrders.Discord.Commands.General
 {
-    public class InfoModule : ModuleBase<SocketCommandContext>
+    public class Info : ModuleBase<SocketCommandContext>
     {
         private const string DiscordUrl = "https://pokelegends.org";
         private static readonly string[] Contributors = { "Kurt", "Berichan", "CodeHedge", "DeVry" };

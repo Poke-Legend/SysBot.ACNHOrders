@@ -13,7 +13,7 @@ using SysBot.Base;
 
 namespace SysBot.ACNHOrders
 {
-    public class OrderModule : ModuleBase<SocketCommandContext>
+    public class Order : ModuleBase<SocketCommandContext>
     {
         private static int MaxOrderCount => Globals.Bot.Config.OrderConfig.MaxQueueCount;
         private static readonly Dictionary<ulong, DateTime> UserLastCommand = new();
@@ -32,7 +32,7 @@ namespace SysBot.ACNHOrders
 
             var cfg = Globals.Bot.Config;
             var logMessage = $"order received by {Context.User.Username} - {request}";
-            LogUtil.LogInfo(logMessage, nameof(OrderModule));
+            LogUtil.LogInfo(logMessage, nameof(Order));
 
             // Try to get villager
             var result = VillagerOrderParser.ExtractVillagerName(request, out var villagerName, out var sanitizedOrder);
@@ -74,7 +74,7 @@ namespace SysBot.ACNHOrders
 
             var cfg = Globals.Bot.Config;
             var logMessage = $"ordercat received by {Context.User.Username} - {request}";
-            LogUtil.LogInfo(logMessage, nameof(OrderModule));
+            LogUtil.LogInfo(logMessage, nameof(Order));
 
             // Try to get villager
             var result = VillagerOrderParser.ExtractVillagerName(request, out var villagerName, out var sanitizedOrder);

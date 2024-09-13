@@ -8,7 +8,7 @@ using NHSE.Core;
 
 namespace SysBot.ACNHOrders.Discord.Commands.Bots
 {
-    public class ItemModule : ModuleBase<SocketCommandContext>
+    public class Item : ModuleBase<SocketCommandContext>
     {
         [Command("lookupLang")]
         [Alias("ll")]
@@ -39,9 +39,9 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
             if (await CheckBanAndPermissionsAsync()) return;
 
             ushort itemID = ItemParser.GetID(itemHex);
-            if (itemID == Item.NONE)
+            if (itemID == NHSE.Core.Item.NONE)
             {
-                await ReplyAsync("Invalid item requested.").ConfigureAwait(false);
+                await base.ReplyAsync("Invalid item requested.").ConfigureAwait(false);
                 return;
             }
 
@@ -72,14 +72,14 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
             if (await CheckBanAndPermissionsAsync()) return;
 
             ushort itemID = ItemParser.GetID(itemHex);
-            if (itemID == Item.NONE || count < 1 || count > 99)
+            if (itemID == NHSE.Core.Item.NONE || count < 1 || count > 99)
             {
-                await ReplyAsync("Invalid item requested.").ConfigureAwait(false);
+                await base.ReplyAsync("Invalid item requested.").ConfigureAwait(false);
                 return;
             }
 
             var ct = count - 1; // value 0 => count of 1
-            var item = new Item(itemID) { Count = (ushort)ct };
+            var item = new NHSE.Core.Item(itemID) { Count = (ushort)ct };
             var msg = ItemParser.GetItemText(item);
 
             var responseEmbed = new EmbedBuilder()
@@ -108,9 +108,9 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
             if (await CheckBanAndPermissionsAsync()) return;
 
             ushort itemID = ItemParser.GetID(itemHex);
-            if (itemID == Item.NONE)
+            if (itemID == NHSE.Core.Item.NONE)
             {
-                await ReplyAsync("Invalid item requested.").ConfigureAwait(false);
+                await base.ReplyAsync("Invalid item requested.").ConfigureAwait(false);
                 return;
             }
             if (sum <= 0)
@@ -144,7 +144,7 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
                 return;
             }
 
-            var item = new Item(itemID) { BodyType = body, PatternChoice = fabric };
+            var item = new NHSE.Core.Item(itemID) { BodyType = body, PatternChoice = fabric };
             var msg = ItemParser.GetItemText(item);
 
             var responseEmbed = new EmbedBuilder()

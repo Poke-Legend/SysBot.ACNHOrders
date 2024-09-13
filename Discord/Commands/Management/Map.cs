@@ -6,7 +6,7 @@ using Discord.WebSocket;
 
 namespace SysBot.ACNHOrders.Discord.Commands.Management
 {
-    public class MapModule : ModuleBase<SocketCommandContext>
+    public class Map : ModuleBase<SocketCommandContext>
     {
         [Command("loadLayer")]
         [Summary("Changes the current refresher layer to a new .nhl field item layer")]

@@ -11,7 +11,7 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
     /// <summary>
     /// Module for managing villagers in the Discord bot.
     /// </summary>
-    public class VillagerModule : ModuleBase<SocketCommandContext>
+    public class Villager : ModuleBase<SocketCommandContext>
     {
         #region Commands
 

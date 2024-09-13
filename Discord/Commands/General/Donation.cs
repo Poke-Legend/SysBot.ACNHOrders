@@ -7,7 +7,7 @@ using System;
 
 namespace SysBot.ACNHOrders.Discord.Commands.General
 {
-    public class DonationModule : ModuleBase<SocketCommandContext>
+    public class Donation : ModuleBase<SocketCommandContext>
     {
         // Static fields
         private static readonly Random _random = new();

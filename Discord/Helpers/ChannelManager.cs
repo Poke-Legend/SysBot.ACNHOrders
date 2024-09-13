@@ -12,25 +12,21 @@ namespace SysBot.ACNHOrders.Discord.Helpers
         {
             if (!File.Exists(_filePath))
             {
-                var data = new Dictionary<string, List<ulong>> { { "channels", new List<ulong>() } };
-                File.WriteAllText(_filePath, JsonConvert.SerializeObject(data, Formatting.Indented));
+                // Initialize and save empty channels data
+                SaveChannels(new List<ulong>());
                 return new List<ulong>();
             }
 
             var json = File.ReadAllText(_filePath);
             var channelsData = JsonConvert.DeserializeObject<Dictionary<string, List<ulong>>>(json);
 
-            // Add null checks
-            if (channelsData != null && channelsData.ContainsKey("channels"))
-            {
-                return channelsData["channels"] ?? new List<ulong>();
-            }
-
-            return new List<ulong>();
+            // Return the channel list if present, otherwise return an empty list
+            return channelsData?.GetValueOrDefault("channels") ?? new List<ulong>();
         }
 
         public void SaveChannels(List<ulong> channels)
         {
+            // Serialize and write channels data to file
             var data = new Dictionary<string, List<ulong>> { { "channels", channels } };
             var json = JsonConvert.SerializeObject(data, Formatting.Indented);
             File.WriteAllText(_filePath, json);

@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace SysBot.ACNHOrders.Discord.Commands.Management
 {
-    public class BroadcastModule : ModuleBase<SocketCommandContext>
+    public class Broadcast : ModuleBase<SocketCommandContext>
     {
         private class Config
         {

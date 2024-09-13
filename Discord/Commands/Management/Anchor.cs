@@ -4,7 +4,7 @@ using Discord.Commands;
 
 namespace SysBot.ACNHOrders.Discord.Commands.Management
 {
-    public class AnchorModule : ModuleBase<SocketCommandContext>
+    public class Anchor : ModuleBase<SocketCommandContext>
     {
         [Command("setAnchor")]
         [Summary("Sets one of the anchors required for the queue loop.")]

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace SysBot.ACNHOrders.Discord.Commands.Management
 {
-    public class RemoteControlModule : ModuleBase<SocketCommandContext>
+    public class RemoteControl : ModuleBase<SocketCommandContext>
     {
         private static CrossBot Bot => Globals.Bot;
 

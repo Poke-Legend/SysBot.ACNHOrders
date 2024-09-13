@@ -14,7 +14,7 @@ using SysBot.Base;
 namespace SysBot.ACNHOrders.Discord.Commands.Management
 {
     // ReSharper disable once UnusedType.Global
-    public class DropModule : ModuleBase<SocketCommandContext>
+    public class Drop : ModuleBase<SocketCommandContext>
     {
         private static int MaxRequestCount => Globals.Bot.Config.DropConfig.MaxDropCount;
 

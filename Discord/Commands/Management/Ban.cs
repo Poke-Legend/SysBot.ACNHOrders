@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SysBot.ACNHOrders.Discord.Commands.Management
 {
-    public class BanModule : ModuleBase<SocketCommandContext>
+    public class Ban : ModuleBase<SocketCommandContext>
     {
         [Command("unBan")]
         [Summary("unbans a user by their long number id.")]

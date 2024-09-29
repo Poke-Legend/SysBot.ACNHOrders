@@ -479,7 +479,6 @@ namespace SysBot.ACNHOrders
                 GameIsDirty = true;
             }
 
-            if (result == OrderResult.NoArrival || result == OrderResult.NoLeave)
 
             // Clear username of last arrival
             await Connection.WriteBytesAsync(new byte[0x14], (uint)OffsetHelper.ArriverNameLocAddress, token).ConfigureAwait(false);
@@ -514,70 +513,127 @@ namespace SysBot.ACNHOrders
         // execute order from scratch (press home, shutdown game, start over, usually due to "a connection error has occured")
         private async Task<OrderResult> ExecuteOrderStart(IACNHOrderNotifier<Item> order, bool ignoreInjection, bool fromRestart, CancellationToken token)
         {
-            // Method:
-            // 1) Restart the game. This is the most reliable way to do this if running endlessly atm. Dodo code offset shifts are bizarre and don't have good pointers.
-            // 2) Wait for Isabelle's speech (if any), Notify player to be ready, teleport player into their airport then in front of orville, open gate & inform dodo code.
-            // 3) Notify player to come now, teleport outside into drop zone, wait for drop command in their DMs, the config time or until the player leaves
-            // 4) Once the timer runs out or the user leaves, start over with next user.
+            // Detach the controller at the start to reset the game state.
+            await DetachControllerAsync(token);
 
-            await Connection.SendAsync(SwitchCommand.DetachController(), token).ConfigureAwait(false);
-            await Task.Delay(200, token).ConfigureAwait(false);
-
+            // If the game is restarted, go through the restart process and handle order injection.
             if (fromRestart)
             {
-                await RestartGame(token).ConfigureAwait(false);
-
-                // Reset any sticks
-                await SetStick(SwitchStick.LEFT, 0, 0, 0_500, token).ConfigureAwait(false);
-
-                // Setup order locally, clear map by puliing all and checking difference. Read is much faster than write
-                if (!ignoreInjection)
-                {
-                    await ClearMapAndSpawnInternally(order.Order, Map, false, token).ConfigureAwait(false);
-
-                    if (order.VillagerOrder != null)
-                        await Villagers.InjectVillager(order.VillagerOrder, token).ConfigureAwait(false);
-                }
-
-                // Press A on title screen
-                await Click(SwitchButton.A, 0_500, token).ConfigureAwait(false);
-
-                // Wait for the load time which feels like an age.
-                // Wait for the game to teleport us from the "hell" position to our front door. Keep pressing A & B incase we're stuck at the day intro.
-                int echoCount = 0;
-                bool gameStarted = await EnsureAnchorMatches(0, 150_000, async () =>
-                {
-                    await ClickConversation(SwitchButton.A, 0_300, token).ConfigureAwait(false);
-                    await ClickConversation(SwitchButton.B, 0_300, token).ConfigureAwait(false);
-                    if (echoCount < 5)
-                    {
-                        if (await DodoPosition.GetOverworldState(OffsetHelper.PlayerCoordJumps, token).ConfigureAwait(false) == OverworldState.Overworld)
-                        {
-                            LogUtil.LogInfo("Reached overworld, waiting for anchor 0 to match...", Config.IP);
-                            echoCount++;
-                        }
-                    }
-
-                }, token);
-
-                if (!gameStarted)
-                {
-                    var error = "Failed to reach the overworld.";
-                    LogUtil.LogError($"{error} Trying next request.", Config.IP);
-                    order.OrderCancelled(this, $"{error} Sorry, your request has been removed.", true);
-                    return OrderResult.Faulted;
-                }
-
-                LogUtil.LogInfo("Anchor 0 matched successfully.", Config.IP);
-
-                // inject order
-                if (!ignoreInjection)
-                {
-                    await InjectOrder(Map, token).ConfigureAwait(false);
-                    order.OrderInitializing(this, string.Empty);
-                }
+                await HandleGameRestartAsync(order, ignoreInjection, token);
             }
 
+            // Wait until the overworld state is reached.
+            await WaitForOverworldStateAsync(token, ignoreInjection);
+
+            // Unhold any held items once in the overworld.
+            await HandleItemUnholdAsync(token);
+
+            LogUtil.LogInfo($"Reached overworld, teleporting to the airport.", Config.IP);
+
+            // Inject airport entry anchor.
+            await InjectAirportEntryAnchorAsync(token, ignoreInjection);
+
+            // Enter the airport and proceed with the order process.
+            await EnterAirportAndProceedAsync(order, ignoreInjection, token);
+
+            // Fetch the Dodo code and wait for the order to be completed.
+            return await FetchDodoAndAwaitOrder(order, ignoreInjection, token).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Detaches the controller to reset the game state.
+        /// </summary>
+        private async Task DetachControllerAsync(CancellationToken token)
+        {
+            await Connection.SendAsync(SwitchCommand.DetachController(), token).ConfigureAwait(false);
+            await Task.Delay(200, token).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Handles the game restart process, including clearing the map and injecting orders.
+        /// </summary>
+        private async Task HandleGameRestartAsync(IACNHOrderNotifier<Item> order, bool ignoreInjection, CancellationToken token)
+        {
+            await RestartGame(token).ConfigureAwait(false);
+            await ResetControllerStickAsync(token);
+
+            if (!ignoreInjection)
+            {
+                await ClearMapAndSpawnOrderAsync(order, token);
+
+                if (order.VillagerOrder != null)
+                    await Villagers.InjectVillager(order.VillagerOrder, token).ConfigureAwait(false);
+            }
+
+            await PressTitleScreenButtonAsync(token);
+            await WaitForOverworldAfterRestartAsync(token, ignoreInjection, order);
+        }
+
+        /// <summary>
+        /// Resets the controller stick to its default state.
+        /// </summary>
+        private async Task ResetControllerStickAsync(CancellationToken token)
+        {
+            await SetStick(SwitchStick.LEFT, 0, 0, 0_500, token).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Clears the map and spawns the order if injection is required.
+        /// </summary>
+        private async Task ClearMapAndSpawnOrderAsync(IACNHOrderNotifier<Item> order, CancellationToken token)
+        {
+            await ClearMapAndSpawnInternally(order.Order, Map, false, token).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Presses the A button on the title screen to proceed with the game.
+        /// </summary>
+        private async Task PressTitleScreenButtonAsync(CancellationToken token)
+        {
+            await Click(SwitchButton.A, 0_500, token).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Waits for the overworld state after restarting the game, ensuring proper transitions.
+        /// </summary>
+        private async Task WaitForOverworldAfterRestartAsync(CancellationToken token, bool ignoreInjection, IACNHOrderNotifier<Item> order)
+        {
+            int echoCount = 0;
+            bool gameStarted = await EnsureAnchorMatches(0, 150_000, async () =>
+            {
+                await ClickConversation(SwitchButton.A, 0_300, token).ConfigureAwait(false);
+                await ClickConversation(SwitchButton.B, 0_300, token).ConfigureAwait(false);
+
+                if (echoCount < 5 && await DodoPosition.GetOverworldState(OffsetHelper.PlayerCoordJumps, token).ConfigureAwait(false) == OverworldState.Overworld)
+                {
+                    LogUtil.LogInfo("Reached overworld, waiting for anchor 0 to match...", Config.IP);
+                    echoCount++;
+                }
+
+            }, token);
+
+            if (!gameStarted)
+            {
+                string error = "Failed to reach the overworld.";
+                LogUtil.LogError($"{error} Trying next request.", Config.IP);
+                order.OrderCancelled(this, $"{error} Sorry, your request has been removed.", true);
+                throw new OperationCanceledException(error);
+            }
+
+            LogUtil.LogInfo("Anchor 0 matched successfully.", Config.IP);
+
+            if (!ignoreInjection)
+            {
+                await InjectOrder(Map, token).ConfigureAwait(false);
+                order.OrderInitializing(this, string.Empty);
+            }
+        }
+
+        /// <summary>
+        /// Waits for the overworld state to be reached after a potential game restart.
+        /// </summary>
+        private async Task WaitForOverworldStateAsync(CancellationToken token, bool ignoreInjection)
+        {
             while (await DodoPosition.GetOverworldState(OffsetHelper.PlayerCoordJumps, token).ConfigureAwait(false) != OverworldState.Overworld)
             {
                 await Task.Delay(1_000, token).ConfigureAwait(false);
@@ -585,31 +641,54 @@ namespace SysBot.ACNHOrders
                     await Click(SwitchButton.B, 0_500, token).ConfigureAwait(false);
             }
 
-            // Delay for animation
+            // Wait for animation to complete.
             await Task.Delay(1_800, token).ConfigureAwait(false);
-            // Unhold any held items
+        }
+
+        /// <summary>
+        /// Handles unholding any held items once in the overworld.
+        /// </summary>
+        private async Task HandleItemUnholdAsync(CancellationToken token)
+        {
             await Click(SwitchButton.DDOWN, 0_300, token).ConfigureAwait(false);
+        }
 
-            LogUtil.LogInfo($"Reached overworld, teleporting to the airport.", Config.IP);
-
-            // Inject the airport entry anchor
+        /// <summary>
+        /// Injects the airport entry anchor and handles any necessary morning announcements.
+        /// </summary>
+        private async Task InjectAirportEntryAnchorAsync(CancellationToken token, bool ignoreInjection)
+        {
             await SendAnchorBytes(2, token).ConfigureAwait(false);
 
             if (ignoreInjection)
             {
-                await SendAnchorBytes(1, token).ConfigureAwait(false);
-                LogUtil.LogInfo($"Checking for morning announcement", Config.IP);
-                // We need to check for Isabelle's morning announcement
-                for (int i = 0; i < 3; ++i)
-                    await Click(SwitchButton.B, 0_400, token).ConfigureAwait(false);
-                while (await DodoPosition.GetOverworldState(OffsetHelper.PlayerCoordJumps, token).ConfigureAwait(false) != OverworldState.Overworld)
-                {
-                    await Click(SwitchButton.B, 0_300, token).ConfigureAwait(false);
-                    await Task.Delay(1_000, token).ConfigureAwait(false);
-                }
+                await HandleMorningAnnouncementAsync(token);
+            }
+        }
+
+        /// <summary>
+        /// Handles the morning announcement by pressing necessary buttons.
+        /// </summary>
+        private async Task HandleMorningAnnouncementAsync(CancellationToken token)
+        {
+            LogUtil.LogInfo($"Checking for morning announcement", Config.IP);
+            for (int i = 0; i < 3; i++)
+            {
+                await Click(SwitchButton.B, 0_400, token).ConfigureAwait(false);
             }
 
-            // Get out of any calls, events, etc
+            while (await DodoPosition.GetOverworldState(OffsetHelper.PlayerCoordJumps, token).ConfigureAwait(false) != OverworldState.Overworld)
+            {
+                await Click(SwitchButton.B, 0_300, token).ConfigureAwait(false);
+                await Task.Delay(1_000, token).ConfigureAwait(false);
+            }
+        }
+
+        /// <summary>
+        /// Enters the airport and proceeds with the order process.
+        /// </summary>
+        private async Task EnterAirportAndProceedAsync(IACNHOrderNotifier<Item> order, bool ignoreInjection, CancellationToken token)
+        {
             bool atAirport = await EnsureAnchorMatches(2, 10_000, async () =>
             {
                 await Click(SwitchButton.A, 0_300, token).ConfigureAwait(false);
@@ -620,28 +699,36 @@ namespace SysBot.ACNHOrders
             await Task.Delay(0_500, token).ConfigureAwait(false);
 
             LogUtil.LogInfo($"Entering airport.", Config.IP);
-
             await EnterAirport(token).ConfigureAwait(false);
 
             if (await DodoPosition.GetOverworldState(OffsetHelper.PlayerCoordJumps, token).ConfigureAwait(false) == OverworldState.Null)
-                return OrderResult.Faulted; // we are in the water
+                throw new InvalidOperationException("We are in the water - faulted state");
 
             // Teleport to Orville (twice, in case we get pulled back)
+            await TeleportToDodoCounterAsync(token);
+        }
+
+        /// <summary>
+        /// Teleports to the Dodo counter and ensures the correct anchor match.
+        /// </summary>
+        private async Task TeleportToDodoCounterAsync(CancellationToken token)
+        {
             await SendAnchorBytes(3, token).ConfigureAwait(false);
             await Task.Delay(0_500, token).ConfigureAwait(false);
+
             int numChecks = 10;
             LogUtil.LogInfo($"Attempting to warp to dodo counter...", Config.IP);
+
             while (!AnchorHelper.DoAnchorsMatch(await ReadAnchor(token).ConfigureAwait(false), Anchors.Anchors[3]))
             {
                 await SendAnchorBytes(3, token).ConfigureAwait(false);
                 if (numChecks-- < 0)
-                    return OrderResult.Faulted;
+                    throw new InvalidOperationException("Failed to warp to dodo counter, faulted state");
 
                 await Task.Delay(0_500, token).ConfigureAwait(false);
             }
-
-            return await FetchDodoAndAwaitOrder(order, ignoreInjection, token).ConfigureAwait(false);
         }
+
 
         private async Task ClearMapAndSpawnInternally(Item[]? order, MapTerrainLite clearMap, bool includeAdditionalParams, CancellationToken token, bool forceFullWrite = false)
         {
@@ -767,6 +854,17 @@ namespace SysBot.ACNHOrders
                 LogUtil.LogInfo(e.Message + "\r\n" + e.StackTrace, Config.IP);
             }
 
+            if (!Config.AllowKnownAbusers)
+            {
+                LogUtil.LogInfo($"{LastArrival} from {LastArrivalIsland} is a known abuser. Starting next order...", Config.IP);
+                order.OrderCancelled(this, $"You are a known abuser. You cannot use this bot.", false);
+                return OrderResult.NoArrival;
+            }
+            else
+            {
+                LogUtil.LogInfo($"{LastArrival} from {LastArrivalIsland} is a known abuser, but you are allowing them to use your bot at your own risk.", Config.IP);
+            }
+        
             order.SendNotification(this, $"Visitor arriving: {LastArrival}. Your items will be in front of you once you land.");
             if (order.VillagerName != string.Empty && Config.OrderConfig.EchoArrivingLeavingChannels.Count > 0)
                 await AttemptEchoHook($"> Visitor arriving: {order.VillagerName}", Config.OrderConfig.EchoArrivingLeavingChannels, token).ConfigureAwait(false);
@@ -952,6 +1050,7 @@ namespace SysBot.ACNHOrders
                 await Connection.WriteBytesAsync(mapChunks[i].ToSend, mapChunks[i].Offset, token).ConfigureAwait(false);
         }
 
+        /// <returns>Whether or not the connection is active at the end of the close gate function</returns>
         private async Task<bool> CloseGate(CancellationToken token)
         {
             // Teleport to airport entry anchor  (twice, in case we get pulled back)

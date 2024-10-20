@@ -98,8 +98,8 @@ namespace SysBot.ACNHOrders
             DodoCode = string.Empty;
         }
 
-        byte[] freezeBytes = Encoding.ASCII.GetBytes($"freeze 0x{ACNHMobileSpawner.OffsetHelper.TextSpeedAddress:X8} 0x03\r\n");
-        byte[] unFreezeBytes = Encoding.ASCII.GetBytes($"unFreeze 0x{ACNHMobileSpawner.OffsetHelper.TextSpeedAddress:X8}\r\n");
+        private readonly byte[] freezeBytes = Encoding.ASCII.GetBytes($"freeze 0x{ACNHMobileSpawner.OffsetHelper.TextSpeedAddress:X8} 0x03\r\n");
+        private readonly byte[] unFreezeBytes = Encoding.ASCII.GetBytes($"unFreeze 0x{ACNHMobileSpawner.OffsetHelper.TextSpeedAddress:X8}\r\n");
 
         public async Task GetDodoCode(uint Offset, bool isRetry, CancellationToken token)
         {
@@ -149,7 +149,7 @@ namespace SysBot.ACNHOrders
                 await AttemptCheckForEndOfConversation(10, token).ConfigureAwait(false);
 
             byte[] bytes = await Connection.ReadBytesAsync(Offset, 0x5, token).ConfigureAwait(false);
-            DodoCode = Encoding.UTF8.GetString(bytes, 0, 5);
+            DodoCode = Encoding.UTF8.GetString(bytes, 0, 5).Trim();
             LogUtil.LogInfo($"Retrieved Dodo code: {DodoCode}.", Config.IP);
 
             await Task.Delay(2_000, token).ConfigureAwait(false);
@@ -221,7 +221,7 @@ namespace SysBot.ACNHOrders
                 await AttemptCheckForEndOfConversation(10, token).ConfigureAwait(false);
 
             byte[] bytes = await Connection.ReadBytesAsync(Offset, 0x5, token).ConfigureAwait(false);
-            DodoCode = Encoding.UTF8.GetString(bytes, 0, 5);
+            DodoCode = Encoding.UTF8.GetString(bytes, 0, 5).Trim();
             LogUtil.LogInfo($"Retrieved Dodo code: {DodoCode}.", Config.IP);
 
             await Task.Delay(2_000, token).ConfigureAwait(false);
@@ -235,10 +235,13 @@ namespace SysBot.ACNHOrders
 
             if (!File.Exists(ExperimentalFetchTextFilename))
                 File.WriteAllText(ExperimentalFetchTextFilename, ExperimentalDodoFetchRoutine);
+
             var experimentalText = File.ReadAllText(ExperimentalFetchTextFilename)
+                .Trim()  // Ensure the read text is trimmed to remove unnecessary whitespace
                 .Replace("{0}", $"{(isRetry ? 2_000 : 3_100)}")
                 .Replace("{1}", $"{17_000 + Config.ExtraTimeConnectionWait}")
                 .Replace("{end}", "\r\n");
+
             var encodedBytesSequence = Encoding.ASCII.GetBytes($"clickSeq " + experimentalText);
 
             var bytesRes = await BotRunner.SwitchConnection.ReadRaw(encodedBytesSequence, 6, token).ConfigureAwait(false);
@@ -254,7 +257,7 @@ namespace SysBot.ACNHOrders
                 await AttemptCheckForEndOfConversation(10, token).ConfigureAwait(false);
 
             byte[] bytes = await Connection.ReadBytesAsync(Offset, 0x5, token).ConfigureAwait(false);
-            DodoCode = Encoding.UTF8.GetString(bytes, 0, 5);
+            DodoCode = Encoding.UTF8.GetString(bytes, 0, 5).Trim();  // Ensure trimming of the retrieved Dodo code
             LogUtil.LogInfo($"Retrieved Dodo code: {DodoCode}.", Config.IP);
 
             await Task.Delay(2_000, token).ConfigureAwait(false);

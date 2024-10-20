@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SysBot.ACNHOrders")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ea81d402f49bd3a6c3c06773b8bad3585fafd2f2")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+df1076f9af4ba74c9d2a4fbe08431b8948282a1c")]
 [assembly: System.Reflection.AssemblyProductAttribute("SysBot.ACNHOrders")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SysBot.ACNHOrders")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

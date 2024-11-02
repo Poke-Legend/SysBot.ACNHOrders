@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\brand\\Source\\Repos\\SysBot.ACNHOrders\\SysBot.ACNHOrders.csproj": {}
+    "C:\\Users\\brand\\source\\repos\\SysBot.ACNHOrders\\SysBot.ACNHOrders.csproj": {}
   },
   "projects": {
-    "C:\\Users\\brand\\Source\\Repos\\SysBot.ACNHOrders\\SysBot.ACNHOrders.csproj": {
+    "C:\\Users\\brand\\source\\repos\\SysBot.ACNHOrders\\SysBot.ACNHOrders.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\brand\\Source\\Repos\\SysBot.ACNHOrders\\SysBot.ACNHOrders.csproj",
+        "projectUniqueName": "C:\\Users\\brand\\source\\repos\\SysBot.ACNHOrders\\SysBot.ACNHOrders.csproj",
         "projectName": "SysBot.ACNHOrders",
-        "projectPath": "C:\\Users\\brand\\Source\\Repos\\SysBot.ACNHOrders\\SysBot.ACNHOrders.csproj",
+        "projectPath": "C:\\Users\\brand\\source\\repos\\SysBot.ACNHOrders\\SysBot.ACNHOrders.csproj",
         "packagesPath": "C:\\Users\\brand\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\brand\\Source\\Repos\\SysBot.ACNHOrders\\obj\\",
+        "outputPath": "C:\\Users\\brand\\source\\repos\\SysBot.ACNHOrders\\obj\\",
         "projectStyle": "PackageReference",
         "crossTargeting": true,
         "fallbackFolders": [
@@ -26,6 +26,7 @@
           "net8.0"
         ],
         "sources": {
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -51,19 +52,19 @@
           "dependencies": {
             "Discord.Net": {
               "target": "Package",
-              "version": "[3.15.3, )"
+              "version": "[3.16.0, )"
             },
             "Discord.Net.Core": {
               "target": "Package",
-              "version": "[3.15.3, )"
+              "version": "[3.16.0, )"
             },
             "Microsoft.AspNetCore.SignalR.Client": {
               "target": "Package",
-              "version": "[8.0.8, )"
+              "version": "[8.0.10, )"
             },
             "Microsoft.Extensions.DependencyInjection": {
               "target": "Package",
-              "version": "[8.0.0, )"
+              "version": "[8.0.1, )"
             },
             "NLog": {
               "target": "Package",
@@ -71,7 +72,7 @@
             },
             "SixLabors.Fonts": {
               "target": "Package",
-              "version": "[2.0.4, )"
+              "version": "[2.0.6, )"
             },
             "SixLabors.ImageSharp": {
               "target": "Package",
@@ -83,7 +84,7 @@
             },
             "System.Text.Json": {
               "target": "Package",
-              "version": "[8.0.4, )"
+              "version": "[8.0.5, )"
             },
             "TwitchLib.Client": {
               "target": "Package",

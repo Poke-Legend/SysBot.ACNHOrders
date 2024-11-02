@@ -56,15 +56,39 @@ namespace SysBot.ACNHOrders
                 villagerRequest = new VillagerRequest(Context.User.Username, villager, 0, GameInfo.Strings.GetVillager(villagerName));
             }
 
-            var items = await GetItemsFromRequestAsync(request, cfg, Context.Message.Attachments.FirstOrDefault());
-            if (items == null)
+            // Get items and convert to array if needed
+            var itemsList = (await GetItemsFromRequestAsync(request, cfg, Context.Message.Attachments.FirstOrDefault())).ToList();
+            if (itemsList == null)
             {
                 await ReplyAsync("No valid items or NHI attachment provided!");
                 return;
             }
 
-            await AttemptToQueueRequest(items, Context.User, Context.Channel, villagerRequest).ConfigureAwait(false);
+            // Convert to a list for manipulation
+            List<NHSE.Core.Item> items = itemsList.ToList();
+
+            // Ensure the total number of items reaches 40
+            if (items.Count == 1)
+            {
+                // Repeat the single item 40 times
+                items = Enumerable.Repeat(items.First(), 40).ToList();
+            }
+            else if (items.Count >= 2 && items.Count < 40)
+            {
+                // Mix items to reach a total of 40
+                // Mix items to reach a total of 40
+                var random = new Random();
+                while (items.Count < 40)
+                {
+                    items.Add(items[random.Next(itemsList.Count)]);
+                }
+            }
+
+                // Convert items to an array for compatibility
+                await AttemptToQueueRequest(items.ToArray(), Context.User, Context.Channel, villagerRequest).ConfigureAwait(false);
         }
+
+
 
         [Command("ordercat")]
         [Summary("Orders a catalogue of items created by an order tool such as ACNHMobileSpawner, does not duplicate any items.")]

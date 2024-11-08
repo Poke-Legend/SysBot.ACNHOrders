@@ -13,9 +13,9 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
         private static readonly HashSet<string> BannedServerIds = new();
         private static readonly SemaphoreSlim FileLock = new(1, 1);
 
-        private const string GitHubRawServerBanUrl = "https://raw.githubusercontent.com/Poke-Legend/ACNH-DATABASE/main/serverban.json";
-        private const string GitHubApiServerBanUrl = "https://api.github.com/repos/Poke-Legend/ACNH-DATABASE/contents/serverban.json";
-        private const string GitHubToken = "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"; // Replace with your GitHub token
+        private const string GitHubRawServerBanUrl = "";
+        private const string GitHubApiServerBanUrl = ";
+        private const string GitHubToken = ""; // Replace with your GitHub token
 
         public static async Task InitializeAsync() => await LoadBannedServers();
 

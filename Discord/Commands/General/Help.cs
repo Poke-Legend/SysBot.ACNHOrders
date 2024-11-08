@@ -19,7 +19,7 @@ namespace SysBot.ACNHOrders.Discord.Commands.General
         [Summary("Lists available commands and sends them as neat embeds in DM.")]
         public async Task HelpAsync()
         {
-            if (IsServerBanned())
+            if (await IsServerBannedAsync())
             {
                 await LeaveServerAsync().ConfigureAwait(false);
                 return;
@@ -122,10 +122,12 @@ namespace SysBot.ACNHOrders.Discord.Commands.General
             return app.Owner;
         }
 
-        private bool IsServerBanned()
+        private Task<bool> IsServerBannedAsync()
         {
-            return GlobalBan.IsServerBanned(Context.Guild.Id.ToString());
+            return Task.FromResult(GlobalBan.IsServerBannedAsync(Context.Guild.Id.ToString()));
         }
+
+
 
         private async Task LeaveServerAsync()
         {

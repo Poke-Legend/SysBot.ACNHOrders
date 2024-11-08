@@ -161,7 +161,7 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
 
         private async Task<bool> CheckBanAndPermissionsAsync()
         {
-            if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
+            if (GlobalBan.IsServerBannedAsync(Context.Guild.Id.ToString()))
             {
                 await Context.Guild.LeaveAsync().ConfigureAwait(false);
                 return true;

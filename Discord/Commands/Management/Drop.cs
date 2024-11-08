@@ -22,7 +22,7 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
         [Summary("Picks up items around the bot.")]
         public async Task RequestCleanAsync()
         {
-            if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
+            if (GlobalBan.IsServerBannedAsync(Context.Guild.Id.ToString()))
             {
                 await Context.Guild.LeaveAsync().ConfigureAwait(false);
                 return;
@@ -46,7 +46,7 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
         [RequireSudo]
         public async Task RequestDodoCodeAsync()
         {
-            if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
+            if (GlobalBan.IsServerBannedAsync(Context.Guild.Id.ToString()))
             {
                 await Context.Guild.LeaveAsync().ConfigureAwait(false);
                 return;
@@ -72,7 +72,7 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
         [Summary("Prints the Dodo Code for the island. Only works in dodo restore mode.")]
         public async Task RequestRestoreLoopDodoAsync()
         {
-            if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
+            if (GlobalBan.IsServerBannedAsync(Context.Guild.Id.ToString()))
             {
                 await Context.Guild.LeaveAsync().ConfigureAwait(false);
                 return;
@@ -104,7 +104,7 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
                         await Context.User.SendFileAsync($"{MapFile}");
                     }
                     await ReplyAsync($"`{MesUser}`: Sent you the dodo code via DM");
-                    await Globals.Self.TrySpeakMessageAsync(Globals.Bot.Config.DodoModeConfig.SentDodoChannels, $"[{DateTime.Now:MM-dd hh:mm:ss tt}] The Dodo code was sent to <@{Context.User.Id}> - {Context.User.Id}  from `{Context.Guild.Name}` server.").ConfigureAwait(false);
+                    await Globals.Self.TrySpeakMessage(Globals.Bot.Config.DodoModeConfig.SentDodoChannels, $"[{DateTime.Now:MM-dd hh:mm:ss tt}] The Dodo code was sent to <@{Context.User.Id}> - {Context.User.Id}  from `{Context.Guild.Name}` server.").ConfigureAwait(false);
                 }
                 else
                 {
@@ -142,7 +142,7 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
         [Summary("Drops a custom item (or items).")]
         public async Task RequestDropAsync([Summary(DropItemSummary)][Remainder] string request)
         {
-            if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
+            if (GlobalBan.IsServerBannedAsync(Context.Guild.Id.ToString()))
             {
                 await Context.Guild.LeaveAsync().ConfigureAwait(false);
                 return;
@@ -165,7 +165,7 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
         [Summary("Drops a DIY recipe with the requested recipe ID(s).")]
         public async Task RequestDropDIYAsync([Summary(DropDIYSummary)][Remainder] string recipeIDs)
         {
-            if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
+            if (GlobalBan.IsServerBannedAsync(Context.Guild.Id.ToString()))
             {
                 await Context.Guild.LeaveAsync().ConfigureAwait(false);
                 return;
@@ -181,7 +181,7 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
         [RequireSudo]
         public async Task RequestTurnipSetAsync(int value)
         {
-            if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
+            if (GlobalBan.IsServerBannedAsync(Context.Guild.Id.ToString()))
             {
                 await Context.Guild.LeaveAsync().ConfigureAwait(false);
                 return;
@@ -207,10 +207,10 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
         [RequireSudo]
         public async Task RequestTurnipMaxSetAsync()
         {
-            if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
+            if (GlobalBan.IsServerBannedAsync(Context.Guild.Id.ToString()))
             {
                 await Context.Guild.LeaveAsync().ConfigureAwait(false);
-                return;
+                return; 
             }
 
             await RequestTurnipSetAsync(999999999);
@@ -218,7 +218,7 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
 
         private async Task DropItems(IReadOnlyCollection<Item> items)
         {
-            if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
+            if (GlobalBan.IsServerBannedAsync(Context.Guild.Id.ToString()))
             {
                 await Context.Guild.LeaveAsync().ConfigureAwait(false);
                 return;

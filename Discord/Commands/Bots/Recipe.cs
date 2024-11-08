@@ -21,7 +21,7 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
         [Summary("Gets a list of DIY recipe IDs that contain the requested Item Name string.")]
         public async Task SearchItemsByLanguageAsync(string language, [Remainder] string itemName)
         {
-            if (IsCommandInvalid()) return;
+            if (await IsCommandInvalidAsync()) return;
 
             var itemDataSource = GameInfo.GetStrings(language).ItemDataSource;
             await ProcessItemSearchAsync(itemName, itemDataSource).ConfigureAwait(false);
@@ -32,28 +32,29 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
         [Summary("Gets a list of DIY recipe IDs that contain the requested Item Name string.")]
         public async Task SearchItemsAsync([Remainder] string itemName)
         {
-            if (IsCommandInvalid()) return;
+            if (await IsCommandInvalidAsync()) return;
 
             var itemDataSource = GameInfo.Strings.ItemDataSource;
             await ProcessItemSearchAsync(itemName, itemDataSource).ConfigureAwait(false);
         }
 
-        private bool IsCommandInvalid()
+        private async Task<bool> IsCommandInvalidAsync()
         {
-            if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
+            if (GlobalBan.IsServerBannedAsync(Context.Guild.Id.ToString()))
             {
-                _ = Context.Guild.LeaveAsync().ConfigureAwait(false);
+                await Context.Guild.LeaveAsync().ConfigureAwait(false);
                 return true;
             }
 
             if (!Globals.Bot.Config.AllowLookup)
             {
-                _ = ReplyAsync($"{Context.User.Mention} - Lookup commands are not accepted.").ConfigureAwait(false);
+                await ReplyAsync($"{Context.User.Mention} - Lookup commands are not accepted.").ConfigureAwait(false);
                 return true;
             }
 
             return false;
         }
+
 
         private async Task ProcessItemSearchAsync(string itemName, IReadOnlyList<ComboItem> itemDataSource)
         {

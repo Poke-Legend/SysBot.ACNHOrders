@@ -29,7 +29,7 @@ namespace SysBot.ACNHOrders.Discord.Commands.General
         public async Task HiAsync()
         {
             // Check if the server is banned
-            if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
+            if (GlobalBan.IsServerBannedAsync(Context.Guild.Id.ToString()))
             {
                 await Context.Guild.LeaveAsync().ConfigureAwait(false);
                 return;

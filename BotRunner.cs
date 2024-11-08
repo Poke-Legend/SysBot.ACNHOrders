@@ -23,7 +23,6 @@ namespace SysBot.ACNHOrders
             Globals.Self = sys;
             Globals.Bot = bot;
             Globals.Hub = QueueHub.CurrentInstance;
-            GlobalBan.UpdateConfiguration(config);
 
             bot.Log("Starting Discord.");
 

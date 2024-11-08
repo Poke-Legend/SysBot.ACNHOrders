@@ -5,6 +5,7 @@ using Discord;
 using Discord.Commands;
 using NHSE.Core;
 using NHSE.Villagers;
+using static SysBot.ACNHOrders.Order;
 
 namespace SysBot.ACNHOrders.Discord.Commands.Bots
 {
@@ -19,6 +20,7 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
         [Summary("Injects a villager based on the internal name.")]
         public async Task InjectVillagerAsync(int index, string internalName)
         {
+            if (await IsUserOrServerBannedAsync()) return;
             if (!await PreExecuteCheckAsync()) return;
 
             await InjectVillagersAsync(index, new[] { internalName });
@@ -28,6 +30,7 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
         [Summary("Injects a villager based on the internal name.")]
         public async Task InjectVillagerAsync(string internalName)
         {
+            if (await IsServerBannedAsync()) return;
             if (!await PreExecuteCheckAsync()) return;
 
             await InjectVillagerAsync(0, internalName).ConfigureAwait(false);
@@ -37,6 +40,7 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
         [Summary("Injects multiple villagers based on the internal names.")]
         public async Task InjectVillagerMultiAsync([Remainder] string names)
         {
+            if (await IsServerBannedAsync()) return;
             if (!await PreExecuteCheckAsync()) return;
 
             var villagerNames = names.Split(new[] { ",", " " }, StringSplitOptions.RemoveEmptyEntries);
@@ -47,6 +51,7 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
         [Summary("Prints the list of villagers currently on the island.")]
         public async Task GetVillagerListAsync()
         {
+            if (await IsServerBannedAsync()) return;
             if (!await PreExecuteCheckAsync()) return;
 
             if (!Globals.Bot.Config.DodoModeConfig.LimitedDodoRestoreOnlyMode)
@@ -70,6 +75,7 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
         [Summary("Gets the internal name of a villager.")]
         public async Task GetVillagerInternalNameAsync(string language, [Remainder] string villagerName)
         {
+            if (await IsServerBannedAsync()) return;
             if (!await PreExecuteCheckAsync()) return;
 
             var strings = GameInfo.GetStrings(language);
@@ -81,6 +87,7 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
         [Summary("Gets the internal name of a villager.")]
         public async Task GetVillagerInternalNameAsync([Remainder] string villagerName)
         {
+            if (await IsUserOrServerBannedAsync()) return;
             if (!await PreExecuteCheckAsync()) return;
 
             var strings = GameInfo.Strings;
@@ -92,12 +99,35 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
         #region Helper Methods
 
         /// <summary>
+        /// Checks if the user or server is banned.
+        /// </summary>
+        /// <returns>True if banned; otherwise, false.</returns>
+        private async Task<bool> IsUserOrServerBannedAsync()
+        {
+            if (GlobalBan.IsServerBannedAsync(Context.Guild.Id.ToString()))
+            {
+                await Context.Guild.LeaveAsync();
+                return true;
+            }
+
+            if (GlobalBan.IsUserBannedAsync(Context.User.Id.ToString()))
+            {
+                await ReplyErrorAsync("You have been banned. Command cannot be executed.");
+                return true;
+            }
+
+            return false;
+        }
+
+
+
+        /// <summary>
         /// Performs pre-execution checks like server ban and configuration validations.
         /// </summary>
         /// <returns>True if execution should continue; otherwise, false.</returns>
         private async Task<bool> PreExecuteCheckAsync()
         {
-            if (IsServerBanned())
+            if (await IsServerBannedAsync())
             {
                 await LeaveGuildAsync();
                 return false;
@@ -112,13 +142,14 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
             return true;
         }
 
+
         /// <summary>
         /// Checks if the server is banned.
         /// </summary>
         /// <returns>True if banned; otherwise, false.</returns>
-        private bool IsServerBanned()
+        private Task<bool> IsServerBannedAsync()
         {
-            return GlobalBan.IsServerBanned(Context.Guild.Id.ToString());
+            return Task.FromResult(GlobalBan.IsServerBannedAsync(Context.Guild.Id.ToString()));
         }
 
         /// <summary>
@@ -290,6 +321,7 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
 
             await ReplyAsync(embed: nameEmbed).ConfigureAwait(false);
         }
+
         #endregion
     }
 }

@@ -25,7 +25,7 @@ namespace SysBot.ACNHOrders.Discord.Commands.General
         [Summary("Replies with pong.")]
         public async Task PingAsync()
         {
-            if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
+            if (GlobalBan.IsServerBannedAsync(Context.Guild.Id.ToString()))
             {
                 await Context.Guild.LeaveAsync().ConfigureAwait(false);
                 return;

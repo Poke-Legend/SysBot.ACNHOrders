@@ -32,9 +32,10 @@ namespace SysBot.ACNHOrders
 
             _client = new DiscordSocketClient(new DiscordSocketConfig
             {
-                GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.GuildMembers,
+                GatewayIntents = GatewayIntents.Guilds | GatewayIntents.GuildMessages | GatewayIntents.MessageContent | GatewayIntents.GuildMembers,
                 AlwaysDownloadUsers = true,
             });
+
 
             _client.Log += LogAsync;
             _client.Disconnected += async (exception) =>

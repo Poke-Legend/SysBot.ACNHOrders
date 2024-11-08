@@ -13,7 +13,7 @@ namespace SysBot.ACNHOrders.Discord.Commands.Helpers
         public async Task AddChannelAsync()
         {
             // Check if the server is banned
-            if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
+            if (GlobalBan.IsServerBannedAsync(Context.Guild.Id.ToString()))
             {
                 await Context.Guild.LeaveAsync().ConfigureAwait(false);
                 return;
@@ -49,7 +49,7 @@ namespace SysBot.ACNHOrders.Discord.Commands.Helpers
         public async Task RemoveChannelAsync()
         {
             // Check if the server is banned
-            if (GlobalBan.IsServerBanned(Context.Guild.Id.ToString()))
+            if (GlobalBan.IsServerBannedAsync(Context.Guild.Id.ToString()))
             {
                 await Context.Guild.LeaveAsync().ConfigureAwait(false);
                 return;

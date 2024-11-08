@@ -402,7 +402,7 @@ namespace SysBot.ACNHOrders
         private async Task AttemptEchoHook(string message, IReadOnlyCollection<ulong> channels, CancellationToken token, bool checkForDoublePosts = false)
         {
             foreach (var msgChannel in channels)
-                if (!await Globals.Self.TrySpeakMessageAsync(msgChannel, message, checkForDoublePosts).ConfigureAwait(false))
+                if (!await Globals.Self.TrySpeakMessage(msgChannel, message, checkForDoublePosts).ConfigureAwait(false))
                     LogUtil.LogError($"Unable to post into channels: {msgChannel}.", Config.IP);
 
             LogUtil.LogText($"Echo: {message}");

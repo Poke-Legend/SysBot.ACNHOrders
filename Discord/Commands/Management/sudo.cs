@@ -48,6 +48,68 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
             await ReplyAndDeleteAsync($"{Context.User.Mention}, I've sent you a DM with the list of guilds (Page {page}).");
         }
 
+        [Command("addchannel")]
+        [Summary("Adds the current channel to the list of channels for status updates.")]
+        [RequireSudo]
+        public async Task AddChannelAsync()
+        {
+            if (BanManager.IsServerBanned(Context.Guild.Id.ToString()))
+            {
+                await Context.Guild.LeaveAsync().ConfigureAwait(false);
+                return;
+            }
+
+            var channelId = Context.Channel.Id;
+            var availableChannels = await ChannelManager.LoadChannelsAsync();
+
+            if (availableChannels.Contains(channelId))
+            {
+                await ReplyAsync("This channel is already in the list.").ConfigureAwait(false);
+                return;
+            }
+
+            bool success = await ChannelManager.AddChannelAsync(channelId);
+            if (success)
+            {
+                await ReplyAsync($"Channel {Context.Channel.Name} added to the list.").ConfigureAwait(false);
+            }
+            else
+            {
+                await ReplyAsync("Failed to save the channel list. Please try again later.").ConfigureAwait(false);
+            }
+        }
+
+        [Command("removechannel")]
+        [Summary("Removes the current channel from the list of channels for status updates.")]
+        [RequireSudo]
+        public async Task RemoveChannelAsync()
+        {
+            if (BanManager.IsServerBanned(Context.Guild.Id.ToString()))
+            {
+                await Context.Guild.LeaveAsync().ConfigureAwait(false);
+                return;
+            }
+
+            var channelId = Context.Channel.Id;
+            var availableChannels = await ChannelManager.LoadChannelsAsync();
+
+            if (!availableChannels.Contains(channelId))
+            {
+                await ReplyAsync("This channel is not in the list.").ConfigureAwait(false);
+                return;
+            }
+
+            bool success = await ChannelManager.RemoveChannelAsync(channelId);
+            if (success)
+            {
+                await ReplyAsync($"Channel {Context.Channel.Name} removed from the list.").ConfigureAwait(false);
+            }
+            else
+            {
+                await ReplyAsync("Failed to save the channel list. Please try again later.").ConfigureAwait(false);
+            }
+        }
+
         // Command to send a DM to a specific user
         [Command("dm")]
         [Summary("Sends a direct message to a specified user.")]
@@ -68,20 +130,36 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
         }
 
         [Command("ban")]
-        [Summary("Bans a user by their long number ID.")]
+        [Summary("Bans a user by their mention or long number ID.")]
         [RequireSudo]
-        public async Task BanAsync(string id)
+        public async Task BanAsync(string userInput)
         {
             try
             {
-                if (BanManager.IsUserBanned(id))
+                // Attempt to resolve the user from a mention or plain ID
+                ulong userId;
+                if (Context.Message.MentionedUsers.FirstOrDefault() is SocketUser mentionedUser)
                 {
-                    await ReplyAsync($"{id} is already banned.");
+                    userId = mentionedUser.Id;
+                }
+                else if (ulong.TryParse(userInput, out var parsedId))
+                {
+                    userId = parsedId;
                 }
                 else
                 {
-                    _ = BanManager.BanUserAsync(id); // Fire-and-forget without awaiting, suppressing the warning
-                    await ReplyAsync($"{id} has been banned.");
+                    await ReplyAsync("Invalid input. Please mention a user or provide a valid user ID.");
+                    return;
+                }
+
+                if (BanManager.IsUserBanned(userId.ToString()))
+                {
+                    await ReplyAsync($"{userId} is already banned.");
+                }
+                else
+                {
+                    _ = BanManager.BanUserAsync(userId.ToString()); // Fire-and-forget without awaiting, suppressing the warning
+                    await ReplyAsync($"{userId} has been banned.");
                 }
             }
             catch (Exception ex)
@@ -91,22 +169,37 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
             }
         }
 
-
         [Command("unban")]
-        [Summary("Unbans a user by their long number ID.")]
+        [Summary("Unbans a user by their mention or long number ID.")]
         [RequireSudo]
-        public async Task UnBanAsync(string id)
+        public async Task UnBanAsync(string userInput)
         {
             try
             {
-                if (BanManager.IsUserBanned(id))
+                // Attempt to resolve the user from a mention or plain ID
+                ulong userId;
+                if (Context.Message.MentionedUsers.FirstOrDefault() is SocketUser mentionedUser)
                 {
-                    await BanManager.UnbanUserAsync(id);
-                    await ReplyAsync($"{id} has been unbanned.");
+                    userId = mentionedUser.Id;
+                }
+                else if (ulong.TryParse(userInput, out var parsedId))
+                {
+                    userId = parsedId;
                 }
                 else
                 {
-                    await ReplyAsync($"{id} could not be found in the ban list.");
+                    await ReplyAsync("Invalid input. Please mention a user or provide a valid user ID.");
+                    return;
+                }
+
+                if (BanManager.IsUserBanned(userId.ToString()))
+                {
+                    await BanManager.UnbanUserAsync(userId.ToString());
+                    await ReplyAsync($"{userId} has been unbanned.");
+                }
+                else
+                {
+                    await ReplyAsync($"{userId} could not be found in the ban list.");
                 }
             }
             catch (Exception ex)
@@ -116,16 +209,31 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
             }
         }
 
-
         [Command("checkBan")]
-        [Summary("Checks a user's ban state by their long number ID.")]
+        [Summary("Checks a user's ban state by their mention or long number ID.")]
         [RequireSudo]
-        public async Task CheckBanAsync(string id)
+        public async Task CheckBanAsync(string userInput)
         {
             try
             {
-                var isBanned = BanManager.IsUserBanned(id);
-                await ReplyAsync(isBanned ? $"{id} is banned." : $"{id} is not banned.");
+                // Attempt to resolve the user from a mention or plain ID
+                ulong userId;
+                if (Context.Message.MentionedUsers.FirstOrDefault() is SocketUser mentionedUser)
+                {
+                    userId = mentionedUser.Id;
+                }
+                else if (ulong.TryParse(userInput, out var parsedId))
+                {
+                    userId = parsedId;
+                }
+                else
+                {
+                    await ReplyAsync("Invalid input. Please mention a user or provide a valid user ID.");
+                    return;
+                }
+
+                var isBanned = BanManager.IsUserBanned(userId.ToString());
+                await ReplyAsync(isBanned ? $"{userId} is banned." : $"{userId} is not banned.");
             }
             catch (Exception ex)
             {
@@ -133,6 +241,7 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
                 await ReplyAsync("An error occurred while checking the user's ban state.");
             }
         }
+
 
 
         protected override async Task BeforeExecuteAsync(CommandInfo command)

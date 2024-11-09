@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
-using System.Collections.Generic;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -14,13 +12,12 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
         private const int GuildsPerPage = 25;
         private static readonly Color EmbedColor = new Color(52, 152, 219); // Blue (RGB)
 
-       
         // Command to leave the current server
         [Command("leave")]
         [Alias("bye")]
         [Summary("Leaves the current server.")]
         [RequireOwner]
-        public async Task Leave()
+        public async Task LeaveAsync()
         {
             await ReplyAndDeleteAsync("Goodbye.");
             await Context.Guild.LeaveAsync().ConfigureAwait(false);
@@ -30,7 +27,7 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
         [Command("leaveall")]
         [Summary("Leaves all servers the bot is currently in.")]
         [RequireOwner]
-        public async Task LeaveAll()
+        public async Task LeaveAllAsync()
         {
             await ReplyAndDeleteAsync("Leaving all servers.");
             foreach (var guild in Context.Client.Guilds)
@@ -43,24 +40,38 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
         [RequireOwner]  // Only allow the bot owner to add sudo users
         public async Task AddSudoAsync([Remainder] string userInput)
         {
-            // Try to find the user either by mention or by ID
+            // Try to find the user by mention, ID, or username
             SocketUser? user = Context.Message.MentionedUsers.FirstOrDefault();
 
-            // If no mentioned user, try to parse the input as a user ID
             if (user == null && ulong.TryParse(userInput, out ulong userId))
             {
+                // Try to get the user by ID
                 user = Context.Client.GetUser(userId);
+            }
+
+            if (user == null)
+            {
+                // Iterate through each guild and look for the user by username
+                foreach (var guild in Context.Client.Guilds)
+                {
+                    var guildUser = guild.Users.FirstOrDefault(u => u.Username.Equals(userInput, StringComparison.OrdinalIgnoreCase));
+                    if (guildUser != null)
+                    {
+                        user = guildUser;
+                        break;
+                    }
+                }
             }
 
             // If still no user found, return an error message
             if (user == null)
             {
-                await ReplyAsync("User not found. Please mention a valid user or provide a valid user ID.");
+                await ReplyAsync("User not found. Please mention a valid user, provide a valid user ID, or enter a valid username.");
                 return;
             }
 
             // Add the user to the sudo list and save
-            Globals.Manager.AddSudo(user.Id);
+            await Globals.Manager.AddSudoAsync(user.Id);
             await ReplyAsync($"{user.Username} has been added to the sudo list.").ConfigureAwait(false);
         }
 
@@ -68,24 +79,38 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
         [RequireOwner]  // Only allow the bot owner to remove sudo users
         public async Task RemoveSudoAsync([Remainder] string userInput)
         {
-            // Try to find the user either by mention or by ID
+            // Try to find the user by mention, ID, or username
             SocketUser? user = Context.Message.MentionedUsers.FirstOrDefault();
 
-            // If no mentioned user, try to parse the input as a user ID
             if (user == null && ulong.TryParse(userInput, out ulong userId))
             {
+                // Try to get the user by ID
                 user = Context.Client.GetUser(userId);
+            }
+
+            if (user == null)
+            {
+                // Iterate through each guild and look for the user by username
+                foreach (var guild in Context.Client.Guilds)
+                {
+                    var guildUser = guild.Users.FirstOrDefault(u => u.Username.Equals(userInput, StringComparison.OrdinalIgnoreCase));
+                    if (guildUser != null)
+                    {
+                        user = guildUser;
+                        break;
+                    }
+                }
             }
 
             // If still no user found, return an error message
             if (user == null)
             {
-                await ReplyAsync("User not found. Please mention a valid user or provide a valid user ID.");
+                await ReplyAsync("User not found. Please mention a valid user, provide a valid user ID, or enter a valid username.");
                 return;
             }
 
             // Remove the user from the sudo list and save
-            Globals.Manager.RemoveSudo(user.Id);
+            await Globals.Manager.RemoveSudoAsync(user.Id);
             await ReplyAsync($"{user.Username} has been removed from the sudo list.").ConfigureAwait(false);
         }
 
@@ -114,7 +139,7 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
             };
         }
 
-       
+        // Helper method to reply and delete the message after a delay
         private async Task ReplyAndDeleteAsync(string message)
         {
             var userMessage = await ReplyAsync(message);
@@ -128,5 +153,4 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
         public ulong ID { get; set; }
         public string Username { get; set; } = string.Empty; // Initialize with default value
     }
-
 }

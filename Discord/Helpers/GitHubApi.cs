@@ -10,13 +10,14 @@ namespace SysBot.ACNHOrders.Discord.Helpers
 {
     public static class GitHubApi
     {
-        // GitHub API URLs for each file
+        // API URL constants for different files
+        public const string SudoApiUrl = "https://api.github.com/repos/Poke-Legend/ACNH-DATABASE/contents/sudo.json";
         public const string UserBanApiUrl = "https://api.github.com/repos/Poke-Legend/ACNH-DATABASE/contents/userban.json";
         public const string ServerBanApiUrl = "https://api.github.com/repos/Poke-Legend/ACNH-DATABASE/contents/serverban.json";
         public const string ChannelListApiUrl = "https://api.github.com/repos/Poke-Legend/ACNH-DATABASE/contents/whitelistchannel.json";
 
         // GitHub Token for authentication (Replace with actual token or retrieve from environment variables for better security)
-        private const string GitHubToken = "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";
+        private const string GitHubToken = "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";
 
         public static HttpClient CreateHttpClient()
         {
@@ -29,6 +30,28 @@ namespace SysBot.ACNHOrders.Discord.Helpers
             return client;
         }
 
+        public static async Task<string?> FetchFileContentAsync(string apiUrl)
+        {
+            using var client = CreateHttpClient();
+            try
+            {
+                var response = await client.GetAsync(apiUrl);
+                if (response.IsSuccessStatusCode)
+                {
+                    var json = await response.Content.ReadAsStringAsync();
+                    var fileData = JsonSerializer.Deserialize<GitHubFileData>(json);
+                    return fileData?.Content != null ? Encoding.UTF8.GetString(Convert.FromBase64String(fileData.Content)) : null;
+                }
+                Console.WriteLine($"Error fetching file: {response.StatusCode}");
+                return null;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching file content: {ex.Message}");
+                return null;
+            }
+        }
+
         public static async Task<string?> GetFileShaAsync(string apiUrl)
         {
             using var client = CreateHttpClient();
@@ -38,7 +61,7 @@ namespace SysBot.ACNHOrders.Discord.Helpers
                 if (response.IsSuccessStatusCode)
                 {
                     var responseContent = await response.Content.ReadAsStringAsync();
-                    var fileInfo = JsonSerializer.Deserialize<GitHubFileInfo>(responseContent);
+                    var fileInfo = JsonSerializer.Deserialize<GitHubFileData>(responseContent);
                     return fileInfo?.Sha;
                 }
                 else if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
@@ -99,35 +122,13 @@ namespace SysBot.ACNHOrders.Discord.Helpers
             }
         }
 
-        private class GitHubFileInfo
+        private class GitHubFileData
         {
             [JsonPropertyName("sha")]
             public string? Sha { get; set; }
-        }
-    }
 
-    // Example usage in another class or method
-    public class ExampleUsage
-    {
-        public async Task UpdateChannelListAsync()
-        {
-            string commitMessage = "Update channel list";
-            string contentToSave = "<your content here>";
-            string apiUrl = GitHubApi.ChannelListApiUrl; // Use the correct API URL
-
-            // Get the SHA of the existing file before updating
-            string? sha = await GitHubApi.GetFileShaAsync(apiUrl);
-
-            // Call UpdateFileAsync with the null-forgiving operator
-            bool success = await GitHubApi.UpdateFileAsync(contentToSave, commitMessage, apiUrl!, sha);
-            if (success)
-            {
-                Console.WriteLine("Channel list updated successfully.");
-            }
-            else
-            {
-                Console.WriteLine("Failed to update the channel list.");
-            }
+            [JsonPropertyName("content")]
+            public string? Content { get; set; }
         }
     }
 }

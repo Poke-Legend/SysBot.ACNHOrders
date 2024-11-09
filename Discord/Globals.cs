@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Discord.Commands;
 using Discord.WebSocket;
+using SysBot.ACNHOrders.Discord.Helpers;
 
 namespace SysBot.ACNHOrders
 {
@@ -14,7 +14,7 @@ namespace SysBot.ACNHOrders
         public static SysCord Self { get; set; } = default!;
         public static CrossBot Bot { get; set; } = default!;
         public static QueueHub Hub { get; set; } = default!;
-        public static PermissionManager Manager { get; set; } = new PermissionManager(); // Initializes and loads sudo.json
+        public static PermissionManager Manager { get; set; } = new PermissionManager();
     }
 
     public class PermissionConfig
@@ -31,7 +31,6 @@ namespace SysBot.ACNHOrders
 
     public class PermissionManager
     {
-        private const string SudoFilePath = "sudo.json";
         private HashSet<ulong> GlobalSudoList { get; set; } = new HashSet<ulong>();
 
         public PermissionConfig Config { get; set; } = new PermissionConfig();
@@ -39,57 +38,49 @@ namespace SysBot.ACNHOrders
         public PermissionManager()
         {
             // Initialize the sudo list
-            LoadSudoList();
+            LoadSudoList().Wait();
         }
 
         public bool CanUseSudo(ulong userId) => GlobalSudoList.Contains(userId);
 
-        public void AddSudo(ulong userId)
+        public async Task AddSudoAsync(ulong userId)
         {
-            GlobalSudoList.Add(userId);
-            SaveSudoList();
+            if (!GlobalSudoList.Contains(userId))
+            {
+                GlobalSudoList.Add(userId);
+                await SaveSudoListAsync(); // Save the updated list to GitHub
+            }
         }
 
-        public void RemoveSudo(ulong userId)
+        public async Task RemoveSudoAsync(ulong userId)
         {
-            GlobalSudoList.Remove(userId);
-            SaveSudoList();
+            if (GlobalSudoList.Contains(userId))
+            {
+                GlobalSudoList.Remove(userId);
+                await SaveSudoListAsync(); // Save the updated list to GitHub
+            }
         }
 
         public IEnumerable<ulong> GetAllSudoUsers() => GlobalSudoList;
 
-        // Loads the sudo list from sudo.json
-        private void LoadSudoList()
+        private async Task LoadSudoList()
         {
-            if (File.Exists(SudoFilePath))
+            string? json = await GitHubApi.FetchFileContentAsync(GitHubApi.SudoApiUrl);
+            if (!string.IsNullOrEmpty(json))
             {
-                try
-                {
-                    var json = File.ReadAllText(SudoFilePath);
-                    GlobalSudoList = JsonSerializer.Deserialize<HashSet<ulong>>(json) ?? new HashSet<ulong>();
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error loading sudo list: {ex.Message}");
-                    GlobalSudoList = new HashSet<ulong>();
-                }
+                GlobalSudoList = JsonSerializer.Deserialize<HashSet<ulong>>(json) ?? new HashSet<ulong>();
             }
         }
 
-        // Saves the sudo list to sudo.json
-        private void SaveSudoList()
+        // Saves the sudo list to GitHub
+        private async Task SaveSudoListAsync()
         {
-            try
-            {
-                var json = JsonSerializer.Serialize(GlobalSudoList);
-                File.WriteAllText(SudoFilePath, json);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error saving sudo list: {ex.Message}");
-            }
+            string content = JsonSerializer.Serialize(GlobalSudoList);
+            string? sha = await GitHubApi.GetFileShaAsync(GitHubApi.SudoApiUrl);
+            await GitHubApi.UpdateFileAsync(content, "Update sudo list", GitHubApi.SudoApiUrl, sha);
         }
     }
+
 
     public sealed class RequireSudoAttribute : PreconditionAttribute
     {

@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using SysBot.ACNHOrders.Discord.Helpers;
 
 namespace SysBot.ACNHOrders.Discord.Commands.General
 {
@@ -124,7 +125,7 @@ namespace SysBot.ACNHOrders.Discord.Commands.General
 
         private Task<bool> IsServerBannedAsync()
         {
-            return Task.FromResult(GlobalBan.IsServerBannedAsync(Context.Guild.Id.ToString()));
+            return Task.FromResult(BanManager.IsServerBanned(Context.Guild.Id.ToString()));
         }
 
 

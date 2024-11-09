@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.Rest;
+using SysBot.ACNHOrders.Discord.Helpers;
 
 namespace SysBot.ACNHOrders.Discord.Commands.General
 {
@@ -33,7 +34,7 @@ namespace SysBot.ACNHOrders.Discord.Commands.General
                 return;
             }
 
-            if (GlobalBan.IsServerBannedAsync(Context.Guild.Id.ToString()))
+            if (BanManager.IsServerBanned(Context.Guild.Id.ToString()))
             {
                 await Context.Guild.LeaveAsync().ConfigureAwait(false);
                 return;

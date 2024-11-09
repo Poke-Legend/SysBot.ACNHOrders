@@ -8,6 +8,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using System.IO;
 using System.Threading;
+using SysBot.ACNHOrders.Discord.Helpers;
 
 namespace SysBot.ACNHOrders.Discord.Commands.Management
 {
@@ -73,13 +74,13 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
         {
             try
             {
-                if (GlobalBan.IsUserBannedAsync(id))
+                if (BanManager.IsUserBanned(id))
                 {
                     await ReplyAsync($"{id} is already banned.");
                 }
                 else
                 {
-                    _ = GlobalBan.BanUserAsync(id); // Fire-and-forget without awaiting, suppressing the warning
+                    _ = BanManager.BanUserAsync(id); // Fire-and-forget without awaiting, suppressing the warning
                     await ReplyAsync($"{id} has been banned.");
                 }
             }
@@ -98,9 +99,9 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
         {
             try
             {
-                if (GlobalBan.IsUserBannedAsync(id))
+                if (BanManager.IsUserBanned(id))
                 {
-                    await GlobalBan.UnbanUserAsync(id);
+                    await BanManager.UnbanUserAsync(id);
                     await ReplyAsync($"{id} has been unbanned.");
                 }
                 else
@@ -123,7 +124,7 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
         {
             try
             {
-                var isBanned = GlobalBan.IsUserBannedAsync(id);
+                var isBanned = BanManager.IsUserBanned(id);
                 await ReplyAsync(isBanned ? $"{id} is banned." : $"{id} is not banned.");
             }
             catch (Exception ex)
@@ -136,7 +137,7 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
 
         protected override async Task BeforeExecuteAsync(CommandInfo command)
         {
-            if (ServerBanManager.IsServerBanned(Context.Guild.Id.ToString()))
+            if (BanManager.IsServerBanned(Context.Guild.Id.ToString()))
             {
                 await ReplyAsync("This server is banned from using the bot.").ConfigureAwait(false);
                 throw new InvalidOperationException("Server is banned");
@@ -151,13 +152,13 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
         [RequireSudo]
         public async Task UnbanServerAsync(string serverId)
         {
-            if (!ServerBanManager.IsServerBanned(serverId))
+            if (!BanManager.IsServerBanned(serverId))
             {
                 await ReplyAsync($"Server {serverId} is not in the ban list.").ConfigureAwait(false);
                 return;
             }
 
-            _ = ServerBanManager.UnbanServerAsync(serverId);
+            _ = BanManager.UnbanServerAsync(serverId);
             await ReplyAsync($"Server {serverId} has been unbanned.").ConfigureAwait(false);
         }
 
@@ -166,13 +167,13 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
         [RequireSudo]
         public async Task BanServerAsync(string serverId)
         {
-            if (ServerBanManager.IsServerBanned(serverId))
+            if (BanManager.IsServerBanned(serverId))
             {
                 await ReplyAsync($"Server {serverId} is already banned.").ConfigureAwait(false);
                 return;
             }
 
-            _ = ServerBanManager.BanServerAsync(serverId);
+            _ = BanManager.BanServerAsync(serverId);
             await ReplyAsync($"Server {serverId} has been banned.").ConfigureAwait(false);
 
             if (ulong.TryParse(serverId, out var guildId))
@@ -190,7 +191,7 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
         [RequireSudo]
         public async Task CheckServerBanAsync(string serverId)
         {
-            var message = ServerBanManager.IsServerBanned(serverId)
+            var message = BanManager.IsServerBanned(serverId)
                 ? $"Server {serverId} is banned."
                 : $"Server {serverId} is not banned.";
             await ReplyAsync(message).ConfigureAwait(false);

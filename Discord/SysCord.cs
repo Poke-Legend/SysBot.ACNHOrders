@@ -313,11 +313,11 @@ namespace SysBot.ACNHOrders
             return false;
         }
 
-        // Channel Name Update
-        private async Task UpdateChannelNameWithStatus(string statusIcon)
+        // Inside SysCord.cs - UpdateChannelNameWithStatus method
+
+        public async Task UpdateChannelNameWithStatus(string statusIcon)
         {
-            var channelManager = new ChannelManager();
-            var availableChannels = channelManager.LoadChannels();
+            var availableChannels = await ChannelManager.LoadChannelsAsync(); // Static async call to load channels
 
             foreach (var channelId in availableChannels)
             {
@@ -327,21 +327,27 @@ namespace SysBot.ACNHOrders
                 try
                 {
                     string currentName = channel.Name;
+
+                    // Remove any existing status icon (assuming icons are either "🟢" or "🔴" at the start)
                     if (currentName.StartsWith("🟢") || currentName.StartsWith("🔴"))
                         currentName = currentName.Substring(1).Trim(); // Remove existing status icon if present
 
-                    string newChannelName = $"{statusIcon}{currentName}";
+                    // Update the channel name with the status icon if provided
+                    string newChannelName = string.IsNullOrEmpty(statusIcon) ? currentName : $"{statusIcon}{currentName}";
                     await channel.ModifyAsync(prop => prop.Name = newChannelName);
                     Console.WriteLine($"Channel name updated to: {newChannelName} in {channel.Guild.Name}");
                 }
                 catch (HttpException ex) when (ex.HttpCode == System.Net.HttpStatusCode.TooManyRequests)
                 {
-                    if (ex.Data.Contains("Retry-After"))
+                    if (ex.Data["Retry-After"] is int retryAfterMs)
                     {
-                        var retryAfterMs = Convert.ToInt32(ex.Data["Retry-After"]);
                         Console.WriteLine($"Rate limit hit. Retrying after {retryAfterMs} milliseconds...");
                         await Task.Delay(retryAfterMs);
-                        await channel.ModifyAsync(prop => prop.Name = $"{statusIcon}{channel.Name.Substring(1).Trim()}");
+
+                        // Retry the modification after delay
+                        string retryChannelName = string.IsNullOrEmpty(statusIcon) ? channel.Name.Substring(1).Trim() : $"{statusIcon}{channel.Name.Substring(1).Trim()}";
+                        await channel.ModifyAsync(prop => prop.Name = retryChannelName);
+                        Console.WriteLine($"Channel name updated to: {retryChannelName} in {channel.Guild.Name} after retry");
                     }
                     else
                     {
@@ -354,6 +360,7 @@ namespace SysBot.ACNHOrders
                 }
             }
         }
+
 
         // Shutdown and Restart
         private async Task ShutdownAsync()

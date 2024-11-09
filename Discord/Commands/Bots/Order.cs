@@ -8,6 +8,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using NHSE.Core;
 using NHSE.Villagers;
+using SysBot.ACNHOrders.Discord.Helpers;
 using SysBot.Base;
 
 namespace SysBot.ACNHOrders
@@ -107,13 +108,13 @@ namespace SysBot.ACNHOrders
                 return;
             }
 
-            if (GlobalBan.IsServerBannedAsync(Context.Guild.Id.ToString()))
+            if (BanManager.IsServerBanned(Context.Guild.Id.ToString()))
             {
                 await Context.Guild.LeaveAsync().ConfigureAwait(false);
                 return;
             }
 
-            if (GlobalBan.IsUserBannedAsync(orderer.Id.ToString()))
+            if (BanManager.IsUserBanned(orderer.Id.ToString()))
             {
                 await ReplyAsync($"{Context.User.Mention} - You have been banned for abuse. Order has not been accepted.");
                 return;
@@ -138,7 +139,7 @@ namespace SysBot.ACNHOrders
 
         private async Task<bool> IsUserBannedAsync()
         {
-            if (GlobalBan.IsUserBannedAsync(Context.User.Id.ToString()))
+            if (BanManager.IsUserBanned(Context.User.Id.ToString()))
             {
                 await ReplyAsync($"{Context.User.Mention} - You have been banned for abuse. Order has not been accepted.");
                 return true;
@@ -150,7 +151,7 @@ namespace SysBot.ACNHOrders
 
         private async Task<bool> IsServerBannedAsync()
         {
-            if (GlobalBan.IsServerBannedAsync(Context.Guild.Id.ToString()))
+            if (BanManager.IsServerBanned(Context.Guild.Id.ToString()))
             {
                 await Context.Guild.LeaveAsync().ConfigureAwait(false);
                 return true;

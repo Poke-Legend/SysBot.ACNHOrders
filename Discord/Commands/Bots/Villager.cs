@@ -6,6 +6,7 @@ using Discord.Commands;
 using NHSE.Core;
 using NHSE.Villagers;
 using static SysBot.ACNHOrders.Order;
+using SysBot.ACNHOrders.Discord.Helpers;
 
 namespace SysBot.ACNHOrders.Discord.Commands.Bots
 {
@@ -104,13 +105,13 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
         /// <returns>True if banned; otherwise, false.</returns>
         private async Task<bool> IsUserOrServerBannedAsync()
         {
-            if (GlobalBan.IsServerBannedAsync(Context.Guild.Id.ToString()))
+            if (BanManager.IsServerBanned(Context.Guild.Id.ToString()))
             {
                 await Context.Guild.LeaveAsync();
                 return true;
             }
 
-            if (GlobalBan.IsUserBannedAsync(Context.User.Id.ToString()))
+            if (BanManager.IsUserBanned(Context.User.Id.ToString()))
             {
                 await ReplyErrorAsync("You have been banned. Command cannot be executed.");
                 return true;
@@ -149,7 +150,7 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
         /// <returns>True if banned; otherwise, false.</returns>
         private Task<bool> IsServerBannedAsync()
         {
-            return Task.FromResult(GlobalBan.IsServerBannedAsync(Context.Guild.Id.ToString()));
+            return Task.FromResult(BanManager.IsServerBanned(Context.Guild.Id.ToString()));
         }
 
         /// <summary>

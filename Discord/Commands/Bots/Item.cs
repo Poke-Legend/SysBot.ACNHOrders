@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using NHSE.Core;
+using SysBot.ACNHOrders.Discord.Helpers;
 
 namespace SysBot.ACNHOrders.Discord.Commands.Bots
 {
@@ -161,7 +162,7 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
 
         private async Task<bool> CheckBanAndPermissionsAsync()
         {
-            if (GlobalBan.IsServerBannedAsync(Context.Guild.Id.ToString()))
+            if (BanManager.IsServerBanned(Context.Guild.Id.ToString()))
             {
                 await Context.Guild.LeaveAsync().ConfigureAwait(false);
                 return true;

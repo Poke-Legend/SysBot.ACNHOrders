@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using System.IO;
 using System.Text.Json;
 using System;
+using SysBot.ACNHOrders.Discord.Helpers;
 
 namespace SysBot.ACNHOrders.Discord.Commands.General
 {
@@ -28,7 +29,7 @@ namespace SysBot.ACNHOrders.Discord.Commands.General
         public async Task DonateAsync()
         {
             // Check if the server is banned
-            if (GlobalBan.IsServerBannedAsync(Context.Guild.Id.ToString()))
+            if (BanManager.IsServerBanned(Context.Guild.Id.ToString()))
             {
                 await Context.Guild.LeaveAsync().ConfigureAwait(false);
                 return;

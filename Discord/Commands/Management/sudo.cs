@@ -241,9 +241,6 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
                 await ReplyAsync("An error occurred while checking the user's ban state.");
             }
         }
-
-
-
         protected override async Task BeforeExecuteAsync(CommandInfo command)
         {
             if (BanManager.IsServerBanned(Context.Guild.Id.ToString()))

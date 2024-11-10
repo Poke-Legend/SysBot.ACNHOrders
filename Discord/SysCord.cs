@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -8,6 +9,7 @@ using Discord.Commands;
 using Discord.Net;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json;
 using SysBot.ACNHOrders.Discord.Helpers;
 using SysBot.Base;
 
@@ -97,21 +99,38 @@ namespace SysBot.ACNHOrders
         {
             var context = new SocketCommandContext(_client, msg);
 
-            if (!_bot.Config.IgnoreAllPermissions)
+            // Fetch the list of sudo users from GitHub
+            var sudoJson = await GitHubApi.FetchFileContentAsync(GitHubApi.SudoApiUrl);
+            if (sudoJson == null)
             {
-                if (!_bot.Config.CanUseCommandUser(msg.Author.Id))
-                {
-                    await msg.Channel.SendMessageAsync("You are not permitted to use this command.");
-                    return true;
-                }
-
-                if (!_bot.Config.CanUseCommandChannel(msg.Channel.Id) && msg.Author.Id != Owner && !_bot.Config.CanUseSudo(msg.Author.Id))
-                {
-                    await msg.Channel.SendMessageAsync("You can't use that command here.");
-                    return true;
-                }
+                await msg.Channel.SendMessageAsync("Failed to fetch permissions from GitHub.");
+                return true;
             }
 
+            // Deserialize sudo user IDs from JSON
+            var sudoUserIds = JsonConvert.DeserializeObject<List<ulong>>(sudoJson) ?? new List<ulong>();
+
+            // Optionally fetch channel permissions if needed
+            var channelJson = await GitHubApi.FetchFileContentAsync(GitHubApi.ChannelListApiUrl);
+            var allowedChannelIds = channelJson != null
+                ? JsonConvert.DeserializeObject<List<ulong>>(channelJson) ?? new List<ulong>()
+                : new List<ulong>();
+
+            // Check if the user is permitted
+            if (!sudoUserIds.Contains(msg.Author.Id) && msg.Author.Id != Owner)
+            {
+                await msg.Channel.SendMessageAsync("You are not permitted to use this command.");
+                return true;
+            }
+
+            // Check if the command is allowed in the current channel
+            if (!allowedChannelIds.Contains(msg.Channel.Id) && msg.Author.Id != Owner && !sudoUserIds.Contains(msg.Author.Id))
+            {
+                await msg.Channel.SendMessageAsync("You can't use that command here.");
+                return true;
+            }
+
+            // Execute the command
             var result = await _commands.ExecuteAsync(context, argPos, _services);
 
             if (!result.IsSuccess)
@@ -119,6 +138,7 @@ namespace SysBot.ACNHOrders
 
             return result.Error != CommandError.UnknownCommand;
         }
+
 
         private async Task HandleMessageAsync(SocketMessage arg)
         {

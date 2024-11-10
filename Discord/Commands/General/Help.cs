@@ -128,8 +128,6 @@ namespace SysBot.ACNHOrders.Discord.Commands.General
             return Task.FromResult(BanManager.IsServerBanned(Context.Guild.Id.ToString()));
         }
 
-
-
         private async Task LeaveServerAsync()
         {
             await Context.Guild.LeaveAsync().ConfigureAwait(false);

@@ -2,9 +2,9 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Newtonsoft.Json;
+using SysBot.ACNHOrders.Discord.Helpers;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Threading.Tasks;
 
 namespace SysBot.ACNHOrders.Discord.Commands.Management
@@ -17,19 +17,47 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
             public List<ulong> Sudo { get; set; } = new List<ulong>();
         }
 
-        private Config LoadConfig()
+        private async Task<Config> LoadConfigAsync()
         {
             try
             {
-                var configContent = File.ReadAllText("config.json");
-                return JsonConvert.DeserializeObject<Config>(configContent) ?? new Config();
+                var channelListJson = await GitHubApi.FetchFileContentAsync(GitHubApi.ChannelListApiUrl);
+                if (string.IsNullOrEmpty(channelListJson))
+                {
+                    Console.WriteLine("Failed to fetch channel list from GitHub.");
+                    return new Config();
+                }
+
+                // Deserialize directly into a list of ulong for channel IDs
+                var channelIds = JsonConvert.DeserializeObject<List<ulong>>(channelListJson);
+                if (channelIds == null)
+                {
+                    Console.WriteLine("Failed to deserialize channel list.");
+                    return new Config();
+                }
+
+                // Initialize a Config object and assign the deserialized channel IDs
+                var config = new Config
+                {
+                    Channels = channelIds
+                };
+
+                // Optionally, fetch Sudo user IDs from another source or keep it empty as default
+                var sudoJson = await GitHubApi.FetchFileContentAsync(GitHubApi.SudoApiUrl);
+                if (!string.IsNullOrEmpty(sudoJson))
+                {
+                    config.Sudo = JsonConvert.DeserializeObject<List<ulong>>(sudoJson) ?? new List<ulong>();
+                }
+
+                return config;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error reading config file: {ex.Message}");
-                return new Config(); // Return a default config to avoid returning null
+                Console.WriteLine($"Error reading config from GitHub: {ex.Message}");
+                return new Config();
             }
         }
+
 
         private bool IsUserAuthorized(Config config)
         {
@@ -48,7 +76,7 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
         }
 
         [Command("broadcast")]
-        [Summary("Broadcasts a message to channels specified in the config")]
+        [Summary("Broadcasts a message to channels specified in the GitHub config")]
         [RequireSudo]
         public async Task BroadcastAsync([Remainder] string message)
         {
@@ -58,10 +86,10 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
                 return;
             }
 
-            var config = LoadConfig();
+            var config = await LoadConfigAsync();
             if (config == null)
             {
-                await ReplyAsync("Configuration error, please ensure config.json is properly configured.");
+                await ReplyAsync("Configuration error, please ensure GitHub configuration is properly set up.");
                 return;
             }
 

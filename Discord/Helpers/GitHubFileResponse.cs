@@ -7,4 +7,5 @@ namespace SysBot.ACNHOrders.Discord.Helpers
         [JsonPropertyName("content")]
         public string? Content { get; set; }
     }
+
 }

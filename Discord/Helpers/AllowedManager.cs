@@ -20,8 +20,8 @@ namespace SysBot.ACNHOrders.Discord.Helpers
 
             await EnsureBlacklistUpdated();
 
-            // Check if the guildId is in the read-only blacklist
-            return !_cachedBlacklist.Contains(guildId.Value);
+            // Check if the guildId is in the read-only blacklist (return true if blacklisted)
+            return _cachedBlacklist.Contains(guildId.Value);
         }
 
         private static async Task EnsureBlacklistUpdated()

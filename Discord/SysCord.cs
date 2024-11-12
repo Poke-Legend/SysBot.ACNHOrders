@@ -153,7 +153,10 @@ namespace SysBot.ACNHOrders
             // Check if the message is in a guild channel and if the server is blacklisted
             if (msg.Channel is SocketGuildChannel guildChannel)
             {
-                if (await AllowedManager.ServerBlacklisted(guildChannel.Guild.Id))
+                // Only leave the server if its ID is in the blacklist.
+                bool isBlacklisted = await AllowedManager.ServerBlacklisted(guildChannel.Guild.Id);
+
+                if (isBlacklisted)
                 {
                     await guildChannel.Guild.LeaveAsync();
                     return;

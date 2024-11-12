@@ -17,7 +17,7 @@ namespace SysBot.ACNHOrders.Discord.Helpers
         public const string ChannelListApiUrl = "https://api.github.com/repos/Poke-Legend/ACNH-DATABASE/contents/whitelistchannel.json";
 
         // GitHub Token for authentication (Replace with actual token or retrieve from environment variables for better security)
-        private const string GitHubToken = " ";
+        private const string GitHubToken = ".";
 
         public static HttpClient CreateHttpClient()
         {

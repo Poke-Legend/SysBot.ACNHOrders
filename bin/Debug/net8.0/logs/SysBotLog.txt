@@ -1,12 +1,9 @@
-2024-11-10 00:20:47.9942|INFO|SysBot.Base.LogUtil|192.168.68.199 Starting Discord.
-2024-11-10 00:20:48.2513|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Discord: Discord.Net v3.16.0 (API v10) 
-2024-11-10 00:20:48.2513|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Connecting 
-2024-11-10 00:20:48.3048|INFO|SysBot.Base.LogUtil|192.168.68.199 Starting bot loop.
-2024-11-10 00:20:48.3048|INFO|SysBot.Base.LogUtil|192.168.68.199 Connecting to device...
-2024-11-10 00:20:48.4099|INFO|SysBot.Base.LogUtil|192.168.68.199 Connected!
-2024-11-10 00:20:48.4099|INFO|SysBot.Base.LogUtil|192.168.68.199 Initializing connection with console...
-2024-11-10 00:20:48.4179|INFO|SysBot.Base.LogUtil|192.168.68.199 Detaching controller on startup as first interaction.
-2024-11-10 00:20:48.6619|INFO|SysBot.Base.LogUtil|SysCord: [ Warning] Gateway:  Discord.Net.HttpException: The server responded with error 401: 401: Unauthorized
+2024-11-11 01:44:42.2341|INFO|SysBot.Base.LogUtil|192.168.68.199 Starting Discord.
+2024-11-11 01:44:42.5137|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Discord: Discord.Net v3.16.0 (API v10) 
+2024-11-11 01:44:42.5137|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Connecting 
+2024-11-11 01:44:42.6054|INFO|SysBot.Base.LogUtil|192.168.68.199 Starting bot loop.
+2024-11-11 01:44:42.6054|INFO|SysBot.Base.LogUtil|192.168.68.199 Connecting to device...
+2024-11-11 01:44:43.2169|INFO|SysBot.Base.LogUtil|SysCord: [ Warning] Gateway:  Discord.Net.HttpException: The server responded with error 401: 401: Unauthorized
    at Discord.Net.Queue.RequestBucket.SendAsync(RestRequest request)
    at Discord.Net.Queue.RequestQueue.SendAsync(RestRequest request)
    at Discord.API.DiscordRestApiClient.SendInternalAsync(String method, String endpoint, RestRequest request)
@@ -17,7 +14,323 @@
    at Discord.WebSocket.DiscordSocketClient.OnConnectingAsync()
    at Discord.ConnectionManager.ConnectAsync(CancellationTokenSource reconnectCancelToken)
    at Discord.ConnectionManager.<>c__DisplayClass29_0.<<StartAsync>b__0>d.MoveNext()
-2024-11-10 00:20:48.6619|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Disconnecting 
-2024-11-10 00:20:48.6664|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Disconnected 
-2024-11-10 00:20:48.7541|INFO|SysBot.Base.LogUtil|192.168.68.199 Attempting get version. Please wait...
-2024-11-10 00:20:48.7665|INFO|SysBot.Base.LogUtil|192.168.68.199 sys-botbase version identified as: 2.4
+2024-11-11 01:44:43.2169|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Disconnecting 
+2024-11-11 01:44:43.2169|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Disconnected 
+2024-11-11 01:44:43.4567|INFO|SysBot.Base.LogUtil|192.168.68.199 Connected!
+2024-11-11 01:44:43.4567|INFO|SysBot.Base.LogUtil|192.168.68.199 Initializing connection with console...
+2024-11-11 01:44:43.4652|INFO|SysBot.Base.LogUtil|192.168.68.199 Detaching controller on startup as first interaction.
+2024-11-11 01:44:43.7813|INFO|SysBot.Base.LogUtil|192.168.68.199 Attempting get version. Please wait...
+2024-11-11 01:44:43.7813|INFO|SysBot.Base.LogUtil|192.168.68.199 sys-botbase version identified as: 2.4
+2024-11-11 01:44:44.2172|INFO|SysBot.Base.LogUtil|192.168.68.199 Found the following players on your island: Yuno, Jamie
+2024-11-11 01:44:44.2172|INFO|SysBot.Base.LogUtil|192.168.68.199 Checking inventory offset for validity.
+2024-11-11 01:44:44.2307|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Connecting 
+2024-11-11 01:44:44.2752|INFO|SysBot.Base.LogUtil|192.168.68.199 Reading original map status. Please wait...
+2024-11-11 01:44:44.3062|INFO|SysBot.Base.LogUtil|SysCord: [ Warning] Gateway:  Discord.Net.HttpException: The server responded with error 401: 401: Unauthorized
+   at Discord.Net.Queue.RequestBucket.SendAsync(RestRequest request)
+   at Discord.Net.Queue.RequestQueue.SendAsync(RestRequest request)
+   at Discord.API.DiscordRestApiClient.SendInternalAsync(String method, String endpoint, RestRequest request)
+   at Discord.API.DiscordRestApiClient.SendAsync[TResponse](String method, String endpoint, BucketId bucketId, ClientBucketType clientBucket, RequestOptions options)
+   at Discord.API.DiscordSocketApiClient.ConnectInternalAsync()
+   at Discord.API.DiscordSocketApiClient.ConnectInternalAsync()
+   at Discord.API.DiscordSocketApiClient.ConnectAsync()
+   at Discord.WebSocket.DiscordSocketClient.OnConnectingAsync()
+   at Discord.ConnectionManager.ConnectAsync(CancellationTokenSource reconnectCancelToken)
+   at Discord.ConnectionManager.<>c__DisplayClass29_0.<<StartAsync>b__0>d.MoveNext()
+2024-11-11 01:44:44.3062|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Disconnecting 
+2024-11-11 01:44:44.3062|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Disconnected 
+2024-11-11 01:44:46.4812|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Connecting 
+2024-11-11 01:44:46.5496|INFO|SysBot.Base.LogUtil|SysCord: [ Warning] Gateway:  Discord.Net.HttpException: The server responded with error 401: 401: Unauthorized
+   at Discord.Net.Queue.RequestBucket.SendAsync(RestRequest request)
+   at Discord.Net.Queue.RequestQueue.SendAsync(RestRequest request)
+   at Discord.API.DiscordRestApiClient.SendInternalAsync(String method, String endpoint, RestRequest request)
+   at Discord.API.DiscordRestApiClient.SendAsync[TResponse](String method, String endpoint, BucketId bucketId, ClientBucketType clientBucket, RequestOptions options)
+   at Discord.API.DiscordSocketApiClient.ConnectInternalAsync()
+   at Discord.API.DiscordSocketApiClient.ConnectInternalAsync()
+   at Discord.API.DiscordSocketApiClient.ConnectAsync()
+   at Discord.WebSocket.DiscordSocketClient.OnConnectingAsync()
+   at Discord.ConnectionManager.ConnectAsync(CancellationTokenSource reconnectCancelToken)
+   at Discord.ConnectionManager.<>c__DisplayClass29_0.<<StartAsync>b__0>d.MoveNext()
+2024-11-11 01:44:46.5496|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Disconnecting 
+2024-11-11 01:44:46.5496|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Disconnected 
+2024-11-11 01:48:24.4833|INFO|SysBot.Base.LogUtil|192.168.68.199 Starting Discord.
+2024-11-11 01:48:24.5550|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Discord: Discord.Net v3.16.0 (API v10) 
+2024-11-11 01:48:24.5645|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Connecting 
+2024-11-11 01:48:24.6157|INFO|SysBot.Base.LogUtil|192.168.68.199 Starting bot loop.
+2024-11-11 01:48:24.6157|INFO|SysBot.Base.LogUtil|192.168.68.199 Connecting to device...
+2024-11-11 01:48:24.6226|INFO|SysBot.Base.LogUtil|192.168.68.199 Connected!
+2024-11-11 01:48:24.6226|INFO|SysBot.Base.LogUtil|192.168.68.199 Initializing connection with console...
+2024-11-11 01:48:24.6226|INFO|SysBot.Base.LogUtil|192.168.68.199 Detaching controller on startup as first interaction.
+2024-11-11 01:48:24.9644|INFO|SysBot.Base.LogUtil|192.168.68.199 Attempting get version. Please wait...
+2024-11-11 01:48:24.9983|INFO|SysBot.Base.LogUtil|192.168.68.199 sys-botbase version identified as: 2.4
+2024-11-11 01:48:25.0172|INFO|SysBot.Base.LogUtil|SysCord: [ Warning] Gateway:  Discord.Net.HttpException: The server responded with error 401: 401: Unauthorized
+   at Discord.Net.Queue.RequestBucket.SendAsync(RestRequest request)
+   at Discord.Net.Queue.RequestQueue.SendAsync(RestRequest request)
+   at Discord.API.DiscordRestApiClient.SendInternalAsync(String method, String endpoint, RestRequest request)
+   at Discord.API.DiscordRestApiClient.SendAsync[TResponse](String method, String endpoint, BucketId bucketId, ClientBucketType clientBucket, RequestOptions options)
+   at Discord.API.DiscordSocketApiClient.ConnectInternalAsync()
+   at Discord.API.DiscordSocketApiClient.ConnectInternalAsync()
+   at Discord.API.DiscordSocketApiClient.ConnectAsync()
+   at Discord.WebSocket.DiscordSocketClient.OnConnectingAsync()
+   at Discord.ConnectionManager.ConnectAsync(CancellationTokenSource reconnectCancelToken)
+   at Discord.ConnectionManager.<>c__DisplayClass29_0.<<StartAsync>b__0>d.MoveNext()
+2024-11-11 01:48:25.0172|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Disconnecting 
+2024-11-11 01:48:25.0172|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Disconnected 
+2024-11-11 01:48:25.4211|INFO|SysBot.Base.LogUtil|192.168.68.199 Found the following players on your island: Yuno, Jamie
+2024-11-11 01:48:25.4211|INFO|SysBot.Base.LogUtil|192.168.68.199 Checking inventory offset for validity.
+2024-11-11 01:48:25.4786|INFO|SysBot.Base.LogUtil|192.168.68.199 Reading original map status. Please wait...
+2024-11-11 01:48:26.0284|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Connecting 
+2024-11-11 01:48:26.1604|INFO|SysBot.Base.LogUtil|SysCord: [ Warning] Gateway:  Discord.Net.HttpException: The server responded with error 401: 401: Unauthorized
+   at Discord.Net.Queue.RequestBucket.SendAsync(RestRequest request)
+   at Discord.Net.Queue.RequestQueue.SendAsync(RestRequest request)
+   at Discord.API.DiscordRestApiClient.SendInternalAsync(String method, String endpoint, RestRequest request)
+   at Discord.API.DiscordRestApiClient.SendAsync[TResponse](String method, String endpoint, BucketId bucketId, ClientBucketType clientBucket, RequestOptions options)
+   at Discord.API.DiscordSocketApiClient.ConnectInternalAsync()
+   at Discord.API.DiscordSocketApiClient.ConnectInternalAsync()
+   at Discord.API.DiscordSocketApiClient.ConnectAsync()
+   at Discord.WebSocket.DiscordSocketClient.OnConnectingAsync()
+   at Discord.ConnectionManager.ConnectAsync(CancellationTokenSource reconnectCancelToken)
+   at Discord.ConnectionManager.<>c__DisplayClass29_0.<<StartAsync>b__0>d.MoveNext()
+2024-11-11 01:48:26.1604|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Disconnecting 
+2024-11-11 01:48:26.1604|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Disconnected 
+2024-11-11 02:05:49.0280|INFO|SysBot.Base.LogUtil|192.168.68.199 Starting Discord.
+2024-11-11 02:05:49.0918|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Discord: Discord.Net v3.16.0 (API v10) 
+2024-11-11 02:05:49.0918|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Connecting 
+2024-11-11 02:05:49.1382|INFO|SysBot.Base.LogUtil|192.168.68.199 Starting bot loop.
+2024-11-11 02:05:49.1382|INFO|SysBot.Base.LogUtil|192.168.68.199 Connecting to device...
+2024-11-11 02:05:49.1382|INFO|SysBot.Base.LogUtil|192.168.68.199 Connected!
+2024-11-11 02:05:49.1382|INFO|SysBot.Base.LogUtil|192.168.68.199 Initializing connection with console...
+2024-11-11 02:05:49.1526|INFO|SysBot.Base.LogUtil|192.168.68.199 Detaching controller on startup as first interaction.
+2024-11-11 02:05:49.4506|INFO|SysBot.Base.LogUtil|SysCord: [ Warning] Gateway:  Discord.Net.HttpException: The server responded with error 401: 401: Unauthorized
+   at Discord.Net.Queue.RequestBucket.SendAsync(RestRequest request)
+   at Discord.Net.Queue.RequestQueue.SendAsync(RestRequest request)
+   at Discord.API.DiscordRestApiClient.SendInternalAsync(String method, String endpoint, RestRequest request)
+   at Discord.API.DiscordRestApiClient.SendAsync[TResponse](String method, String endpoint, BucketId bucketId, ClientBucketType clientBucket, RequestOptions options)
+   at Discord.API.DiscordSocketApiClient.ConnectInternalAsync()
+   at Discord.API.DiscordSocketApiClient.ConnectInternalAsync()
+   at Discord.API.DiscordSocketApiClient.ConnectAsync()
+   at Discord.WebSocket.DiscordSocketClient.OnConnectingAsync()
+   at Discord.ConnectionManager.ConnectAsync(CancellationTokenSource reconnectCancelToken)
+   at Discord.ConnectionManager.<>c__DisplayClass29_0.<<StartAsync>b__0>d.MoveNext()
+2024-11-11 02:05:49.4506|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Disconnecting 
+2024-11-11 02:05:49.4506|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Disconnected 
+2024-11-11 02:05:49.4740|INFO|SysBot.Base.LogUtil|192.168.68.199 Attempting get version. Please wait...
+2024-11-11 02:05:49.4740|INFO|SysBot.Base.LogUtil|192.168.68.199 sys-botbase version identified as: 2.4
+2024-11-11 02:05:49.9141|INFO|SysBot.Base.LogUtil|192.168.68.199 Found the following players on your island: Yuno, Jamie
+2024-11-11 02:05:49.9141|INFO|SysBot.Base.LogUtil|192.168.68.199 Checking inventory offset for validity.
+2024-11-11 02:05:49.9719|INFO|SysBot.Base.LogUtil|192.168.68.199 Reading original map status. Please wait...
+2024-11-11 02:06:33.3174|INFO|SysBot.Base.LogUtil|192.168.68.199 Starting Discord.
+2024-11-11 02:06:33.3902|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Discord: Discord.Net v3.16.0 (API v10) 
+2024-11-11 02:06:33.3902|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Connecting 
+2024-11-11 02:06:33.4380|INFO|SysBot.Base.LogUtil|192.168.68.199 Starting bot loop.
+2024-11-11 02:06:33.4380|INFO|SysBot.Base.LogUtil|192.168.68.199 Connecting to device...
+2024-11-11 02:06:33.4380|INFO|SysBot.Base.LogUtil|192.168.68.199 Connected!
+2024-11-11 02:06:33.4380|INFO|SysBot.Base.LogUtil|192.168.68.199 Initializing connection with console...
+2024-11-11 02:06:33.4524|INFO|SysBot.Base.LogUtil|192.168.68.199 Detaching controller on startup as first interaction.
+2024-11-11 02:06:33.7633|INFO|SysBot.Base.LogUtil|192.168.68.199 Attempting get version. Please wait...
+2024-11-11 02:06:33.7633|INFO|SysBot.Base.LogUtil|192.168.68.199 sys-botbase version identified as: 2.4
+2024-11-11 02:06:33.7633|INFO|SysBot.Base.LogUtil|SysCord: [ Warning] Gateway:  Discord.Net.HttpException: The server responded with error 401: 401: Unauthorized
+   at Discord.Net.Queue.RequestBucket.SendAsync(RestRequest request)
+   at Discord.Net.Queue.RequestQueue.SendAsync(RestRequest request)
+   at Discord.API.DiscordRestApiClient.SendInternalAsync(String method, String endpoint, RestRequest request)
+   at Discord.API.DiscordRestApiClient.SendAsync[TResponse](String method, String endpoint, BucketId bucketId, ClientBucketType clientBucket, RequestOptions options)
+   at Discord.API.DiscordSocketApiClient.ConnectInternalAsync()
+   at Discord.API.DiscordSocketApiClient.ConnectInternalAsync()
+   at Discord.API.DiscordSocketApiClient.ConnectAsync()
+   at Discord.WebSocket.DiscordSocketClient.OnConnectingAsync()
+   at Discord.ConnectionManager.ConnectAsync(CancellationTokenSource reconnectCancelToken)
+   at Discord.ConnectionManager.<>c__DisplayClass29_0.<<StartAsync>b__0>d.MoveNext()
+2024-11-11 02:06:33.7633|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Disconnecting 
+2024-11-11 02:06:33.7781|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Disconnected 
+2024-11-11 02:06:34.2062|INFO|SysBot.Base.LogUtil|192.168.68.199 Found the following players on your island: Yuno, Jamie
+2024-11-11 02:06:34.2062|INFO|SysBot.Base.LogUtil|192.168.68.199 Checking inventory offset for validity.
+2024-11-11 02:06:34.2603|INFO|SysBot.Base.LogUtil|192.168.68.199 Reading original map status. Please wait...
+2024-11-11 02:06:34.7888|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Connecting 
+2024-11-11 02:06:34.8748|INFO|SysBot.Base.LogUtil|SysCord: [ Warning] Gateway:  Discord.Net.HttpException: The server responded with error 401: 401: Unauthorized
+   at Discord.Net.Queue.RequestBucket.SendAsync(RestRequest request)
+   at Discord.Net.Queue.RequestQueue.SendAsync(RestRequest request)
+   at Discord.API.DiscordRestApiClient.SendInternalAsync(String method, String endpoint, RestRequest request)
+   at Discord.API.DiscordRestApiClient.SendAsync[TResponse](String method, String endpoint, BucketId bucketId, ClientBucketType clientBucket, RequestOptions options)
+   at Discord.API.DiscordSocketApiClient.ConnectInternalAsync()
+   at Discord.API.DiscordSocketApiClient.ConnectInternalAsync()
+   at Discord.API.DiscordSocketApiClient.ConnectAsync()
+   at Discord.WebSocket.DiscordSocketClient.OnConnectingAsync()
+   at Discord.ConnectionManager.ConnectAsync(CancellationTokenSource reconnectCancelToken)
+   at Discord.ConnectionManager.<>c__DisplayClass29_0.<<StartAsync>b__0>d.MoveNext()
+2024-11-11 02:06:34.8748|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Disconnecting 
+2024-11-11 02:06:34.8748|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Disconnected 
+2024-11-11 02:06:36.8546|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Connecting 
+2024-11-11 02:06:36.9313|INFO|SysBot.Base.LogUtil|SysCord: [ Warning] Gateway:  Discord.Net.HttpException: The server responded with error 401: 401: Unauthorized
+   at Discord.Net.Queue.RequestBucket.SendAsync(RestRequest request)
+   at Discord.Net.Queue.RequestQueue.SendAsync(RestRequest request)
+   at Discord.API.DiscordRestApiClient.SendInternalAsync(String method, String endpoint, RestRequest request)
+   at Discord.API.DiscordRestApiClient.SendAsync[TResponse](String method, String endpoint, BucketId bucketId, ClientBucketType clientBucket, RequestOptions options)
+   at Discord.API.DiscordSocketApiClient.ConnectInternalAsync()
+   at Discord.API.DiscordSocketApiClient.ConnectInternalAsync()
+   at Discord.API.DiscordSocketApiClient.ConnectAsync()
+   at Discord.WebSocket.DiscordSocketClient.OnConnectingAsync()
+   at Discord.ConnectionManager.ConnectAsync(CancellationTokenSource reconnectCancelToken)
+   at Discord.ConnectionManager.<>c__DisplayClass29_0.<<StartAsync>b__0>d.MoveNext()
+2024-11-11 02:06:36.9313|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Disconnecting 
+2024-11-11 02:06:36.9313|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Disconnected 
+2024-11-11 05:03:02.6251|INFO|SysBot.Base.LogUtil|192.168.68.199 Starting Discord.
+2024-11-11 05:03:02.7173|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Discord: Discord.Net v3.16.0 (API v10) 
+2024-11-11 05:03:02.7173|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Connecting 
+2024-11-11 05:03:02.8091|INFO|SysBot.Base.LogUtil|192.168.68.199 Starting bot loop.
+2024-11-11 05:03:02.8091|INFO|SysBot.Base.LogUtil|192.168.68.199 Connecting to device...
+2024-11-11 05:06:27.0015|INFO|SysBot.Base.LogUtil|192.168.68.199 Starting Discord.
+2024-11-11 05:06:27.0692|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Discord: Discord.Net v3.16.0 (API v10) 
+2024-11-11 05:06:27.0765|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Connecting 
+2024-11-11 05:06:27.1224|INFO|SysBot.Base.LogUtil|192.168.68.199 Starting bot loop.
+2024-11-11 05:06:27.1224|INFO|SysBot.Base.LogUtil|192.168.68.199 Connecting to device...
+2024-11-11 05:06:27.1224|INFO|SysBot.Base.LogUtil|192.168.68.199 Connected!
+2024-11-11 05:06:27.1224|INFO|SysBot.Base.LogUtil|192.168.68.199 Initializing connection with console...
+2024-11-11 05:06:27.1385|INFO|SysBot.Base.LogUtil|192.168.68.199 Detaching controller on startup as first interaction.
+2024-11-11 05:06:27.4689|INFO|SysBot.Base.LogUtil|192.168.68.199 Attempting get version. Please wait...
+2024-11-11 05:06:27.4814|INFO|SysBot.Base.LogUtil|192.168.68.199 sys-botbase version identified as: 2.4
+2024-11-11 05:06:27.4967|INFO|SysBot.Base.LogUtil|SysCord: [ Warning] Gateway:  Discord.Net.HttpException: The server responded with error 401: 401: Unauthorized
+   at Discord.Net.Queue.RequestBucket.SendAsync(RestRequest request)
+   at Discord.Net.Queue.RequestQueue.SendAsync(RestRequest request)
+   at Discord.API.DiscordRestApiClient.SendInternalAsync(String method, String endpoint, RestRequest request)
+   at Discord.API.DiscordRestApiClient.SendAsync[TResponse](String method, String endpoint, BucketId bucketId, ClientBucketType clientBucket, RequestOptions options)
+   at Discord.API.DiscordSocketApiClient.ConnectInternalAsync()
+   at Discord.API.DiscordSocketApiClient.ConnectInternalAsync()
+   at Discord.API.DiscordSocketApiClient.ConnectAsync()
+   at Discord.WebSocket.DiscordSocketClient.OnConnectingAsync()
+   at Discord.ConnectionManager.ConnectAsync(CancellationTokenSource reconnectCancelToken)
+   at Discord.ConnectionManager.<>c__DisplayClass29_0.<<StartAsync>b__0>d.MoveNext()
+2024-11-11 05:06:27.4967|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Disconnecting 
+2024-11-11 05:06:27.4967|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Disconnected 
+2024-11-11 05:06:27.9129|INFO|SysBot.Base.LogUtil|192.168.68.199 Found the following players on your island: Yuno, Jamie
+2024-11-11 05:06:27.9129|INFO|SysBot.Base.LogUtil|192.168.68.199 Checking inventory offset for validity.
+2024-11-11 05:06:27.9701|INFO|SysBot.Base.LogUtil|192.168.68.199 Reading original map status. Please wait...
+2024-11-11 05:08:09.9483|INFO|SysBot.Base.LogUtil|192.168.68.199 Starting Discord.
+2024-11-11 05:08:10.0278|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Discord: Discord.Net v3.16.0 (API v10) 
+2024-11-11 05:08:10.0278|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Connecting 
+2024-11-11 05:08:10.0797|INFO|SysBot.Base.LogUtil|192.168.68.199 Starting bot loop.
+2024-11-11 05:08:10.0797|INFO|SysBot.Base.LogUtil|192.168.68.199 Connecting to device...
+2024-11-11 05:08:10.0797|INFO|SysBot.Base.LogUtil|192.168.68.199 Connected!
+2024-11-11 05:08:10.0797|INFO|SysBot.Base.LogUtil|192.168.68.199 Initializing connection with console...
+2024-11-11 05:08:10.0967|INFO|SysBot.Base.LogUtil|192.168.68.199 Detaching controller on startup as first interaction.
+2024-11-11 05:08:10.4118|INFO|SysBot.Base.LogUtil|192.168.68.199 Attempting get version. Please wait...
+2024-11-11 05:08:10.4408|INFO|SysBot.Base.LogUtil|192.168.68.199 sys-botbase version identified as: 2.4
+2024-11-11 05:08:10.4693|INFO|SysBot.Base.LogUtil|SysCord: [ Warning] Gateway:  Discord.Net.HttpException: The server responded with error 401: 401: Unauthorized
+   at Discord.Net.Queue.RequestBucket.SendAsync(RestRequest request)
+   at Discord.Net.Queue.RequestQueue.SendAsync(RestRequest request)
+   at Discord.API.DiscordRestApiClient.SendInternalAsync(String method, String endpoint, RestRequest request)
+   at Discord.API.DiscordRestApiClient.SendAsync[TResponse](String method, String endpoint, BucketId bucketId, ClientBucketType clientBucket, RequestOptions options)
+   at Discord.API.DiscordSocketApiClient.ConnectInternalAsync()
+   at Discord.API.DiscordSocketApiClient.ConnectInternalAsync()
+   at Discord.API.DiscordSocketApiClient.ConnectAsync()
+   at Discord.WebSocket.DiscordSocketClient.OnConnectingAsync()
+   at Discord.ConnectionManager.ConnectAsync(CancellationTokenSource reconnectCancelToken)
+   at Discord.ConnectionManager.<>c__DisplayClass29_0.<<StartAsync>b__0>d.MoveNext()
+2024-11-11 05:08:10.4693|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Disconnecting 
+2024-11-11 05:08:10.4693|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Disconnected 
+2024-11-11 05:08:10.8656|INFO|SysBot.Base.LogUtil|192.168.68.199 Found the following players on your island: Yuno, Jamie
+2024-11-11 05:08:10.8656|INFO|SysBot.Base.LogUtil|192.168.68.199 Checking inventory offset for validity.
+2024-11-11 05:08:10.9216|INFO|SysBot.Base.LogUtil|192.168.68.199 Reading original map status. Please wait...
+2024-11-11 05:09:33.8590|INFO|SysBot.Base.LogUtil|192.168.68.199 Starting Discord.
+2024-11-11 05:09:33.9277|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Discord: Discord.Net v3.16.0 (API v10) 
+2024-11-11 05:09:33.9349|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Connecting 
+2024-11-11 05:09:33.9726|INFO|SysBot.Base.LogUtil|192.168.68.199 Starting bot loop.
+2024-11-11 05:09:33.9726|INFO|SysBot.Base.LogUtil|192.168.68.199 Connecting to device...
+2024-11-11 05:09:33.9726|INFO|SysBot.Base.LogUtil|192.168.68.199 Connected!
+2024-11-11 05:09:33.9726|INFO|SysBot.Base.LogUtil|192.168.68.199 Initializing connection with console...
+2024-11-11 05:09:33.9932|INFO|SysBot.Base.LogUtil|192.168.68.199 Detaching controller on startup as first interaction.
+2024-11-11 05:21:54.9499|INFO|SysBot.Base.LogUtil|192.168.68.199 Starting Discord.
+2024-11-11 05:21:55.0381|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Discord: Discord.Net v3.16.0 (API v10) 
+2024-11-11 05:21:55.0464|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Connecting 
+2024-11-11 05:21:55.0856|INFO|SysBot.Base.LogUtil|192.168.68.199 Starting bot loop.
+2024-11-11 05:21:55.0856|INFO|SysBot.Base.LogUtil|192.168.68.199 Connecting to device...
+2024-11-11 05:21:55.0930|INFO|SysBot.Base.LogUtil|192.168.68.199 Connected!
+2024-11-11 05:21:55.0930|INFO|SysBot.Base.LogUtil|192.168.68.199 Initializing connection with console...
+2024-11-11 05:21:55.0930|INFO|SysBot.Base.LogUtil|192.168.68.199 Detaching controller on startup as first interaction.
+2024-11-11 05:22:05.9528|INFO|SysBot.Base.LogUtil|192.168.68.199 Starting Discord.
+2024-11-11 05:22:06.0200|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Discord: Discord.Net v3.16.0 (API v10) 
+2024-11-11 05:22:06.0273|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Connecting 
+2024-11-11 05:22:06.0693|INFO|SysBot.Base.LogUtil|192.168.68.199 Starting bot loop.
+2024-11-11 05:22:06.0693|INFO|SysBot.Base.LogUtil|192.168.68.199 Connecting to device...
+2024-11-11 05:22:06.0741|INFO|SysBot.Base.LogUtil|192.168.68.199 Connected!
+2024-11-11 05:22:06.0741|INFO|SysBot.Base.LogUtil|192.168.68.199 Initializing connection with console...
+2024-11-11 05:22:06.0741|INFO|SysBot.Base.LogUtil|192.168.68.199 Detaching controller on startup as first interaction.
+2024-11-11 05:22:06.3954|INFO|SysBot.Base.LogUtil|SysCord: [ Warning] Gateway:  Discord.Net.HttpException: The server responded with error 401: 401: Unauthorized
+   at Discord.Net.Queue.RequestBucket.SendAsync(RestRequest request)
+   at Discord.Net.Queue.RequestQueue.SendAsync(RestRequest request)
+   at Discord.API.DiscordRestApiClient.SendInternalAsync(String method, String endpoint, RestRequest request)
+   at Discord.API.DiscordRestApiClient.SendAsync[TResponse](String method, String endpoint, BucketId bucketId, ClientBucketType clientBucket, RequestOptions options)
+   at Discord.API.DiscordSocketApiClient.ConnectInternalAsync()
+   at Discord.API.DiscordSocketApiClient.ConnectInternalAsync()
+   at Discord.API.DiscordSocketApiClient.ConnectAsync()
+   at Discord.WebSocket.DiscordSocketClient.OnConnectingAsync()
+   at Discord.ConnectionManager.ConnectAsync(CancellationTokenSource reconnectCancelToken)
+   at Discord.ConnectionManager.<>c__DisplayClass29_0.<<StartAsync>b__0>d.MoveNext()
+2024-11-11 05:22:06.3954|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Disconnecting 
+2024-11-11 05:22:06.3954|INFO|SysBot.Base.LogUtil|192.168.68.199 Attempting get version. Please wait...
+2024-11-11 05:22:06.3954|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Disconnected 
+2024-11-11 05:22:06.4432|INFO|SysBot.Base.LogUtil|192.168.68.199 sys-botbase version identified as: 2.4
+2024-11-11 05:22:06.8747|INFO|SysBot.Base.LogUtil|192.168.68.199 Found the following players on your island: Yuno, Jamie
+2024-11-11 05:22:06.8747|INFO|SysBot.Base.LogUtil|192.168.68.199 Checking inventory offset for validity.
+2024-11-11 05:22:06.9662|INFO|SysBot.Base.LogUtil|192.168.68.199 Reading original map status. Please wait...
+2024-11-11 05:22:07.4038|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Connecting 
+2024-11-11 05:22:07.5098|INFO|SysBot.Base.LogUtil|SysCord: [ Warning] Gateway:  Discord.Net.HttpException: The server responded with error 401: 401: Unauthorized
+   at Discord.Net.Queue.RequestBucket.SendAsync(RestRequest request)
+   at Discord.Net.Queue.RequestQueue.SendAsync(RestRequest request)
+   at Discord.API.DiscordRestApiClient.SendInternalAsync(String method, String endpoint, RestRequest request)
+   at Discord.API.DiscordRestApiClient.SendAsync[TResponse](String method, String endpoint, BucketId bucketId, ClientBucketType clientBucket, RequestOptions options)
+   at Discord.API.DiscordSocketApiClient.ConnectInternalAsync()
+   at Discord.API.DiscordSocketApiClient.ConnectInternalAsync()
+   at Discord.API.DiscordSocketApiClient.ConnectAsync()
+   at Discord.WebSocket.DiscordSocketClient.OnConnectingAsync()
+   at Discord.ConnectionManager.ConnectAsync(CancellationTokenSource reconnectCancelToken)
+   at Discord.ConnectionManager.<>c__DisplayClass29_0.<<StartAsync>b__0>d.MoveNext()
+2024-11-11 05:22:07.5098|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Disconnecting 
+2024-11-11 05:22:07.5098|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Disconnected 
+2024-11-11 05:24:56.1157|INFO|SysBot.Base.LogUtil|192.168.68.199 Starting Discord.
+2024-11-11 05:24:56.1884|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Discord: Discord.Net v3.16.0 (API v10) 
+2024-11-11 05:24:56.1884|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Connecting 
+2024-11-11 05:24:56.2355|INFO|SysBot.Base.LogUtil|192.168.68.199 Starting bot loop.
+2024-11-11 05:24:56.2355|INFO|SysBot.Base.LogUtil|192.168.68.199 Connecting to device...
+2024-11-11 05:24:56.3143|INFO|SysBot.Base.LogUtil|192.168.68.199 Connected!
+2024-11-11 05:24:56.3143|INFO|SysBot.Base.LogUtil|192.168.68.199 Initializing connection with console...
+2024-11-11 05:24:56.3143|INFO|SysBot.Base.LogUtil|192.168.68.199 Detaching controller on startup as first interaction.
+2024-11-11 05:24:56.5692|INFO|SysBot.Base.LogUtil|SysCord: [ Warning] Gateway:  Discord.Net.HttpException: The server responded with error 401: 401: Unauthorized
+   at Discord.Net.Queue.RequestBucket.SendAsync(RestRequest request)
+   at Discord.Net.Queue.RequestQueue.SendAsync(RestRequest request)
+   at Discord.API.DiscordRestApiClient.SendInternalAsync(String method, String endpoint, RestRequest request)
+   at Discord.API.DiscordRestApiClient.SendAsync[TResponse](String method, String endpoint, BucketId bucketId, ClientBucketType clientBucket, RequestOptions options)
+   at Discord.API.DiscordSocketApiClient.ConnectInternalAsync()
+   at Discord.API.DiscordSocketApiClient.ConnectInternalAsync()
+   at Discord.API.DiscordSocketApiClient.ConnectAsync()
+   at Discord.WebSocket.DiscordSocketClient.OnConnectingAsync()
+   at Discord.ConnectionManager.ConnectAsync(CancellationTokenSource reconnectCancelToken)
+   at Discord.ConnectionManager.<>c__DisplayClass29_0.<<StartAsync>b__0>d.MoveNext()
+2024-11-11 05:24:56.5692|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Disconnecting 
+2024-11-11 05:24:56.5738|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Disconnected 
+2024-11-11 05:24:56.6557|INFO|SysBot.Base.LogUtil|192.168.68.199 Attempting get version. Please wait...
+2024-11-11 05:24:56.6557|INFO|SysBot.Base.LogUtil|192.168.68.199 sys-botbase version identified as: 2.4
+2024-11-11 05:24:57.0984|INFO|SysBot.Base.LogUtil|192.168.68.199 Found the following players on your island: Yuno, Jamie
+2024-11-11 05:24:57.0984|INFO|SysBot.Base.LogUtil|192.168.68.199 Checking inventory offset for validity.
+2024-11-11 05:24:57.1546|INFO|SysBot.Base.LogUtil|192.168.68.199 Reading original map status. Please wait...
+2024-11-11 05:29:12.5127|INFO|SysBot.Base.LogUtil|192.168.68.199 Starting Discord.
+2024-11-11 05:29:12.5787|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Discord: Discord.Net v3.16.0 (API v10) 
+2024-11-11 05:29:12.5787|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Connecting 
+2024-11-11 05:29:12.6270|INFO|SysBot.Base.LogUtil|192.168.68.199 Starting bot loop.
+2024-11-11 05:29:12.6270|INFO|SysBot.Base.LogUtil|192.168.68.199 Connecting to device...
+2024-11-11 05:29:12.6270|INFO|SysBot.Base.LogUtil|192.168.68.199 Connected!
+2024-11-11 05:29:12.6270|INFO|SysBot.Base.LogUtil|192.168.68.199 Initializing connection with console...
+2024-11-11 05:29:12.6390|INFO|SysBot.Base.LogUtil|192.168.68.199 Detaching controller on startup as first interaction.
+2024-11-11 05:29:12.9498|INFO|SysBot.Base.LogUtil|192.168.68.199 Attempting get version. Please wait...
+2024-11-11 05:29:12.9498|INFO|SysBot.Base.LogUtil|SysCord: [ Warning] Gateway:  Discord.Net.HttpException: The server responded with error 401: 401: Unauthorized
+   at Discord.Net.Queue.RequestBucket.SendAsync(RestRequest request)
+   at Discord.Net.Queue.RequestQueue.SendAsync(RestRequest request)
+   at Discord.API.DiscordRestApiClient.SendInternalAsync(String method, String endpoint, RestRequest request)
+   at Discord.API.DiscordRestApiClient.SendAsync[TResponse](String method, String endpoint, BucketId bucketId, ClientBucketType clientBucket, RequestOptions options)
+   at Discord.API.DiscordSocketApiClient.ConnectInternalAsync()
+   at Discord.API.DiscordSocketApiClient.ConnectInternalAsync()
+   at Discord.API.DiscordSocketApiClient.ConnectAsync()
+   at Discord.WebSocket.DiscordSocketClient.OnConnectingAsync()
+   at Discord.ConnectionManager.ConnectAsync(CancellationTokenSource reconnectCancelToken)
+   at Discord.ConnectionManager.<>c__DisplayClass29_0.<<StartAsync>b__0>d.MoveNext()
+2024-11-11 05:29:12.9498|INFO|SysBot.Base.LogUtil|192.168.68.199 sys-botbase version identified as: 2.4
+2024-11-11 05:29:12.9498|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Disconnecting 
+2024-11-11 05:29:12.9692|INFO|SysBot.Base.LogUtil|SysCord: [    Info] Gateway: Disconnected 

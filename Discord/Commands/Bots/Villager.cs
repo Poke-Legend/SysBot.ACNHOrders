@@ -63,9 +63,10 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
 
             var villagers = Globals.Bot.Villagers.LastVillagers;
             var embed = new EmbedBuilder()
-                .WithTitle($"Villagers on {Globals.Bot.TownName}")
-                .WithDescription($"{Context.User.Mention}: {villagers}.")
+                .WithTitle($"🌴 Villagers on {Globals.Bot.TownName}")
+                .WithDescription($"{Context.User.Mention}, here are the villagers currently on the island:\n{villagers}.")
                 .WithColor(Color.Green)
+                .WithFooter("Thank you for using Villager Bot!")
                 .Build();
 
             await ReplyAsync(embed: embed).ConfigureAwait(false);
@@ -99,10 +100,6 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
 
         #region Helper Methods
 
-        /// <summary>
-        /// Checks if the user or server is banned.
-        /// </summary>
-        /// <returns>True if banned; otherwise, false.</returns>
         private async Task<bool> IsUserOrServerBannedAsync()
         {
             if (BanManager.IsServerBanned(Context.Guild.Id.ToString()))
@@ -120,12 +117,6 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
             return false;
         }
 
-
-
-        /// <summary>
-        /// Performs pre-execution checks like server ban and configuration validations.
-        /// </summary>
-        /// <returns>True if execution should continue; otherwise, false.</returns>
         private async Task<bool> PreExecuteCheckAsync()
         {
             if (await IsServerBannedAsync())
@@ -143,44 +134,29 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
             return true;
         }
 
-
-        /// <summary>
-        /// Checks if the server is banned.
-        /// </summary>
-        /// <returns>True if banned; otherwise, false.</returns>
         private Task<bool> IsServerBannedAsync()
         {
             return Task.FromResult(BanManager.IsServerBanned(Context.Guild.Id.ToString()));
         }
 
-        /// <summary>
-        /// Leaves the guild asynchronously.
-        /// </summary>
         private async Task LeaveGuildAsync()
         {
             await Context.Guild.LeaveAsync().ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// Sends an error embed message.
-        /// </summary>
-        /// <param name="message">Error message to display.</param>
         private async Task ReplyErrorAsync(string message)
         {
             var embed = new EmbedBuilder()
-                .WithTitle("Error")
+                .WithTitle("❌ Error")
                 .WithDescription($"{Context.User.Mention} - {message}")
                 .WithColor(Color.Red)
+                .WithFooter("Please check command permissions or try again later.")
+                .WithTimestamp(DateTimeOffset.Now)
                 .Build();
 
             await ReplyAsync(embed: embed).ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// Injects villagers based on provided names.
-        /// </summary>
-        /// <param name="startIndex">Starting index for injection.</param>
-        /// <param name="villagerNames">Array of villager internal names.</param>
         private async Task InjectVillagersAsync(int startIndex, string[] villagerNames)
         {
             if (!Globals.Bot.Config.AllowVillagerInjection)
@@ -218,21 +194,18 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
             }
 
             var addMsg = count > 1 ? $"Villager inject request for {count} villagers has" : "Villager inject request has";
-            var msg = $"{Context.User.Mention}: {addMsg} been added to the queue and will be injected momentarily. I will reply to you once this has completed.";
+            var msg = $"{Context.User.Mention}, {addMsg} been added to the queue and will be injected momentarily. I will reply to you once this is completed.";
             var embedResponse = new EmbedBuilder()
-                .WithTitle("Villager Injection")
+                .WithTitle("🌸 Villager Injection")
                 .WithDescription(msg)
                 .WithColor(Color.Blue)
+                .WithFooter("Thank you for your patience!")
+                .WithTimestamp(DateTimeOffset.Now)
                 .Build();
 
             await ReplyAsync(embed: embedResponse).ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// Resolves the internal name of a villager.
-        /// </summary>
-        /// <param name="nameLookup">The name to lookup.</param>
-        /// <returns>Resolved internal name or null if not found.</returns>
         private string ResolveInternalName(string nameLookup)
         {
             if (VillagerResources.IsVillagerDataKnown(nameLookup))
@@ -243,21 +216,11 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
                 .Key;
         }
 
-        /// <summary>
-        /// Checks if the provided index is valid.
-        /// </summary>
-        /// <param name="index">Index to validate.</param>
-        /// <returns>True if valid; otherwise, false.</returns>
         private bool IsValidIndex(int index)
         {
             return index >= 0 && index <= byte.MaxValue;
         }
 
-        /// <summary>
-        /// Enqueues a villager injection request.
-        /// </summary>
-        /// <param name="internalName">Internal name of the villager.</param>
-        /// <param name="index">Index at which to inject.</param>
         private void EnqueueVillagerInjection(string internalName, int index)
         {
             var replace = VillagerResources.GetVillager(internalName);
@@ -274,9 +237,11 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
                         : "Failed to inject villager. Please tell the bot owner to look at the logs!";
 
                     var embed = new EmbedBuilder()
-                        .WithTitle("Villager Injection")
+                        .WithTitle("🌸 Villager Injection Status")
                         .WithDescription($"{Context.User.Mention}: {reply}")
                         .WithColor(success ? Color.Green : Color.Red)
+                        .WithFooter(success ? "Villager injected successfully!" : "Injection failed.")
+                        .WithTimestamp(DateTimeOffset.Now)
                         .Build();
 
                     Task.Run(async () => await ReplyAsync(embed: embed).ConfigureAwait(false));
@@ -286,11 +251,6 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
             Globals.Bot.VillagerInjections.Enqueue(request);
         }
 
-        /// <summary>
-        /// Replies with the internal name of a villager.
-        /// </summary>
-        /// <param name="strings">Game strings based on language.</param>
-        /// <param name="villagerName">Name of the villager to lookup.</param>
         private async Task ReplyVillagerNameAsync(GameStrings strings, string villagerName)
         {
             if (!Globals.Bot.Config.AllowLookup)
@@ -306,18 +266,22 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
             if (string.IsNullOrWhiteSpace(result.Key))
             {
                 var embed = new EmbedBuilder()
-                    .WithTitle("Villager Lookup")
+                    .WithTitle("🌸 Villager Lookup")
                     .WithDescription($"No villager found with the name {villagerName}.")
                     .WithColor(Color.Red)
+                    .WithFooter("Try another name or check spelling.")
+                    .WithTimestamp(DateTimeOffset.Now)
                     .Build();
                 await ReplyAsync(embed: embed).ConfigureAwait(false);
                 return;
             }
 
             var nameEmbed = new EmbedBuilder()
-                .WithTitle("Villager Lookup")
+                .WithTitle("🌸 Villager Lookup")
                 .WithDescription($"{villagerName} = {result.Key}")
                 .WithColor(Color.Green)
+                .WithFooter("Internal name found successfully!")
+                .WithTimestamp(DateTimeOffset.Now)
                 .Build();
 
             await ReplyAsync(embed: nameEmbed).ConfigureAwait(false);

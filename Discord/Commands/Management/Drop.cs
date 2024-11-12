@@ -2,22 +2,35 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.Net;
 using Discord.WebSocket;
+using Newtonsoft.Json;
 using NHSE.Core;
 using SysBot.ACNHOrders.Discord.Helpers;
 using SysBot.Base;
 
 namespace SysBot.ACNHOrders.Discord.Commands.Management
 {
-    // ReSharper disable once UnusedType.Global
     public class Drop : ModuleBase<SocketCommandContext>
     {
+        private static readonly HttpClient HttpClient = new HttpClient();
         private static int MaxRequestCount => Globals.Bot.Config.DropConfig.MaxDropCount;
+        private static readonly Color EmbedColor = new Color(52, 152, 219); // Blue (RGB)
+
+        private const string DropDIYSummary =
+        "Requests the bot to drop DIY recipes based on user input. " +
+        "Hex Mode: Enter DIY recipe IDs in hexadecimal format, separated by spaces. " +
+        "Text Mode: Enter recipe names separated by commas. Use a language code followed by a comma to parse recipes in that language.";
+
+        private const string DropItemSummary =
+        "Requests the bot to drop an item based on user input. " +
+        "Hex Mode: Enter item IDs in hexadecimal format, separated by spaces. " +
+        "Text Mode: Enter item names separated by commas. You can also specify a language code, followed by a comma, to parse items in that language.";
 
         [Command("clean")]
         [Summary("Picks up items around the bot.")]
@@ -34,11 +47,23 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
 
             if (!Globals.Bot.Config.AllowClean)
             {
-                await ReplyAsync("Clean functionality is currently disabled.").ConfigureAwait(false);
+                var errorEmbed = new EmbedBuilder()
+                    .WithColor(Color.Red)
+                    .WithTitle("❌ Clean Disabled")
+                    .WithDescription("The clean functionality is currently disabled.")
+                    .Build();
+                await ReplyAsync(embed: errorEmbed).ConfigureAwait(false);
                 return;
             }
+
             Globals.Bot.CleanRequested = true;
-            await ReplyAsync("A clean request will be executed momentarily.").ConfigureAwait(false);
+            var successEmbed = new EmbedBuilder()
+                .WithColor(EmbedColor)
+                .WithTitle("🧹 Clean Request")
+                .WithDescription("A clean request has been received and will be executed shortly.")
+                .WithTimestamp(DateTimeOffset.Now)
+                .Build();
+            await ReplyAsync(embed: successEmbed).ConfigureAwait(false);
         }
 
         [Command("code")]
@@ -54,18 +79,23 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
             }
 
             var draw = Globals.Bot.DodoImageDrawer;
-            var txt = $"Dodo Code for {Globals.Bot.TownName}: {Globals.Bot.DodoCode}.";
-            if (draw != null)
-            {
-                var path = draw.GetProcessedDodoImagePath();
-                if (path != null)
-                {
-                    await Context.Channel.SendFileAsync(path, txt);
-                    return;
-                }
-            }
+            var message = $"Dodo Code for **{Globals.Bot.TownName}**: **{Globals.Bot.DodoCode}**.";
 
-            await ReplyAsync(txt).ConfigureAwait(false);
+            if (draw != null && draw.GetProcessedDodoImagePath() is string path)
+            {
+                await Context.Channel.SendFileAsync(path, message);
+            }
+            else
+            {
+                var embed = new EmbedBuilder()
+                    .WithColor(EmbedColor)
+                    .WithTitle("🛩️ Dodo Code")
+                    .WithDescription(message)
+                    .WithFooter($"Requested by {Context.User.Username}", Context.User.GetAvatarUrl())
+                    .WithTimestamp(DateTimeOffset.Now)
+                    .Build();
+                await ReplyAsync(embed: embed).ConfigureAwait(false);
+            }
         }
 
         [Command("sendDodo")]
@@ -80,63 +110,48 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
             }
 
             var cfg = Globals.Bot.Config;
-            var MesUser = Context.User.Username;
-            Globals.Bot.DisUserID = $"{Context.User.Id}";
-            if (!Globals.Bot.Config.DodoModeConfig.AllowSendDodo && !Globals.Bot.Config.CanUseSudo(Context.User.Id) && Globals.Self.Owner != Context.User.Id)
+            if (!cfg.DodoModeConfig.AllowSendDodo && !cfg.CanUseSudo(Context.User.Id))
                 return;
-            if (!Globals.Bot.Config.DodoModeConfig.LimitedDodoRestoreOnlyMode)
+
+            if (!cfg.DodoModeConfig.LimitedDodoRestoreOnlyMode)
                 return;
-            //Check ban list to send dodo code.
-            string[] Checklist = File.ReadAllLines("banlist.txt", Encoding.UTF8);
-            int indexS = Array.FindIndex(Checklist, row => row.Contains(Context.User.Id.ToString()));
-            if (indexS != -1)
+
+            var bannedUsers = await FetchBanListFromGitHubAsync();
+            if (bannedUsers.Contains(Context.User.Id.ToString()))
             {
-                await ReplyAsync($"{Context.User.Mention} - You are currently not allowed to use the bot. Dodo code will not be sent.");
+                var banEmbed = new EmbedBuilder()
+                    .WithColor(Color.Orange)
+                    .WithTitle("⚠️ Access Restricted")
+                    .WithDescription($"{Context.User.Mention}, you are currently not allowed to use the bot. Dodo code will not be sent.")
+                    .Build();
+                await ReplyAsync(embed: banEmbed);
                 return;
             }
+
             try
             {
-                if (cfg.FieldLayerName != "name")
-                {
-                    var MapFile = $"{Globals.Bot.Config.FieldLayerNHLDirectory}/{Globals.Bot.CLayer}.png";
-                    await Context.User.SendMessageAsync($"Dodo Code for {Globals.Bot.TownName}: {Globals.Bot.DodoCode}.\n{Globals.Bot.TownName} is currently set to the following layer: {Globals.Bot.CLayer}.").ConfigureAwait(false);
-                    if (File.Exists($"{MapFile}"))
-                    {
-                        await Context.User.SendFileAsync($"{MapFile}");
-                    }
-                    await ReplyAsync($"`{MesUser}`: Sent you the dodo code via DM");
-                    await Globals.Self.TrySpeakMessage(Globals.Bot.Config.DodoModeConfig.SentDodoChannels, $"[{DateTime.Now:MM-dd hh:mm:ss tt}] The Dodo code was sent to <@{Context.User.Id}> - {Context.User.Id}  from `{Context.Guild.Name}` server.").ConfigureAwait(false);
-                }
-                else
-                {
-                    await Context.User.SendMessageAsync($"Dodo Code for {Globals.Bot.TownName}: {Globals.Bot.DodoCode}.").ConfigureAwait(false);
-                }
+                var message = $"Dodo Code for **{Globals.Bot.TownName}**: **{Globals.Bot.DodoCode}**.";
+                await Context.User.SendMessageAsync(message);
+
+                var confirmEmbed = new EmbedBuilder()
+                    .WithColor(Color.Green)
+                    .WithTitle("✅ Dodo Code Sent")
+                    .WithDescription($"The Dodo code has been sent to {Context.User.Mention} via DM.")
+                    .WithFooter("For private use only")
+                    .WithTimestamp(DateTimeOffset.Now)
+                    .Build();
+                await ReplyAsync(embed: confirmEmbed).ConfigureAwait(false);
             }
             catch (HttpException ex)
             {
-                await ReplyAsync($"{ex.Message}: Private messages must be open to use this command. I won't leak the Dodo code in this channel!");
-                return;
-            }
-
-            var reaction = Globals.Bot.Config.DodoModeConfig.SuccessfulDodoCodeSendReaction;
-            if (!string.IsNullOrWhiteSpace(reaction))
-            {
-                try
-                {
-                    IEmote emote = reaction.StartsWith("<") ? Emote.Parse(reaction) : new Emoji(reaction);
-                    await Context.Message.AddReactionAsync(emote);
-                }
-                catch
-                {
-                    LogUtil.LogError($"Could not parse {reaction} as an emote, or the necessary permissions are not given to this bot.", "Config");
-                }
+                var errorEmbed = new EmbedBuilder()
+                    .WithColor(Color.Red)
+                    .WithTitle("❌ Unable to Send Dodo Code")
+                    .WithDescription($"{ex.Message}. Ensure your private messages are open to use this command.")
+                    .Build();
+                await ReplyAsync(embed: errorEmbed).ConfigureAwait(false);
             }
         }
-
-        private const string DropItemSummary =
-            "Requests the bot drop an item with the user's provided input. " +
-            "Hex Mode: Item IDs (in hex); request multiple by putting spaces between items. " +
-            "Text Mode: Item names; request multiple by putting commas between items. To parse for another language, include the language code first and a comma, followed by the items.";
 
         [Command("drop")]
         [Alias("dropItem")]
@@ -151,15 +166,10 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
 
             var cfg = Globals.Bot.Config;
             var items = ItemParser.GetItemsFromUserInput(request, cfg.DropConfig, cfg.DropConfig.UseLegacyDrop ? ItemDestination.PlayerDropped : ItemDestination.HeldItem);
-
             MultiItem.StackToMax(items);
+
             await DropItems(items).ConfigureAwait(false);
         }
-
-        private const string DropDIYSummary =
-            "Requests the bot drop a DIY recipe with the user's provided input. " +
-            "Hex Mode: DIY Recipe IDs (in hex); request multiple by putting spaces between items. " +
-            "Text Mode: DIY Recipe Item names; request multiple by putting commas between items. To parse for another language, include the language code first and a comma, followed by the items.";
 
         [Command("dropDIY")]
         [Alias("diy")]
@@ -195,11 +205,24 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
                 {
                     var reply = success
                         ? $"All turnip values successfully set to {value}!"
-                        : "Catastrophic failure.";
-                    Task.Run(async () => await ReplyAsync($"{Context.User.Mention}: {reply}").ConfigureAwait(false));
+                        : "Unable to set turnip values.";
+                    var embed = new EmbedBuilder()
+                        .WithColor(success ? Color.Green : Color.Red)
+                        .WithTitle(success ? "🌱 Turnips Set" : "❌ Turnip Set Failed")
+                        .WithDescription(reply)
+                        .WithFooter($"Requested by {Context.User.Username}", Context.User.GetAvatarUrl())
+                        .WithTimestamp(DateTimeOffset.Now)
+                        .Build();
+                    Task.Run(async () => await ReplyAsync(embed: embed).ConfigureAwait(false));
                 }
             });
-            await ReplyAsync($"Queued all turnip values to be set to {value}.");
+            var queueEmbed = new EmbedBuilder()
+                .WithColor(EmbedColor)
+                .WithTitle("📈 Turnip Request Queued")
+                .WithDescription($"Queued turnip values to be set to {value}.")
+                .WithTimestamp(DateTimeOffset.Now)
+                .Build();
+            await ReplyAsync(embed: queueEmbed);
         }
 
         [Command("setTurnipsMax")]
@@ -208,12 +231,6 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
         [RequireSudo]
         public async Task RequestTurnipMaxSetAsync()
         {
-            if (BanManager.IsServerBanned(Context.Guild.Id.ToString()))
-            {
-                await Context.Guild.LeaveAsync().ConfigureAwait(false);
-                return; 
-            }
-
             await RequestTurnipSetAsync(999999999);
         }
 
@@ -230,22 +247,36 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
 
             if (!InternalItemTool.CurrentInstance.IsSane(items, Globals.Bot.Config.DropConfig))
             {
-                await ReplyAsync($"{Context.User.Mention} - You are attempting to drop items that will damage your save. Drop request not accepted.");
+                var errorEmbed = new EmbedBuilder()
+                    .WithColor(Color.Red)
+                    .WithTitle("❌ Invalid Item Request")
+                    .WithDescription($"{Context.User.Mention}, your request contains items that may damage your save file. Request not accepted.")
+                    .Build();
+                await ReplyAsync(embed: errorEmbed).ConfigureAwait(false);
                 return;
             }
 
             if (items.Count > MaxRequestCount)
             {
-                var clamped = $"Users are limited to {MaxRequestCount} items per command. Please use this bot responsibly.";
-                await ReplyAsync(clamped).ConfigureAwait(false);
+                var warningEmbed = new EmbedBuilder()
+                    .WithColor(Color.Orange)
+                    .WithTitle("⚠️ Item Limit Exceeded")
+                    .WithDescription($"You are limited to {MaxRequestCount} items per command. Only the first {MaxRequestCount} items will be processed.")
+                    .Build();
+                await ReplyAsync(embed: warningEmbed).ConfigureAwait(false);
                 items = items.Take(MaxRequestCount).ToArray();
             }
 
             var requestInfo = new ItemRequest(Context.User.Username, items);
             Globals.Bot.Injections.Enqueue(requestInfo);
 
-            var msg = $"Item drop request{(requestInfo.Item.Count > 1 ? "s" : string.Empty)} will be executed momentarily.";
-            await ReplyAsync(msg).ConfigureAwait(false);
+            var dropEmbed = new EmbedBuilder()
+                .WithColor(EmbedColor)
+                .WithTitle("📦 Item Drop Requested")
+                .WithDescription($"Your item drop request will be executed shortly.")
+                .WithTimestamp(DateTimeOffset.Now)
+                .Build();
+            await ReplyAsync(embed: dropEmbed).ConfigureAwait(false);
         }
 
         private async Task<bool> GetDropAvailability()
@@ -255,21 +286,64 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
             if (cfg.CanUseSudo(Context.User.Id) || Globals.Self.Owner == Context.User.Id)
                 return true;
 
-            if (Globals.Bot.CurrentUserId == Context.User.Id)
-                return true;
-
             if (!cfg.AllowDrop)
             {
-                await ReplyAsync($"AllowDrop is currently set to false.");
+                var disabledEmbed = new EmbedBuilder()
+                    .WithColor(Color.Orange)
+                    .WithTitle("⚠️ Drop Disabled")
+                    .WithDescription("Item drop functionality is currently disabled.")
+                    .Build();
+                await ReplyAsync(embed: disabledEmbed).ConfigureAwait(false);
                 return false;
             }
-            else if (!cfg.DodoModeConfig.LimitedDodoRestoreOnlyMode)
+
+            if (!cfg.DodoModeConfig.LimitedDodoRestoreOnlyMode)
             {
-                await ReplyAsync($"{Context.User.Mention} - You are only permitted to use this command while on the island during your order, and only if you have forgotten something in your order.");
+                var restrictionEmbed = new EmbedBuilder()
+                    .WithColor(Color.Orange)
+                    .WithTitle("⚠️ Drop Restricted")
+                    .WithDescription($"{Context.User.Mention}, you are only permitted to use this command while on the island during your order.")
+                    .Build();
+                await ReplyAsync(embed: restrictionEmbed).ConfigureAwait(false);
                 return false;
             }
 
             return true;
         }
+        private async Task<List<string>> FetchBanListFromGitHubAsync()
+        {
+            try
+            {
+                // Fetch the JSON data from GitHub
+                var response = await HttpClient.GetStringAsync("https://api.github.com/repos/Poke-Legend/ACNH-DATABASE/contents/userban.json");
+                var jsonData = JsonConvert.DeserializeObject<GitHubFileContent>(response);
+
+                // Check if jsonData or jsonData.Content is null
+                if (jsonData?.Content == null)
+                {
+                    Console.WriteLine("Error: Content is null in the GitHub file response.");
+                    return new List<string>();
+                }
+
+                // Decode the base64 content to get the actual JSON data
+                var decodedJson = Encoding.UTF8.GetString(Convert.FromBase64String(jsonData.Content));
+                var bannedUsers = JsonConvert.DeserializeObject<List<string>>(decodedJson);
+
+                return bannedUsers ?? new List<string>();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching ban list from GitHub: {ex.Message}");
+                return new List<string>(); // Return empty list if there's an error
+            }
+        }
+
+        private class GitHubFileContent
+        {
+            [JsonProperty("content")]
+            public string Content { get; set; } = string.Empty; // Default to an empty string to satisfy non-nullable requirement
+        }
     }
 }
+
+

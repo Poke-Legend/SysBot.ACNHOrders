@@ -17,6 +17,8 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
             public List<ulong> Sudo { get; set; } = new List<ulong>();
         }
 
+        private static readonly Color EmbedColor = new Color(52, 152, 219); // Blue (RGB)
+
         private async Task<Config> LoadConfigAsync()
         {
             try
@@ -28,7 +30,6 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
                     return new Config();
                 }
 
-                // Deserialize directly into a list of ulong for channel IDs
                 var channelIds = JsonConvert.DeserializeObject<List<ulong>>(channelListJson);
                 if (channelIds == null)
                 {
@@ -36,13 +37,11 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
                     return new Config();
                 }
 
-                // Initialize a Config object and assign the deserialized channel IDs
                 var config = new Config
                 {
                     Channels = channelIds
                 };
 
-                // Optionally, fetch Sudo user IDs from another source or keep it empty as default
                 var sudoJson = await GitHubApi.FetchFileContentAsync(GitHubApi.SudoApiUrl);
                 if (!string.IsNullOrEmpty(sudoJson))
                 {
@@ -58,7 +57,6 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
             }
         }
 
-
         private bool IsUserAuthorized(Config config)
         {
             return config.Sudo.Contains(Context.User.Id);
@@ -67,9 +65,12 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
         private async Task BroadcastMessageAsync(IMessageChannel channel, string message)
         {
             var embed = new EmbedBuilder()
-                .WithTitle("Announcement")
+                .WithTitle("?? Server Announcement")
                 .WithDescription(message)
+                .WithColor(EmbedColor)
                 .WithThumbnailUrl("https://media.giphy.com/media/T87BZ7cyOH7TwDBgwy/giphy.gif")
+                .WithFooter($"Sent by {Context.User.Username}", Context.User.GetAvatarUrl())
+                .WithTimestamp(DateTimeOffset.Now)
                 .Build();
 
             await channel.SendMessageAsync(embed: embed);
@@ -82,23 +83,39 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
         {
             if (Context.Client == null)
             {
-                await ReplyAsync("Client is not initialized.");
+                var errorEmbed = new EmbedBuilder()
+                    .WithColor(Color.Red)
+                    .WithTitle("? Client Not Initialized")
+                    .WithDescription("The Discord client is not initialized. Please try again later.")
+                    .Build();
+                await ReplyAsync(embed: errorEmbed);
                 return;
             }
 
             var config = await LoadConfigAsync();
             if (config == null)
             {
-                await ReplyAsync("Configuration error, please ensure GitHub configuration is properly set up.");
+                var configErrorEmbed = new EmbedBuilder()
+                    .WithColor(Color.Red)
+                    .WithTitle("? Configuration Error")
+                    .WithDescription("There was an issue loading the configuration. Please ensure GitHub configuration is properly set up.")
+                    .Build();
+                await ReplyAsync(embed: configErrorEmbed);
                 return;
             }
 
             if (!IsUserAuthorized(config))
             {
-                await ReplyAsync("You are not authorized to use this command.");
+                var unauthorizedEmbed = new EmbedBuilder()
+                    .WithColor(Color.Orange)
+                    .WithTitle("?? Unauthorized")
+                    .WithDescription("You do not have the necessary permissions to use this command.")
+                    .Build();
+                await ReplyAsync(embed: unauthorizedEmbed);
                 return;
             }
 
+            int successfulBroadcasts = 0;
             foreach (var channelId in config.Channels)
             {
                 var channel = Context.Client.GetChannel(channelId) as IMessageChannel;
@@ -119,7 +136,17 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
                 }
 
                 await BroadcastMessageAsync(channel, message);
+                successfulBroadcasts++;
             }
+
+            var successEmbed = new EmbedBuilder()
+                .WithColor(EmbedColor)
+                .WithTitle("? Broadcast Complete")
+                .WithDescription($"Broadcast message was sent to {successfulBroadcasts} channel(s).")
+                .WithFooter("Broadcast finished", Context.Client.CurrentUser.GetAvatarUrl())
+                .Build();
+
+            await ReplyAsync(embed: successEmbed);
         }
     }
 }

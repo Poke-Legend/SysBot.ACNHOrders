@@ -142,16 +142,37 @@ namespace SysBot.ACNHOrders
 
         private async Task HandleMessageAsync(SocketMessage arg)
         {
-            if (arg is not SocketUserMessage msg || msg.Author.Id == _client.CurrentUser.Id || (!_bot.Config.IgnoreAllPermissions && msg.Author.IsBot)) return;
+            // Check if the message is from a user and not the bot itself
+            if (arg is not SocketUserMessage msg ||
+                msg.Author.Id == _client.CurrentUser.Id ||
+                (!_bot.Config.IgnoreAllPermissions && msg.Author.IsBot))
+                return;
 
             int argPos = 0;
 
+            // Check if the message is in a guild channel and if the server is blacklisted
+            if (msg.Channel is SocketGuildChannel guildChannel)
+            {
+                if (await AllowedManager.ServerBlacklisted(guildChannel.Guild.Id))
+                {
+                    await guildChannel.Guild.LeaveAsync();
+                    return;
+                }
+            }
+
+            // Attempt to handle commands with the specified prefix
             if (msg.HasStringPrefix(_bot.Config.Prefix, ref argPos))
             {
-                if (await TryHandleCommandAsync(msg, argPos)) return;
+                if (await TryHandleCommandAsync(msg, argPos))
+                    return;
             }
-            else if (await CheckMessageDeletionAsync(msg)) return;
+            // Check if message should be deleted
+            else if (await CheckMessageDeletionAsync(msg))
+            {
+                return;
+            }
 
+            // If none of the above conditions match, try handling it as a regular message
             await TryHandleMessage(msg);
         }
 

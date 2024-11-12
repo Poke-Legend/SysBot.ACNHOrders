@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -11,6 +12,7 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
 {
     public class Item : ModuleBase<SocketCommandContext>
     {
+        
         [Command("lookupLang")]
         [Alias("ll")]
         [Summary("Gets a list of items that contain the request string.")]

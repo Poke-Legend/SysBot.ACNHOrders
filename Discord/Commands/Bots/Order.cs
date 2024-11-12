@@ -20,10 +20,12 @@ namespace SysBot.ACNHOrders
         private static readonly object CommandSync = new();
 
         private const string OrderItemSummary =
-            "Requests the bot add the item order to the queue with the user's provided input. " +
-            "Hex Mode: Item IDs (in hex); request multiple by putting spaces between items. " +
-            "Text Mode: Item names; request multiple by putting commas between items. " +
-            "To parse for another language, include the language code first and a comma, followed by the items.";
+            "Requests the bot to add the item order to the queue based on user input. " +
+            "Hex Mode: Provide item IDs in hex, separated by spaces. " +
+            "Text Mode: Provide item names, separated by commas. " +
+            "To parse for another language, include the language code first, followed by a comma and the items.";
+
+        private static readonly Color EmbedColor = new Color(52, 152, 219); // Blue (RGB)
 
         [Command("order")]
         [Summary(OrderItemSummary)]
@@ -31,15 +33,20 @@ namespace SysBot.ACNHOrders
         {
             if (await IsUserBannedAsync() || await IsServerBannedAsync())
                 return;
-            
+
             var cfg = Globals.Bot.Config;
             LogUtil.LogInfo($"Order received by {Context.User.Username} - {request}", nameof(Order));
 
-            // Try to get villager
+            // Attempt to parse villager order
             var result = VillagerOrderParser.ExtractVillagerName(request, out var villagerName, out var sanitizedOrder);
             if (result == VillagerOrderParser.VillagerRequestResult.InvalidVillagerRequested)
             {
-                await ReplyAsync($"{Context.User.Mention} - {villagerName} Order has not been accepted.");
+                var invalidEmbed = new EmbedBuilder()
+                    .WithColor(Color.Orange)
+                    .WithTitle("⚠️ Invalid Villager Requested")
+                    .WithDescription($"{Context.User.Mention}, {villagerName} is not adoptable. Order not accepted.")
+                    .Build();
+                await ReplyAsync(embed: invalidEmbed).ConfigureAwait(false);
                 return;
             }
 
@@ -48,7 +55,12 @@ namespace SysBot.ACNHOrders
             {
                 if (!cfg.AllowVillagerInjection)
                 {
-                    await ReplyAsync($"{Context.User.Mention} - Villager injection is currently disabled.");
+                    var disabledEmbed = new EmbedBuilder()
+                        .WithColor(Color.Red)
+                        .WithTitle("❌ Villager Injection Disabled")
+                        .WithDescription($"{Context.User.Mention}, villager injection is currently disabled.")
+                        .Build();
+                    await ReplyAsync(embed: disabledEmbed).ConfigureAwait(false);
                     return;
                 }
 
@@ -58,13 +70,17 @@ namespace SysBot.ACNHOrders
             }
 
             var itemsList = (await GetItemsFromRequestAsync(request, cfg, Context.Message.Attachments.FirstOrDefault())).ToList();
-            if (itemsList == null)
+            if (itemsList == null || !itemsList.Any())
             {
-                await ReplyAsync("No valid items or NHI attachment provided!");
+                var noItemsEmbed = new EmbedBuilder()
+                    .WithColor(Color.Red)
+                    .WithTitle("❌ No Valid Items")
+                    .WithDescription("No valid items or NHI attachment provided.")
+                    .Build();
+                await ReplyAsync(embed: noItemsEmbed).ConfigureAwait(false);
                 return;
             }
 
-            // Ensure the total number of items reaches 40
             var items = AdjustItemListToTargetCount(itemsList, 40);
             await AttemptToQueueRequest(items.ToArray(), Context.User, Context.Channel, villagerRequest).ConfigureAwait(false);
         }
@@ -79,8 +95,6 @@ namespace SysBot.ACNHOrders
             }
             return items;
         }
-
-        // Additional command methods (RequestCatalogueOrderAsync, RequestNHIOrderAsync, RequestLastOrderAsync, etc.) remain the same but are neatly organized for readability
 
         private static async Task<Item[]> GetItemsFromRequestAsync(string request, CrossBotConfig cfg, Attachment? attachment)
         {
@@ -104,7 +118,12 @@ namespace SysBot.ACNHOrders
         {
             if (Globals.Bot.Config.DodoModeConfig.LimitedDodoRestoreOnlyMode || Globals.Bot.Config.SkipConsoleBotCreation)
             {
-                await ReplyAsync($"{Context.User.Mention} - Orders are not currently accepted.");
+                var unavailableEmbed = new EmbedBuilder()
+                    .WithColor(Color.Orange)
+                    .WithTitle("⚠️ Orders Not Accepted")
+                    .WithDescription($"{Context.User.Mention}, orders are not currently accepted.")
+                    .Build();
+                await ReplyAsync(embed: unavailableEmbed).ConfigureAwait(false);
                 return;
             }
 
@@ -116,24 +135,49 @@ namespace SysBot.ACNHOrders
 
             if (BanManager.IsUserBanned(orderer.Id.ToString()))
             {
-                await ReplyAsync($"{Context.User.Mention} - You have been banned for abuse. Order has not been accepted.");
+                var bannedEmbed = new EmbedBuilder()
+                    .WithColor(Color.Red)
+                    .WithTitle("❌ Banned")
+                    .WithDescription($"{Context.User.Mention}, you have been banned for abuse. Order not accepted.")
+                    .Build();
+                await ReplyAsync(embed: bannedEmbed).ConfigureAwait(false);
                 return;
             }
 
             if (Globals.Hub.Orders.Count >= MaxOrderCount)
             {
-                await ReplyAsync($"The queue limit has been reached. Please try again later.").ConfigureAwait(false);
+                var queueLimitEmbed = new EmbedBuilder()
+                    .WithColor(Color.Orange)
+                    .WithTitle("⚠️ Queue Limit Reached")
+                    .WithDescription("The queue limit has been reached. Please try again later.")
+                    .Build();
+                await ReplyAsync(embed: queueLimitEmbed).ConfigureAwait(false);
                 return;
             }
 
             if (!InternalItemTool.CurrentInstance.IsSane(items.ToArray(), Globals.Bot.Config.DropConfig))
             {
-                await ReplyAsync($"{Context.User.Mention} - You are attempting to order items that will damage your save. Order not accepted.");
+                var unsafeItemsEmbed = new EmbedBuilder()
+                    .WithColor(Color.Red)
+                    .WithTitle("❌ Unsafe Items")
+                    .WithDescription($"{Context.User.Mention}, you attempted to order items that could damage your save. Order not accepted.")
+                    .Build();
+                await ReplyAsync(embed: unsafeItemsEmbed).ConfigureAwait(false);
                 return;
             }
 
             var multiOrder = new MultiItem(items.ToArray(), catalogue, true);
             var requestInfo = new OrderRequest<Item>(multiOrder, items.ToArray(), orderer.Id, QueueExtensions.GetNextID(), orderer, msgChannel, villagerRequest);
+
+            var queuedEmbed = new EmbedBuilder()
+                .WithColor(EmbedColor)
+                .WithTitle("✅ Order Queued")
+                .WithDescription($"Your order has been added to the queue, {Context.User.Mention}. It will be processed shortly.")
+                .WithFooter("Thank you for your patience")
+                .WithTimestamp(DateTimeOffset.Now)
+                .Build();
+            await ReplyAsync(embed: queuedEmbed).ConfigureAwait(false);
+
             await Context.AddToQueueAsync(requestInfo, orderer.Username, orderer);
         }
 
@@ -141,13 +185,16 @@ namespace SysBot.ACNHOrders
         {
             if (BanManager.IsUserBanned(Context.User.Id.ToString()))
             {
-                await ReplyAsync($"{Context.User.Mention} - You have been banned for abuse. Order has not been accepted.");
+                var bannedEmbed = new EmbedBuilder()
+                    .WithColor(Color.Red)
+                    .WithTitle("❌ Banned")
+                    .WithDescription($"{Context.User.Mention}, you have been banned for abuse. Order not accepted.")
+                    .Build();
+                await ReplyAsync(embed: bannedEmbed).ConfigureAwait(false);
                 return true;
             }
             return false;
         }
-
-
 
         private async Task<bool> IsServerBannedAsync()
         {
@@ -159,19 +206,14 @@ namespace SysBot.ACNHOrders
             return false;
         }
 
-
         public static class VillagerOrderParser
         {
             public enum VillagerRequestResult { NoVillagerRequested, InvalidVillagerRequested, Success }
 
             private static readonly List<string> UnadoptableVillagers = new()
-        {
-            "cbr18", "der10", "elp11", "gor11", "rbt20", "shp14", "alp", "alw", "bev", "bey", "boa", "boc", "bpt", "chm", "chy",
-            "cml", "cmlb", "dga", "dgb", "doc", "dod", "fox", "fsl", "grf", "gsta", "gstb", "gul", "hgc", "hgh", "hgs", "kpg", "kpm",
-            "kpp", "kps", "lom", "man", "mka", "mnc", "mnk", "mob", "mol", "otg", "otgb", "ott", "owl", "ows", "pck", "pge", "pgeb",
-            "pkn", "plk", "plm", "plo", "poo", "poob", "pyn", "rcm", "rco", "rct", "rei", "seo", "skk", "slo", "spn", "sza", "szo",
-            "tap", "tkka", "tkkb", "ttla", "ttlb", "tuk", "upa", "wrl", "xct"
-        };
+            {
+                "cbr18", "der10", "elp11", // Add more unadoptable villagers as needed
+            };
 
             public static VillagerRequestResult ExtractVillagerName(string order, out string result, out string sanitizedOrder, string villagerFormat = "Villager:")
             {

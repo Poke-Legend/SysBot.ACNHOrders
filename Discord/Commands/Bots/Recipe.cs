@@ -49,19 +49,30 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
 
             if (!Globals.Bot.Config.AllowLookup)
             {
-                await ReplyAsync($"{Context.User.Mention} - Lookup commands are not accepted.").ConfigureAwait(false);
+                var disabledEmbed = new EmbedBuilder()
+                    .WithColor(NoMatchColor)
+                    .WithTitle("🔒 Lookup Disabled")
+                    .WithDescription($"{Context.User.Mention}, lookup commands are currently disabled.")
+                    .WithFooter("Please check back later.")
+                    .Build();
+                await ReplyAsync(embed: disabledEmbed).ConfigureAwait(false);
                 return true;
             }
 
             return false;
         }
 
-
         private async Task ProcessItemSearchAsync(string itemName, IReadOnlyList<ComboItem> itemDataSource)
         {
             if (itemName.Length <= MinSearchTermLength)
             {
-                await SendEmbedMessageAsync($"Please enter a search term longer than {MinSearchTermLength} characters.", NoMatchColor).ConfigureAwait(false);
+                var shortSearchEmbed = new EmbedBuilder()
+                    .WithColor(NoMatchColor)
+                    .WithTitle("⚠️ Search Term Too Short")
+                    .WithDescription($"Please enter a search term longer than {MinSearchTermLength} characters.")
+                    .WithFooter("Try a longer search term for better results.")
+                    .Build();
+                await ReplyAsync(embed: shortSearchEmbed).ConfigureAwait(false);
                 return;
             }
 
@@ -69,7 +80,13 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
 
             if (!matches.Any())
             {
-                await SendEmbedMessageAsync("No matches found.", NoMatchColor).ConfigureAwait(false);
+                var noMatchEmbed = new EmbedBuilder()
+                    .WithColor(NoMatchColor)
+                    .WithTitle("❌ No Matches Found")
+                    .WithDescription("No recipes found matching your search term.")
+                    .WithFooter("Try refining your search.")
+                    .Build();
+                await ReplyAsync(embed: noMatchEmbed).ConfigureAwait(false);
                 return;
             }
 
@@ -87,10 +104,26 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
         private async Task SendMatchedItemsAsync(IEnumerable<string> matches)
         {
             var result = string.Join(Environment.NewLine, matches);
-            if (result.Length > MaxResultLength)
-                result = result.Substring(0, MaxResultLength) + "...[truncated]";
+            bool isTruncated = false;
 
-            await SendEmbedMessageAsync(result, TruncatedMatchColor).ConfigureAwait(false);
+            if (result.Length > MaxResultLength)
+            {
+                result = result.Substring(0, MaxResultLength) + "...[truncated]";
+                isTruncated = true;
+            }
+
+            var color = isTruncated ? TruncatedMatchColor : MatchColor;
+            var description = isTruncated ? $"{result}\n*Results truncated due to length.*" : result;
+
+            var matchesEmbed = new EmbedBuilder()
+                .WithColor(color)
+                .WithTitle("🔍 Recipe Search Results")
+                .WithDescription(description)
+                .WithFooter(isTruncated ? "Only partial results are shown." : "Full results shown.")
+                .WithTimestamp(DateTimeOffset.Now)
+                .Build();
+
+            await ReplyAsync(embed: matchesEmbed).ConfigureAwait(false);
         }
 
         private async Task SendEmbedMessageAsync(string description, Color color)
@@ -98,6 +131,8 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
             var embed = new EmbedBuilder()
                 .WithDescription(description)
                 .WithColor(color)
+                .WithFooter("Thank you for using the Recipe Bot!")
+                .WithTimestamp(DateTimeOffset.Now)
                 .Build();
 
             await ReplyAsync(embed: embed).ConfigureAwait(false);

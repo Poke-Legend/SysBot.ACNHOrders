@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -12,14 +11,12 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
 {
     public class Item : ModuleBase<SocketCommandContext>
     {
-        
+
         [Command("lookupLang")]
         [Alias("ll")]
         [Summary("Gets a list of items that contain the request string.")]
         public async Task SearchItemsAsync([Summary("Language code to search with")] string language, [Summary("Item name / item substring")][Remainder] string itemName)
         {
-            if (await CheckBanAndPermissionsAsync()) return;
-
             var strings = GameInfo.GetStrings(language).ItemDataSource;
             await PrintItemsAsync(itemName, strings).ConfigureAwait(false);
         }
@@ -29,8 +26,6 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
         [Summary("Gets a list of items that contain the request string.")]
         public async Task SearchItemsAsync([Summary("Item name / item substring")][Remainder] string itemName)
         {
-            if (await CheckBanAndPermissionsAsync()) return;
-
             var strings = GameInfo.Strings.ItemDataSource;
             await PrintItemsAsync(itemName, strings).ConfigureAwait(false);
         }
@@ -39,12 +34,16 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
         [Summary("Gets the info for an item.")]
         public async Task GetItemInfoAsync([Summary("Item ID (in hex)")] string itemHex)
         {
-            if (await CheckBanAndPermissionsAsync()) return;
-
             ushort itemID = ItemParser.GetID(itemHex);
             if (itemID == NHSE.Core.Item.NONE)
             {
-                await base.ReplyAsync("Invalid item requested.").ConfigureAwait(false);
+                var errorEmbed = new EmbedBuilder()
+                    .WithTitle("❌ Invalid Item")
+                    .WithDescription("The item you requested could not be found. Please check the item ID.")
+                    .WithColor(Color.Red)
+                    .WithFooter("Request another item using a valid ID.");
+
+                await ReplyAsync(embed: errorEmbed.Build()).ConfigureAwait(false);
                 return;
             }
 
@@ -52,19 +51,24 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
             var result = ItemInfo.GetItemInfo(itemID);
             if (result.Length == 0)
             {
-                await ReplyAsync($"No customization data available for the requested item ({name}).").ConfigureAwait(false);
+                var noDataEmbed = new EmbedBuilder()
+                    .WithTitle($"ℹ️ Item Info: {name}")
+                    .WithDescription("No customization data available for this item.")
+                    .WithColor(Color.LightGrey)
+                    .WithFooter("Use a different item ID to view customization details.");
+
+                await ReplyAsync(embed: noDataEmbed.Build()).ConfigureAwait(false);
             }
             else
             {
-                var responseEmbed = new EmbedBuilder()
-                    .WithTitle($"Item Info: {name}")
+                var infoEmbed = new EmbedBuilder()
+                    .WithTitle($"📜 Item Info: {name}")
                     .WithDescription(result)
                     .WithColor(Color.Blue)
-                    .WithThumbnailUrl("https://example.com/item-image.png") // Add a relevant image URL
-                    .WithFooter("For more details, check our database.")
+                    .WithFooter("For detailed information, refer to the database.")
                     .WithTimestamp(DateTimeOffset.Now);
 
-                await ReplyAsync(embed: responseEmbed.Build()).ConfigureAwait(false);
+                await ReplyAsync(embed: infoEmbed.Build()).ConfigureAwait(false);
             }
         }
 
@@ -72,21 +76,25 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
         [Summary("Stacks an item and prints the hex code.")]
         public async Task StackAsync([Summary("Item ID (in hex)")] string itemHex, [Summary("Count of items in the stack")] int count)
         {
-            if (await CheckBanAndPermissionsAsync()) return;
-
             ushort itemID = ItemParser.GetID(itemHex);
             if (itemID == NHSE.Core.Item.NONE || count < 1 || count > 99)
             {
-                await base.ReplyAsync("Invalid item requested.").ConfigureAwait(false);
+                var invalidStackEmbed = new EmbedBuilder()
+                    .WithTitle("❌ Invalid Stack")
+                    .WithDescription("The item ID or count is invalid. Ensure the count is between 1 and 99.")
+                    .WithColor(Color.Red)
+                    .WithFooter("Enter valid details to stack items successfully.");
+
+                await ReplyAsync(embed: invalidStackEmbed.Build()).ConfigureAwait(false);
                 return;
             }
 
-            var ct = count - 1; // value 0 => count of 1
+            var ct = count - 1;
             var item = new NHSE.Core.Item(itemID) { Count = (ushort)ct };
             var msg = ItemParser.GetItemText(item);
 
-            var responseEmbed = new EmbedBuilder()
-                .WithTitle("Stacked Item")
+            var stackEmbed = new EmbedBuilder()
+                .WithTitle("📦 Stacked Item")
                 .WithDescription(msg)
                 .WithColor(Color.Purple)
                 .AddField("Item Count", count.ToString(), true)
@@ -94,7 +102,7 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
                 .WithFooter("Item stacking successful!")
                 .WithTimestamp(DateTimeOffset.Now);
 
-            await ReplyAsync(embed: responseEmbed.Build()).ConfigureAwait(false);
+            await ReplyAsync(embed: stackEmbed.Build()).ConfigureAwait(false);
         }
 
         [Command("customize")]
@@ -108,24 +116,40 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
         [Summary("Customizes an item and prints the hex code.")]
         public async Task CustomizeAsync([Summary("Item ID (in hex)")] string itemHex, [Summary("Customization value sum")] int sum)
         {
-            if (await CheckBanAndPermissionsAsync()) return;
-
             ushort itemID = ItemParser.GetID(itemHex);
             if (itemID == NHSE.Core.Item.NONE)
             {
-                await base.ReplyAsync("Invalid item requested.").ConfigureAwait(false);
+                var invalidItemEmbed = new EmbedBuilder()
+                    .WithTitle("❌ Invalid Item")
+                    .WithDescription("The item you requested could not be found. Please check the item ID.")
+                    .WithColor(Color.Red)
+                    .WithFooter("Request another item using a valid ID.");
+
+                await ReplyAsync(embed: invalidItemEmbed.Build()).ConfigureAwait(false);
                 return;
             }
             if (sum <= 0)
             {
-                await ReplyAsync("No customization data specified.").ConfigureAwait(false);
+                var noCustomizationEmbed = new EmbedBuilder()
+                    .WithTitle("❗ No Customization")
+                    .WithDescription("No customization data specified. Please enter a valid customization value.")
+                    .WithColor(Color.Orange)
+                    .WithFooter("Customization not applied.");
+
+                await ReplyAsync(embed: noCustomizationEmbed.Build()).ConfigureAwait(false);
                 return;
             }
 
             var remake = ItemRemakeUtil.GetRemakeIndex(itemID);
             if (remake < 0)
             {
-                await ReplyAsync("No customization data available for the requested item.").ConfigureAwait(false);
+                var noDataEmbed = new EmbedBuilder()
+                    .WithTitle("❗ No Customization Data")
+                    .WithDescription("No customization data available for the requested item.")
+                    .WithColor(Color.LightGrey)
+                    .WithFooter("Select a different item ID to apply customization.");
+
+                await ReplyAsync(embed: noDataEmbed.Build()).ConfigureAwait(false);
                 return;
             }
 
@@ -133,25 +157,21 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
             int fabric = sum >> 5;
             if (fabric > 7 || (fabric << 5 | body) != sum)
             {
-                await ReplyAsync("Invalid customization data specified.").ConfigureAwait(false);
-                return;
-            }
+                var invalidDataEmbed = new EmbedBuilder()
+                    .WithTitle("⚠️ Invalid Customization Data")
+                    .WithDescription("The specified customization data is invalid.")
+                    .WithColor(Color.Red)
+                    .WithFooter("Customization not applied. Check the input values.");
 
-            var info = ItemRemakeInfoData.List[remake];
-            bool hasBody = body == 0 || body <= info.ReBodyPatternNum;
-            bool hasFabric = fabric == 0 || info.GetFabricDescription(fabric) != "Invalid";
-
-            if (!hasBody || !hasFabric)
-            {
-                await ReplyAsync("Requested customization for item appears to be invalid.").ConfigureAwait(false);
+                await ReplyAsync(embed: invalidDataEmbed.Build()).ConfigureAwait(false);
                 return;
             }
 
             var item = new NHSE.Core.Item(itemID) { BodyType = body, PatternChoice = fabric };
             var msg = ItemParser.GetItemText(item);
 
-            var responseEmbed = new EmbedBuilder()
-                .WithTitle("Customized Item")
+            var customizedEmbed = new EmbedBuilder()
+                .WithTitle("🎨 Customized Item")
                 .WithDescription(msg)
                 .WithColor(Color.Orange)
                 .AddField("Body Type", body.ToString(), true)
@@ -159,24 +179,7 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
                 .WithFooter("Customization applied successfully.")
                 .WithTimestamp(DateTimeOffset.Now);
 
-            await ReplyAsync(embed: responseEmbed.Build()).ConfigureAwait(false);
-        }
-
-        private async Task<bool> CheckBanAndPermissionsAsync()
-        {
-            if (BanManager.IsServerBanned(Context.Guild.Id.ToString()))
-            {
-                await Context.Guild.LeaveAsync().ConfigureAwait(false);
-                return true;
-            }
-
-            if (!Globals.Bot.Config.AllowLookup)
-            {
-                await ReplyAsync($"{Context.User.Mention} - Lookup commands are not accepted.");
-                return true;
-            }
-
-            return false;
+            await ReplyAsync(embed: customizedEmbed.Build()).ConfigureAwait(false);
         }
 
         private async Task PrintItemsAsync(string itemName, IReadOnlyList<ComboItem> strings)
@@ -184,23 +187,13 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
             const int minLength = 2;
             if (itemName.Length <= minLength)
             {
-                await ReplyAsync($"Please enter a search term longer than {minLength} characters.").ConfigureAwait(false);
-                return;
-            }
+                var tooShortEmbed = new EmbedBuilder()
+                    .WithTitle("⚠️ Search Term Too Short")
+                    .WithDescription($"Please enter a search term longer than {minLength} characters.")
+                    .WithColor(Color.Red)
+                    .WithFooter("Try again with a longer term.");
 
-            var exact = ItemParser.GetItem(itemName, strings);
-            if (!exact.IsNone)
-            {
-                var msg = $"{exact.ItemId:X4} {itemName}";
-                if (msg == "02F8 vine")
-                {
-                    msg = "3107 vine";
-                }
-                if (msg == "02F7 glowing moss")
-                {
-                    msg = "3106 glowing moss";
-                }
-                await ReplyAsync(Format.Code(msg)).ConfigureAwait(false);
+                await ReplyAsync(embed: tooShortEmbed.Build()).ConfigureAwait(false);
                 return;
             }
 
@@ -209,27 +202,24 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
 
             if (result.Length == 0)
             {
-                var responseEmbed = new EmbedBuilder()
-                    .WithTitle("Search Result")
-                    .WithDescription("No matches found for your search.")
+                var noResultsEmbed = new EmbedBuilder()
+                    .WithTitle("🔍 No Matches Found")
+                    .WithDescription("No items matched your search. Please refine your keywords.")
                     .WithColor(Color.Red)
-                    .WithFooter("Try using different keywords or check your spelling.")
-                    .WithTimestamp(DateTimeOffset.Now);
+                    .WithFooter("Use different keywords for better results.");
 
-                await ReplyAsync(embed: responseEmbed.Build()).ConfigureAwait(false);
+                await ReplyAsync(embed: noResultsEmbed.Build()).ConfigureAwait(false);
                 return;
             }
 
             const int maxLength = 500;
             if (result.Length > maxLength)
             {
-                var ordered = matches.OrderBy(z => LevenshteinDistance.Compute(z.Text, itemName));
-                result = string.Join(Environment.NewLine, ordered.Select(z => $"{z.Value:X4} {z.Text}"));
                 result = result.Substring(0, maxLength) + "...[truncated]";
             }
 
             var codeEmbed = new EmbedBuilder()
-                .WithTitle("Search Result")
+                .WithTitle("🔍 Search Result")
                 .WithDescription(Format.Code(result))
                 .WithColor(Color.Green)
                 .WithFooter("Use a more specific term if you got too many results.")

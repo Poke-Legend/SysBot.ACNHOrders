@@ -28,13 +28,6 @@ namespace SysBot.ACNHOrders.Discord.Commands.General
         [Summary("Provides donation information and encourages support.")]
         public async Task DonateAsync()
         {
-            // Check if the server is banned
-            if (BanManager.IsServerBanned(Context.Guild.Id.ToString()))
-            {
-                await Context.Guild.LeaveAsync().ConfigureAwait(false);
-                return;
-            }
-
             // Ensure donation.json exists and read the donation link
             var donationLink = GetDonationLink();
 

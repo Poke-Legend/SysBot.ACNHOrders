@@ -29,13 +29,6 @@ namespace SysBot.ACNHOrders.Discord.Commands.General
         [Summary("Replies with a friendly greeting.")]
         public async Task HiAsync()
         {
-            // Check if the server is banned
-            if (BanManager.IsServerBanned(Context.Guild.Id.ToString()))
-            {
-                await Context.Guild.LeaveAsync().ConfigureAwait(false);
-                return;
-            }
-
             // Get a random image
             var randomImage = GetRandomImage();
 

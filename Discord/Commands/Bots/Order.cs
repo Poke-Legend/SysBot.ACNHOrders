@@ -31,9 +31,6 @@ namespace SysBot.ACNHOrders
         [Summary(OrderItemSummary)]
         public async Task RequestOrderAsync([Summary(OrderItemSummary)][Remainder] string request)
         {
-            if (await IsUserBannedAsync() || await IsServerBannedAsync())
-                return;
-
             var cfg = Globals.Bot.Config;
             LogUtil.LogInfo($"Order received by {Context.User.Username} - {request}", nameof(Order));
 
@@ -127,23 +124,6 @@ namespace SysBot.ACNHOrders
                 return;
             }
 
-            if (BanManager.IsServerBanned(Context.Guild.Id.ToString()))
-            {
-                await Context.Guild.LeaveAsync().ConfigureAwait(false);
-                return;
-            }
-
-            if (BanManager.IsUserBanned(orderer.Id.ToString()))
-            {
-                var bannedEmbed = new EmbedBuilder()
-                    .WithColor(Color.Red)
-                    .WithTitle("❌ Banned")
-                    .WithDescription($"{Context.User.Mention}, you have been banned for abuse. Order not accepted.")
-                    .Build();
-                await ReplyAsync(embed: bannedEmbed).ConfigureAwait(false);
-                return;
-            }
-
             if (Globals.Hub.Orders.Count >= MaxOrderCount)
             {
                 var queueLimitEmbed = new EmbedBuilder()
@@ -179,31 +159,6 @@ namespace SysBot.ACNHOrders
             await ReplyAsync(embed: queuedEmbed).ConfigureAwait(false);
 
             await Context.AddToQueueAsync(requestInfo, orderer.Username, orderer);
-        }
-
-        private async Task<bool> IsUserBannedAsync()
-        {
-            if (BanManager.IsUserBanned(Context.User.Id.ToString()))
-            {
-                var bannedEmbed = new EmbedBuilder()
-                    .WithColor(Color.Red)
-                    .WithTitle("❌ Banned")
-                    .WithDescription($"{Context.User.Mention}, you have been banned for abuse. Order not accepted.")
-                    .Build();
-                await ReplyAsync(embed: bannedEmbed).ConfigureAwait(false);
-                return true;
-            }
-            return false;
-        }
-
-        private async Task<bool> IsServerBannedAsync()
-        {
-            if (BanManager.IsServerBanned(Context.Guild.Id.ToString()))
-            {
-                await Context.Guild.LeaveAsync().ConfigureAwait(false);
-                return true;
-            }
-            return false;
         }
 
         public static class VillagerOrderParser

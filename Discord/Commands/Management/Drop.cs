@@ -36,12 +36,6 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
         [Summary("Picks up items around the bot.")]
         public async Task RequestCleanAsync()
         {
-            if (BanManager.IsServerBanned(Context.Guild.Id.ToString()))
-            {
-                await Context.Guild.LeaveAsync().ConfigureAwait(false);
-                return;
-            }
-
             if (!await GetDropAvailability().ConfigureAwait(false))
                 return;
 
@@ -72,12 +66,6 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
         [RequireSudo]
         public async Task RequestDodoCodeAsync()
         {
-            if (BanManager.IsServerBanned(Context.Guild.Id.ToString()))
-            {
-                await Context.Guild.LeaveAsync().ConfigureAwait(false);
-                return;
-            }
-
             var draw = Globals.Bot.DodoImageDrawer;
             var message = $"Dodo Code for **{Globals.Bot.TownName}**: **{Globals.Bot.DodoCode}**.";
 
@@ -103,30 +91,12 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
         [Summary("Prints the Dodo Code for the island. Only works in dodo restore mode.")]
         public async Task RequestRestoreLoopDodoAsync()
         {
-            if (BanManager.IsServerBanned(Context.Guild.Id.ToString()))
-            {
-                await Context.Guild.LeaveAsync().ConfigureAwait(false);
-                return;
-            }
-
             var cfg = Globals.Bot.Config;
             if (!cfg.DodoModeConfig.AllowSendDodo && !cfg.CanUseSudo(Context.User.Id))
                 return;
 
             if (!cfg.DodoModeConfig.LimitedDodoRestoreOnlyMode)
                 return;
-
-            var bannedUsers = await FetchBanListFromGitHubAsync();
-            if (bannedUsers.Contains(Context.User.Id.ToString()))
-            {
-                var banEmbed = new EmbedBuilder()
-                    .WithColor(Color.Orange)
-                    .WithTitle("⚠️ Access Restricted")
-                    .WithDescription($"{Context.User.Mention}, you are currently not allowed to use the bot. Dodo code will not be sent.")
-                    .Build();
-                await ReplyAsync(embed: banEmbed);
-                return;
-            }
 
             try
             {
@@ -158,12 +128,6 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
         [Summary("Drops a custom item (or items).")]
         public async Task RequestDropAsync([Summary(DropItemSummary)][Remainder] string request)
         {
-            if (BanManager.IsServerBanned(Context.Guild.Id.ToString()))
-            {
-                await Context.Guild.LeaveAsync().ConfigureAwait(false);
-                return;
-            }
-
             var cfg = Globals.Bot.Config;
             var items = ItemParser.GetItemsFromUserInput(request, cfg.DropConfig, cfg.DropConfig.UseLegacyDrop ? ItemDestination.PlayerDropped : ItemDestination.HeldItem);
             MultiItem.StackToMax(items);
@@ -176,12 +140,6 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
         [Summary("Drops a DIY recipe with the requested recipe ID(s).")]
         public async Task RequestDropDIYAsync([Summary(DropDIYSummary)][Remainder] string recipeIDs)
         {
-            if (BanManager.IsServerBanned(Context.Guild.Id.ToString()))
-            {
-                await Context.Guild.LeaveAsync().ConfigureAwait(false);
-                return;
-            }
-
             var items = ItemParser.GetDIYsFromUserInput(recipeIDs);
             await DropItems(items).ConfigureAwait(false);
         }
@@ -192,12 +150,6 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
         [RequireSudo]
         public async Task RequestTurnipSetAsync(int value)
         {
-            if (BanManager.IsServerBanned(Context.Guild.Id.ToString()))
-            {
-                await Context.Guild.LeaveAsync().ConfigureAwait(false);
-                return;
-            }
-
             var bot = Globals.Bot;
             bot.StonkRequests.Enqueue(new TurnipRequest(Context.User.Username, value)
             {
@@ -236,12 +188,6 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
 
         private async Task DropItems(IReadOnlyCollection<Item> items)
         {
-            if (BanManager.IsServerBanned(Context.Guild.Id.ToString()))
-            {
-                await Context.Guild.LeaveAsync().ConfigureAwait(false);
-                return;
-            }
-
             if (!await GetDropAvailability().ConfigureAwait(false))
                 return;
 
@@ -310,40 +256,5 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
 
             return true;
         }
-        private async Task<List<string>> FetchBanListFromGitHubAsync()
-        {
-            try
-            {
-                // Fetch the JSON data from GitHub
-                var response = await HttpClient.GetStringAsync("https://api.github.com/repos/Poke-Legend/ACNH-DATABASE/contents/userban.json");
-                var jsonData = JsonConvert.DeserializeObject<GitHubFileContent>(response);
-
-                // Check if jsonData or jsonData.Content is null
-                if (jsonData?.Content == null)
-                {
-                    Console.WriteLine("Error: Content is null in the GitHub file response.");
-                    return new List<string>();
-                }
-
-                // Decode the base64 content to get the actual JSON data
-                var decodedJson = Encoding.UTF8.GetString(Convert.FromBase64String(jsonData.Content));
-                var bannedUsers = JsonConvert.DeserializeObject<List<string>>(decodedJson);
-
-                return bannedUsers ?? new List<string>();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error fetching ban list from GitHub: {ex.Message}");
-                return new List<string>(); // Return empty list if there's an error
-            }
-        }
-
-        private class GitHubFileContent
-        {
-            [JsonProperty("content")]
-            public string Content { get; set; } = string.Empty; // Default to an empty string to satisfy non-nullable requirement
-        }
     }
 }
-
-

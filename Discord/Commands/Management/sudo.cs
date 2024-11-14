@@ -57,12 +57,6 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
         [RequireSudo]
         public async Task AddChannelAsync()
         {
-            if (BanManager.IsServerBanned(Context.Guild.Id.ToString()))
-            {
-                await Context.Guild.LeaveAsync().ConfigureAwait(false);
-                return;
-            }
-
             var channelId = Context.Channel.Id;
             var availableChannels = await ChannelManager.LoadChannelsAsync();
 
@@ -88,12 +82,6 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
         [RequireSudo]
         public async Task RemoveChannelAsync()
         {
-            if (BanManager.IsServerBanned(Context.Guild.Id.ToString()))
-            {
-                await Context.Guild.LeaveAsync().ConfigureAwait(false);
-                return;
-            }
-
             var channelId = Context.Channel.Id;
             var availableChannels = await ChannelManager.LoadChannelsAsync();
 

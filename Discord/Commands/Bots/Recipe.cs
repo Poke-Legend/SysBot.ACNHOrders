@@ -22,8 +22,6 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
         [Summary("Gets a list of DIY recipe IDs that contain the requested Item Name string.")]
         public async Task SearchItemsByLanguageAsync(string language, [Remainder] string itemName)
         {
-            if (await IsCommandInvalidAsync()) return;
-
             var itemDataSource = GameInfo.GetStrings(language).ItemDataSource;
             await ProcessItemSearchAsync(itemName, itemDataSource).ConfigureAwait(false);
         }
@@ -33,33 +31,8 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
         [Summary("Gets a list of DIY recipe IDs that contain the requested Item Name string.")]
         public async Task SearchItemsAsync([Remainder] string itemName)
         {
-            if (await IsCommandInvalidAsync()) return;
-
             var itemDataSource = GameInfo.Strings.ItemDataSource;
             await ProcessItemSearchAsync(itemName, itemDataSource).ConfigureAwait(false);
-        }
-
-        private async Task<bool> IsCommandInvalidAsync()
-        {
-            if (BanManager.IsServerBanned(Context.Guild.Id.ToString()))
-            {
-                await Context.Guild.LeaveAsync().ConfigureAwait(false);
-                return true;
-            }
-
-            if (!Globals.Bot.Config.AllowLookup)
-            {
-                var disabledEmbed = new EmbedBuilder()
-                    .WithColor(NoMatchColor)
-                    .WithTitle("🔒 Lookup Disabled")
-                    .WithDescription($"{Context.User.Mention}, lookup commands are currently disabled.")
-                    .WithFooter("Please check back later.")
-                    .Build();
-                await ReplyAsync(embed: disabledEmbed).ConfigureAwait(false);
-                return true;
-            }
-
-            return false;
         }
 
         private async Task ProcessItemSearchAsync(string itemName, IReadOnlyList<ComboItem> itemDataSource)

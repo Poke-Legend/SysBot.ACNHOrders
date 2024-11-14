@@ -103,9 +103,43 @@ namespace SysBot.ACNHOrders
             var sudoJson = await GitHubApi.FetchFileContentAsync(GitHubApi.SudoApiUrl);
             if (sudoJson == null)
             {
-                await msg.Channel.SendMessageAsync("Failed to fetch permissions from GitHub.");
-                return true;
+                var errorEmbed = new EmbedBuilder()
+                    .WithTitle("Permission Error")
+                    .WithDescription("Failed to fetch permissions from GitHub. Please try again later.")
+                    .WithColor(Color.DarkRed)
+                    .WithCurrentTimestamp()
+                    .Build();
+
+                await msg.Channel.SendMessageAsync(embed: errorEmbed);
+                return false;
             }
+
+            if (msg.Channel is SocketGuildChannel guildChannel)
+            {
+                // Only leave the server if its ID is in the blacklist.
+                bool isBlacklisted = await AllowedManager.ServerBlacklisted(guildChannel.Guild.Id);
+
+                if (isBlacklisted)
+                {
+                    var banEmbed = new EmbedBuilder()
+                        .WithTitle("⚠️ Server Banned!")
+                        .WithDescription("This server is on the banned list. The bot will now leave.")
+                        .WithColor(Color.Red)
+                        .WithFooter("Contact support if this is an error.")
+                        .WithCurrentTimestamp()
+                        .Build();
+
+                    await msg.Channel.SendMessageAsync(embed: banEmbed);
+
+                    // Leave the guild after sending the embed
+                    await guildChannel.Guild.LeaveAsync();
+                    return true;
+                }
+            }
+
+            // Check if the user or server is banned
+            if (await IsUserBannedAsync(context) || await IsServerBannedAsync(context))
+                return true;
 
             // Deserialize sudo user IDs from JSON
             var sudoUserIds = JsonConvert.DeserializeObject<List<ulong>>(sudoJson) ?? new List<ulong>();
@@ -116,29 +150,74 @@ namespace SysBot.ACNHOrders
                 ? JsonConvert.DeserializeObject<List<ulong>>(channelJson) ?? new List<ulong>()
                 : new List<ulong>();
 
-            // Check if the user is permitted
-            if (!sudoUserIds.Contains(msg.Author.Id) && msg.Author.Id != Owner)
+            // Allow command execution for sudo users, allowed channels, or the owner
+            if (sudoUserIds.Contains(msg.Author.Id) || allowedChannelIds.Contains(msg.Channel.Id) || msg.Author.Id == Owner)
             {
-                await msg.Channel.SendMessageAsync("You are not permitted to use this command.");
+                var result = await _commands.ExecuteAsync(context, argPos, _services);
+
+                if (!result.IsSuccess)
+                {
+                    var errorEmbed = new EmbedBuilder()
+                        .WithTitle("❌ Command Error")
+                        .WithDescription(result.ErrorReason)
+                        .WithColor(Color.Orange)
+                        .WithFooter("Please check the command syntax or permissions.")
+                        .WithCurrentTimestamp()
+                        .Build();
+
+                    await msg.Channel.SendMessageAsync(embed: errorEmbed);
+                }
+
+                return result.Error != CommandError.UnknownCommand;
+            }
+            else
+            {
+                var denyEmbed = new EmbedBuilder()
+                    .WithTitle("Access Denied")
+                    .WithDescription("You don't have permission to use this command here.")
+                    .WithColor(Color.Orange)
+                    .WithFooter("Contact an admin if you believe this is an error.")
+                    .WithCurrentTimestamp()
+                    .Build();
+
+                await msg.Channel.SendMessageAsync(embed: denyEmbed);
                 return true;
             }
-
-            // Check if the command is allowed in the current channel
-            if (!allowedChannelIds.Contains(msg.Channel.Id) && msg.Author.Id != Owner && !sudoUserIds.Contains(msg.Author.Id))
-            {
-                await msg.Channel.SendMessageAsync("You can't use that command here.");
-                return true;
-            }
-
-            // Execute the command
-            var result = await _commands.ExecuteAsync(context, argPos, _services);
-
-            if (!result.IsSuccess)
-                await msg.Channel.SendMessageAsync(result.ErrorReason);
-
-            return result.Error != CommandError.UnknownCommand;
         }
 
+        private static async Task<bool> IsUserBannedAsync(SocketCommandContext context)
+        {
+            if (BanManager.IsUserBanned(context.User.Id.ToString()))
+            {
+                var bannedEmbed = new EmbedBuilder()
+                    .WithColor(Color.Red)
+                    .WithTitle("❌ Banned")
+                    .WithDescription($"{context.User.Mention}, you have been banned for abuse. Order not accepted.")
+                    .Build();
+                await context.Channel.SendMessageAsync(embed: bannedEmbed).ConfigureAwait(false);
+                return true;
+            }
+            return false;
+        }
+
+        private static async Task<bool> IsServerBannedAsync(SocketCommandContext context)
+        {
+            if (BanManager.IsServerBanned(context.Guild.Id.ToString()))
+            {
+                var embed = new EmbedBuilder()
+                    .WithColor(Color.Red)
+                    .WithTitle("🚫 Server Banned")
+                    .WithDescription("This server has been blacklisted due to violations. The bot will now leave.")
+                    .AddField("Appeal", "Please contact support if you believe this is an error.")
+                    .WithFooter("Visit https://pokelegends.org/ for more info") // Replacing server ID with URL here
+                    .Build();
+
+                await context.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+                await context.Guild.LeaveAsync().ConfigureAwait(false);
+                return true;
+            }
+            return false;
+        }
 
         private async Task HandleMessageAsync(SocketMessage arg)
         {
@@ -151,18 +230,7 @@ namespace SysBot.ACNHOrders
             int argPos = 0;
 
             // Check if the message is in a guild channel and if the server is blacklisted
-            if (msg.Channel is SocketGuildChannel guildChannel)
-            {
-                // Only leave the server if its ID is in the blacklist.
-                bool isBlacklisted = await AllowedManager.ServerBlacklisted(guildChannel.Guild.Id);
-
-                if (isBlacklisted)
-                {
-                    await guildChannel.Guild.LeaveAsync();
-                    return;
-                }
-            }
-
+            
             // Attempt to handle commands with the specified prefix
             if (msg.HasStringPrefix(_bot.Config.Prefix, ref argPos))
             {

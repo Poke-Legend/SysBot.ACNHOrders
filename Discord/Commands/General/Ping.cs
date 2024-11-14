@@ -26,12 +26,6 @@ namespace SysBot.ACNHOrders.Discord.Commands.General
         [Summary("Replies with pong.")]
         public async Task PingAsync()
         {
-            if (BanManager.IsServerBanned(Context.Guild.Id.ToString()))
-            {
-                await Context.Guild.LeaveAsync().ConfigureAwait(false);
-                return;
-            }
-
             var randomImage = GetRandomImage();
 
             var embed = BuildPingEmbed(randomImage);

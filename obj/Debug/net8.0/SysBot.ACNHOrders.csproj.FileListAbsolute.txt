@@ -111,3 +111,9 @@ C:\Users\brand\source\repos\SysBot.ACNHOrders\obj\Debug\net8.0\refint\SysBot.ACN
 C:\Users\brand\source\repos\SysBot.ACNHOrders\obj\Debug\net8.0\SysBot.ACNHOrders.pdb
 C:\Users\brand\source\repos\SysBot.ACNHOrders\obj\Debug\net8.0\SysBot.ACNHOrders.genruntimeconfig.cache
 C:\Users\brand\source\repos\SysBot.ACNHOrders\obj\Debug\net8.0\ref\SysBot.ACNHOrders.dll
+C:\Users\brand\source\repos\SysBot.ACNHOrders\bin\Debug\net8.0\Microsoft.Bcl.TimeProvider.dll
+C:\Users\brand\source\repos\SysBot.ACNHOrders\bin\Debug\net8.0\System.Diagnostics.DiagnosticSource.dll
+C:\Users\brand\source\repos\SysBot.ACNHOrders\bin\Debug\net8.0\System.Net.ServerSentEvents.dll
+C:\Users\brand\source\repos\SysBot.ACNHOrders\bin\Debug\net8.0\System.Text.Encodings.Web.dll
+C:\Users\brand\source\repos\SysBot.ACNHOrders\bin\Debug\net8.0\System.Threading.Channels.dll
+C:\Users\brand\source\repos\SysBot.ACNHOrders\bin\Debug\net8.0\runtimes\browser\lib\net8.0\System.Text.Encodings.Web.dll

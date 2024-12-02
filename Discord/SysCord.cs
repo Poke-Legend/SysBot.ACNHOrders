@@ -114,29 +114,6 @@ namespace SysBot.ACNHOrders
                 return false;
             }
 
-            if (msg.Channel is SocketGuildChannel guildChannel)
-            {
-                // Only leave the server if its ID is in the blacklist.
-                bool isBlacklisted = await AllowedManager.ServerBlacklisted(guildChannel.Guild.Id);
-
-                if (isBlacklisted)
-                {
-                    var banEmbed = new EmbedBuilder()
-                        .WithTitle("⚠️ Server Banned!")
-                        .WithDescription("This server is on the banned list. The bot will now leave.")
-                        .WithColor(Color.Red)
-                        .WithFooter("Contact support if this is an error.")
-                        .WithCurrentTimestamp()
-                        .Build();
-
-                    await msg.Channel.SendMessageAsync(embed: banEmbed);
-
-                    // Leave the guild after sending the embed
-                    await guildChannel.Guild.LeaveAsync();
-                    return true;
-                }
-            }
-
             // Check if the user or server is banned
             if (await IsUserBannedAsync(context) || await IsServerBannedAsync(context))
                 return true;
@@ -209,7 +186,7 @@ namespace SysBot.ACNHOrders
                     .WithTitle("🚫 Server Banned")
                     .WithDescription("This server has been blacklisted due to violations. The bot will now leave.")
                     .AddField("Appeal", "Please contact support if you believe this is an error.")
-                    .WithFooter("Visit https://pokelegends.org/ for more info") // Replacing server ID with URL here
+                    .WithFooter("Visit https://pokelegends.org/ for more info")
                     .Build();
 
                 await context.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
@@ -218,6 +195,7 @@ namespace SysBot.ACNHOrders
             }
             return false;
         }
+
 
         private async Task HandleMessageAsync(SocketMessage arg)
         {

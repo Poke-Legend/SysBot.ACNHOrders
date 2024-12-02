@@ -95,6 +95,7 @@
     "AuthID": "",
     "AuthTokenOrString": ""
   },
+  "GitHubToken": "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",
   "Protocol": 0,
   "IP": "192.168.68.199",
   "Port": 6000,

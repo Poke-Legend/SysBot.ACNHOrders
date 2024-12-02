@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -16,8 +17,21 @@ namespace SysBot.ACNHOrders.Discord.Helpers
         public const string ServerBanApiUrl = "https://api.github.com/repos/Poke-Legend/ACNH-DATABASE/contents/serverban.json";
         public const string ChannelListApiUrl = "https://api.github.com/repos/Poke-Legend/ACNH-DATABASE/contents/whitelistchannel.json";
 
-        // GitHub Token for authentication (Replace with actual token or retrieve from environment variables for better security)
-        private const string GitHubToken = " ";
+        private static string GitHubToken = LoadConfig().GitHubToken;
+
+        private static Config LoadConfig()
+        {
+            try
+            {
+                var configContent = File.ReadAllText("config.json");
+                return JsonSerializer.Deserialize<Config>(configContent) ?? new Config();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error reading config.json: {ex.Message}");
+                return new Config();
+            }
+        }
 
         public static HttpClient CreateHttpClient()
         {
@@ -121,6 +135,7 @@ namespace SysBot.ACNHOrders.Discord.Helpers
                 return false;
             }
         }
+
         private class GitHubFileData
         {
             [JsonPropertyName("sha")]
@@ -128,6 +143,12 @@ namespace SysBot.ACNHOrders.Discord.Helpers
 
             [JsonPropertyName("content")]
             public string? Content { get; set; }
+        }
+
+        private class Config
+        {
+            [JsonPropertyName("GitHubToken")]
+            public string GitHubToken { get; set; } = string.Empty;
         }
     }
 }

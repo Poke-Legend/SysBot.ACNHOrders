@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -22,24 +21,38 @@ namespace SysBot.ACNHOrders.Discord.Helpers
             await LoadBannedServers();
         }
 
-        public static bool IsUserBanned(string userId) => BannedUserIds.Contains(userId);
-
-        public static async Task BanUserAsync(string userId)
+        public static bool IsUserBanned(string userId)
         {
             lock (BannedUserIds)
             {
-                BannedUserIds.Add(userId);
+                return BannedUserIds.Contains(userId);
             }
-            await SaveBannedUsers();
         }
 
-        public static async Task UnbanUserAsync(string userId)
+        public static bool IsServerBanned(string serverId)
         {
-            lock (BannedUserIds)
+            lock (BannedServerIds)
             {
-                BannedUserIds.Remove(userId);
+                return BannedServerIds.Contains(serverId);
             }
-            await SaveBannedUsers();
+        }
+
+        public static async Task BanServerAsync(string serverId)
+        {
+            lock (BannedServerIds)
+            {
+                BannedServerIds.Add(serverId);
+            }
+            await SaveBannedServers();
+        }
+
+        public static async Task UnbanServerAsync(string serverId)
+        {
+            lock (BannedServerIds)
+            {
+                BannedServerIds.Remove(serverId);
+            }
+            await SaveBannedServers();
         }
 
         private static async Task LoadBannedUsers()
@@ -70,31 +83,6 @@ namespace SysBot.ACNHOrders.Discord.Helpers
             {
                 UserFileLock.Release();
             }
-        }
-
-        private static async Task SaveBannedUsers()
-        {
-            await SaveBanList(GitHubApi.UserBanApiUrl, BannedUserIds, UserFileLock, "Update user ban list");
-        }
-
-        public static bool IsServerBanned(string serverId) => BannedServerIds.Contains(serverId);
-
-        public static async Task BanServerAsync(string serverId)
-        {
-            lock (BannedServerIds)
-            {
-                BannedServerIds.Add(serverId);
-            }
-            await SaveBannedServers();
-        }
-
-        public static async Task UnbanServerAsync(string serverId)
-        {
-            lock (BannedServerIds)
-            {
-                BannedServerIds.Remove(serverId);
-            }
-            await SaveBannedServers();
         }
 
         private static async Task LoadBannedServers()
@@ -130,6 +118,11 @@ namespace SysBot.ACNHOrders.Discord.Helpers
         private static async Task SaveBannedServers()
         {
             await SaveBanList(GitHubApi.ServerBanApiUrl, BannedServerIds, ServerFileLock, "Update server ban list");
+        }
+
+        private static async Task SaveBannedUsers()
+        {
+            await SaveBanList(GitHubApi.UserBanApiUrl, BannedUserIds, UserFileLock, "Update user ban list");
         }
 
         private static async Task SaveBanList(string apiUrl, HashSet<string> banList, SemaphoreSlim fileLock, string commitMessage)

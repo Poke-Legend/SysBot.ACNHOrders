@@ -82,6 +82,83 @@ namespace SysBot.ACNHOrders
             await AttemptToQueueRequest(items.ToArray(), Context.User, Context.Channel, villagerRequest).ConfigureAwait(false);
         }
 
+        [Command("qc")]
+        [Summary("Clears your own orders from the queue.")]
+        public async Task ClearOwnQueueAsync()
+        {
+            var userId = Context.User.Id;
+
+            // Attempt to remove the user's orders from the queue
+            bool isCleared = ClearUserQueue(userId);
+
+            if (isCleared)
+            {
+                var clearedEmbed = new EmbedBuilder()
+                    .WithColor(Color.Green)
+                    .WithTitle("✅ Queue Cleared")
+                    .WithDescription($"{Context.User.Mention}, your orders have been successfully removed from the queue.")
+                    .Build();
+                await ReplyAsync(embed: clearedEmbed).ConfigureAwait(false);
+            }
+            else
+            {
+                var notInQueueEmbed = new EmbedBuilder()
+                    .WithColor(Color.Orange)
+                    .WithTitle("⚠️ No Orders Found")
+                    .WithDescription($"{Context.User.Mention}, you don't have any orders in the queue.")
+                    .Build();
+                await ReplyAsync(embed: notInQueueEmbed).ConfigureAwait(false);
+            }
+        }
+
+        private static bool ClearUserQueue(ulong userId)
+        {
+            lock (CommandSync)
+            {
+                // Check if the orders are stored in a dictionary
+                if (Globals.Hub.Orders is IDictionary<ulong, IACNHOrderNotifier<Item>> ordersDictionary)
+                {
+                    // Find all orders by the user
+                    var userOrders = ordersDictionary.Values.Where(o => o.UserGuid == userId).ToList();
+
+                    if (userOrders.Count == 0)
+                        return false;
+
+                    foreach (var order in userOrders)
+                    {
+                        // Call OrderCancelled to handle order-specific cancellation logic
+                        order.OrderCancelled(Globals.Bot, "Order has been canceled by the user.", faulted: false);
+
+                        // Remove the order using its OrderID
+                        ordersDictionary.Remove(order.OrderID);
+                    }
+                }
+                else if (Globals.Hub.Orders is ICollection<IACNHOrderNotifier<Item>> ordersCollection)
+                {
+                    // Handle non-dictionary collections (like a list)
+                    var userOrders = ordersCollection.Where(o => o.UserGuid == userId).ToList();
+
+                    if (userOrders.Count == 0)
+                        return false;
+
+                    foreach (var order in userOrders)
+                    {
+                        // Call OrderCancelled to handle order-specific cancellation logic
+                        order.OrderCancelled(Globals.Bot, "Order has been canceled by the user.", faulted: false);
+
+                        // Remove from the collection
+                        ordersCollection.Remove(order);
+                    }
+                }
+                else
+                {
+                    throw new InvalidOperationException("Unsupported order collection type.");
+                }
+
+                return true;
+            }
+        }
+
         private static List<Item> AdjustItemListToTargetCount(List<Item> itemsList, int targetCount)
         {
             var items = itemsList.ToList();

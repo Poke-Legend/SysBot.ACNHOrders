@@ -181,6 +181,37 @@ namespace SysBot.ACNHOrders.Discord.Commands.Management
             base.BeforeExecute(command);
         }
 
+        [Command("ban")]
+        [Summary("Bans a user by their user ID.")]
+        [RequireSudo]
+        public async Task BanUserAsync(string userId)
+        {
+            if (BanManager.IsUserBanned(userId))
+            {
+                await ReplyAsync($"User {userId} is already banned.");
+                return;
+            }
+
+            await BanManager.BanUserAsync(userId);
+            await ReplyAsync($"User {userId} has been banned.");
+        }
+
+        [Command("unban")]
+        [Summary("Unbans a user by their user ID.")]
+        [RequireSudo]
+        public async Task UnbanUserAsync(string userId)
+        {
+            if (!BanManager.IsUserBanned(userId))
+            {
+                await ReplyAsync($"User {userId} is not in the ban list.");
+                return;
+            }
+
+            await BanManager.UnbanUserAsync(userId);
+            await ReplyAsync($"User {userId} has been unbanned.");
+        }
+
+
         [Command("bls")]
         [Summary("Bans a server by its server ID.")]
         [RequireSudo]

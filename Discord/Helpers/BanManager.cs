@@ -55,6 +55,24 @@ namespace SysBot.ACNHOrders.Discord.Helpers
             await SaveBannedServers();
         }
 
+        public static async Task BanUserAsync(string userId)
+        {
+            lock (BannedUserIds)
+            {
+                BannedUserIds.Add(userId);
+            }
+            await SaveBannedUsers();
+        }
+
+        public static async Task UnbanUserAsync(string userId)
+        {
+            lock (BannedUserIds)
+            {
+                BannedUserIds.Remove(userId);
+            }
+            await SaveBannedUsers();
+        }
+
         private static async Task LoadBannedUsers()
         {
             await UserFileLock.WaitAsync();

@@ -7,16 +7,16 @@
       "RelativeMoniker": "D:0:0:{EF7676A2-DF5A-49E8-BF8E-F522CE5FCAC3}|SysBot.ACNHOrders.csproj|solutionrelative:discord\\commands\\management\\sudo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{EF7676A2-DF5A-49E8-BF8E-F522CE5FCAC3}|SysBot.ACNHOrders.csproj|c:\\users\\brand\\source\\repos\\sysbot.acnhorders\\discord\\syscord.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{EF7676A2-DF5A-49E8-BF8E-F522CE5FCAC3}|SysBot.ACNHOrders.csproj|solutionrelative:discord\\syscord.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{EF7676A2-DF5A-49E8-BF8E-F522CE5FCAC3}|SysBot.ACNHOrders.csproj|c:\\users\\brand\\source\\repos\\sysbot.acnhorders\\discord\\helpers\\banmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{EF7676A2-DF5A-49E8-BF8E-F522CE5FCAC3}|SysBot.ACNHOrders.csproj|solutionrelative:discord\\helpers\\banmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{EF7676A2-DF5A-49E8-BF8E-F522CE5FCAC3}|SysBot.ACNHOrders.csproj|c:\\users\\brand\\source\\repos\\sysbot.acnhorders\\discord\\commands\\management\\owners.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{EF7676A2-DF5A-49E8-BF8E-F522CE5FCAC3}|SysBot.ACNHOrders.csproj|solutionrelative:discord\\commands\\management\\owners.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EF7676A2-DF5A-49E8-BF8E-F522CE5FCAC3}|SysBot.ACNHOrders.csproj|c:\\users\\brand\\source\\repos\\sysbot.acnhorders\\discord\\syscord.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EF7676A2-DF5A-49E8-BF8E-F522CE5FCAC3}|SysBot.ACNHOrders.csproj|solutionrelative:discord\\syscord.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{EF7676A2-DF5A-49E8-BF8E-F522CE5FCAC3}|SysBot.ACNHOrders.csproj|c:\\users\\brand\\source\\repos\\sysbot.acnhorders\\discord\\helpers\\githubapi.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -30,7 +30,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 22,
+          "SelectedChildIndex": 21,
           "Children": [
             {
               "$type": "Bookmark",
@@ -109,10 +109,6 @@
               "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
             },
             {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
-            },
-            {
               "$type": "Document",
               "DocumentIndex": 4,
               "Title": "GitHubApi.cs",
@@ -122,18 +118,17 @@
               "RelativeToolTip": "Discord\\Helpers\\GitHubApi.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAB/AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-12-02T08:51:43.498Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-12-02T08:51:43.498Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 1,
               "Title": "BanManager.cs",
               "DocumentMoniker": "C:\\Users\\brand\\source\\repos\\SysBot.ACNHOrders\\Discord\\Helpers\\BanManager.cs",
               "RelativeDocumentMoniker": "Discord\\Helpers\\BanManager.cs",
               "ToolTip": "C:\\Users\\brand\\source\\repos\\SysBot.ACNHOrders\\Discord\\Helpers\\BanManager.cs",
               "RelativeToolTip": "Discord\\Helpers\\BanManager.cs",
-              "ViewState": "AgIAAIEAAAAAAAAAAADwv5QAAAAjAAAAAAAAAA==",
+              "ViewState": "AgIAAHsAAAAAAAAAAAAiwEgAAAAkAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-12-02T08:37:02.304Z",
               "EditorCaption": ""
@@ -146,27 +141,27 @@
               "RelativeDocumentMoniker": "Discord\\Commands\\Management\\sudo.cs",
               "ToolTip": "C:\\Users\\brand\\source\\repos\\SysBot.ACNHOrders\\Discord\\Commands\\Management\\sudo.cs",
               "RelativeToolTip": "Discord\\Commands\\Management\\sudo.cs",
-              "ViewState": "AgIAALAAAAAAAAAAAAAcwL8AAAAXAAAAAAAAAA==",
+              "ViewState": "AgIAAKkAAAAAAAAAAAAowMYAAAAXAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-12-02T08:36:26.706Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 2,
               "Title": "Owners.cs",
               "DocumentMoniker": "C:\\Users\\brand\\source\\repos\\SysBot.ACNHOrders\\Discord\\Commands\\Management\\Owners.cs",
               "RelativeDocumentMoniker": "Discord\\Commands\\Management\\Owners.cs",
               "ToolTip": "C:\\Users\\brand\\source\\repos\\SysBot.ACNHOrders\\Discord\\Commands\\Management\\Owners.cs",
               "RelativeToolTip": "Discord\\Commands\\Management\\Owners.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-12-02T08:36:16.962Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 3,
               "Title": "SysCord.cs",
               "DocumentMoniker": "C:\\Users\\brand\\source\\repos\\SysBot.ACNHOrders\\Discord\\SysCord.cs",
               "RelativeDocumentMoniker": "Discord\\SysCord.cs",
@@ -174,8 +169,7 @@
               "RelativeToolTip": "Discord\\SysCord.cs",
               "ViewState": "AgIAAI0AAAAAAAAAAADgv5UAAAAQAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-12-02T08:29:54.056Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-12-02T08:29:54.056Z"
             }
           ]
         }

@@ -16,7 +16,8 @@ namespace SysBot.ACNHOrders
         Overworld,
         Loading,
         UserArriveLeaving,
-        Unknown
+        Unknown,
+        AnnouncementComplete
     }
 
     public class DodoPositionHelper

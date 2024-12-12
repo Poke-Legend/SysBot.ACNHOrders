@@ -671,17 +671,47 @@ namespace SysBot.ACNHOrders
         /// </summary>
         private async Task HandleMorningAnnouncementAsync(CancellationToken token)
         {
-            LogUtil.LogInfo($"Checking for morning announcement", Config.IP);
+            LogUtil.LogInfo("Starting morning announcement handling.", Config.IP);
+
+            // Perform initial clicks
             for (int i = 0; i < 3; i++)
             {
-                await Click(SwitchButton.B, 0_400, token).ConfigureAwait(false);
+                LogUtil.LogInfo($"Performing click {i + 1} of 3.", Config.IP);
+                await Click(SwitchButton.B, 400, token).ConfigureAwait(false);
             }
 
+            // Retry until Overworld state is reached
             while (await DodoPosition.GetOverworldState(OffsetHelper.PlayerCoordJumps, token).ConfigureAwait(false) != OverworldState.Overworld)
             {
-                await Click(SwitchButton.B, 0_300, token).ConfigureAwait(false);
+                LogUtil.LogInfo("Retrying to reach OverworldState.Overworld...", Config.IP);
+                await Click(SwitchButton.B, 300, token).ConfigureAwait(false);
                 await Task.Delay(1_000, token).ConfigureAwait(false);
             }
+
+            // Verify morning announcement completion through a custom mechanism
+            while (!await CheckAnnouncementCompletionAsync(token).ConfigureAwait(false))
+            {
+                LogUtil.LogInfo("Announcement not yet completed. Retrying...", Config.IP);
+
+                // Include any specific logic required to attempt the announcement again
+                await Click(SwitchButton.B, 300, token).ConfigureAwait(false);
+                await Task.Delay(1_000, token).ConfigureAwait(false);
+            }
+
+            LogUtil.LogInfo("Morning announcement completed successfully.", Config.IP);
+        }
+
+        // Helper method to check if the morning announcement is completed
+        private async Task<bool> CheckAnnouncementCompletionAsync(CancellationToken token)
+        {
+            // Replace this with actual logic to confirm the announcement
+            LogUtil.LogInfo("Checking if morning announcement is completed.", Config.IP);
+
+            // For illustration, assume we confirm via GetOverworldState
+            var currentState = await DodoPosition.GetOverworldState(OffsetHelper.PlayerCoordJumps, token).ConfigureAwait(false);
+
+            // Return true if the current state suggests the announcement is done
+            return currentState == OverworldState.Overworld; // Placeholder condition
         }
 
         /// <summary>

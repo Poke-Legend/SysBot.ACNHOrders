@@ -17,7 +17,7 @@ namespace SysBot.ACNHOrders.Discord.Helpers
         public const string ServerBanApiUrl = "https://api.github.com/repos/Poke-Legend/ACNH-DATABASE/contents/serverban.json";
         public const string ChannelListApiUrl = "https://api.github.com/repos/Poke-Legend/ACNH-DATABASE/contents/whitelistchannel.json";
 
-        private static string GitHubToken = LoadConfig().GitHubToken;
+        private static readonly string GitHubToken = LoadConfig().GitHubToken;
 
         private static Config LoadConfig()
         {
@@ -101,11 +101,17 @@ namespace SysBot.ACNHOrders.Discord.Helpers
             using var client = CreateHttpClient();
             try
             {
+                if (string.IsNullOrEmpty(GitHubToken))
+                {
+                    Console.WriteLine("GitHubToken is missing or invalid.");
+                    return false;
+                }
+
                 var updatePayload = new
                 {
                     message = commitMessage,
                     content = Convert.ToBase64String(Encoding.UTF8.GetBytes(content)),
-                    sha // Include the SHA to overwrite the existing file
+                    sha
                 };
 
                 var payloadJson = JsonSerializer.Serialize(updatePayload);
@@ -129,9 +135,9 @@ namespace SysBot.ACNHOrders.Discord.Helpers
                     return false;
                 }
             }
-            catch (HttpRequestException ex)
+            catch (Exception ex)
             {
-                Console.WriteLine($"Error updating file on GitHub: {ex.Message}");
+                Console.WriteLine($"Exception during file update: {ex.Message}");
                 return false;
             }
         }

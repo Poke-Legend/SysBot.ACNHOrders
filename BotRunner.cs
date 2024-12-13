@@ -8,7 +8,6 @@ namespace SysBot.ACNHOrders
 {
     public static class BotRunner
     {
-        // Move Logger methods out of the main method to avoid recreating each time
         private static void Logger(string msg, string identity) => Console.WriteLine(GetMessage(msg, identity));
         private static string GetMessage(string msg, string identity) => $"> [{DateTime.Now:hh:mm:ss}] - {identity}: {msg}";
 
@@ -26,10 +25,10 @@ namespace SysBot.ACNHOrders
 
             bot.Log("Starting Discord.");
 
-            // Directly await sys.MainAsync instead of wrapping it with Task.Run
+            // Start Discord bot task
             var discordTask = sys.MainAsync(config.Token, cancel);
 
-            // Start SignalrCrossBot if applicable
+            // Start SignalR bot if configured
             if (!string.IsNullOrWhiteSpace(config.SignalrConfig.URIEndpoint))
             {
                 bot.Log("Starting Web.");
@@ -49,12 +48,12 @@ namespace SysBot.ACNHOrders
 
                 try
                 {
-                    // Await the bot's main loop
+                    // Run the bot's main loop
                     await bot.RunAsync(cancel).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
-                    bot.Log("Bot has terminated due to an error:");
+                    bot.Log("Bot encountered an error:");
                     bot.Log(ex.Message);
                     if (ex.StackTrace != null)
                     {
@@ -62,20 +61,12 @@ namespace SysBot.ACNHOrders
                     }
                 }
 
-                // Handle restart logic based on configuration
-                if (config.DodoModeConfig.LimitedDodoRestoreOnlyMode)
-                {
-                    await Task.Delay(10_000, cancel).ConfigureAwait(false);
-                    bot.Log("Bot is attempting a restart...");
-                }
-                else
-                {
-                    bot.Log("Bot has terminated.");
-                    break;
-                }
+                // Always restart after an error
+                bot.Log("Bot is restarting...");
+                await Task.Delay(10_000, cancel).ConfigureAwait(false);
             }
 
-            // Await the discord task to ensure proper shutdown handling
+            // Await the Discord task to ensure proper shutdown handling
             await discordTask.ConfigureAwait(false);
         }
     }

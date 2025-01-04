@@ -10,6 +10,9 @@ using SysBot.ACNHOrders.Discord.Helpers;
 
 namespace SysBot.ACNHOrders
 {
+    /// <summary>
+    /// A static class holding global references (bot, syscord, queue, permission manager).
+    /// </summary>
     public static class Globals
     {
         public static SysCord Self { get; set; } = default!;
@@ -18,30 +21,42 @@ namespace SysBot.ACNHOrders
         public static PermissionManager Manager { get; set; } = new PermissionManager();
     }
 
-        public class PermissionConfig
+    /// <summary>
+    /// Basic config for permission checks (ignore all perms, allow commands, etc.).
+    /// </summary>
+    public class PermissionConfig
     {
         public bool IgnoreAllPermissions { get; set; } = false;
         public bool AcceptingCommands { get; set; } = true;
 
-        // Checks if the user has the required role
+        /// <summary>
+        /// Checks if userRoles contains the requiredRole.
+        /// </summary>
         public bool GetHasRole(string requiredRole, IEnumerable<string> userRoles)
         {
             return userRoles.Contains(requiredRole);
         }
     }
 
+    /// <summary>
+    /// Manages the global sudo list and a <see cref="PermissionConfig"/>.
+    /// </summary>
     public class PermissionManager
     {
-        private HashSet<ulong> GlobalSudoList { get; set; } = new HashSet<ulong>();
+        // Stores user IDs that can sudo
+        private HashSet<ulong> GlobalSudoList { get; set; } = new();
 
         public PermissionConfig Config { get; set; } = new PermissionConfig();
 
         public PermissionManager()
         {
-            // Initialize the sudo list
+            // Initialize the sudo list from GitHub on creation
             LoadSudoList().Wait();
         }
 
+        /// <summary>
+        /// Returns true if userId is in the global sudo list.
+        /// </summary>
         public bool CanUseSudo(ulong userId) => GlobalSudoList.Contains(userId);
 
         public async Task AddSudoAsync(ulong userId)
@@ -81,33 +96,39 @@ namespace SysBot.ACNHOrders
         }
     }
 
+    /// <summary>
+    /// A precondition that ensures only "sudo" users or the bot owner can run the command.
+    /// </summary>
     public sealed class RequireSudoAttribute : PreconditionAttribute
     {
-        public override async Task<PreconditionResult> CheckPermissionsAsync(ICommandContext context, CommandInfo command, IServiceProvider services)
+        public override async Task<PreconditionResult> CheckPermissionsAsync(
+            ICommandContext context,
+            CommandInfo command,
+            IServiceProvider services
+        )
         {
             var manager = Globals.Manager;
             var config = manager.Config;
 
-            // Check if permissions are ignored, or if the user is a sudo user or the bot owner
+            // If ignoring perms, or user is sudo, or user is bot owner
             if (config.IgnoreAllPermissions || manager.CanUseSudo(context.User.Id) || context.User.Id == Globals.Self.Owner)
             {
                 await TryDeleteCommandMessageAsync(context);
                 return PreconditionResult.FromSuccess();
             }
 
-            // Ensure the user is a guild member (SocketGuildUser)
+            // If user is not a guild user, we can't check roles
             if (context.User is not SocketGuildUser guildUser)
-            {
                 return PreconditionResult.FromError("You must be in a guild to run this command.");
-            }
 
-            // Check if the user has sudo permissions
+            // If user is in the sudo list
             if (manager.CanUseSudo(guildUser.Id))
             {
                 await TryDeleteCommandMessageAsync(context);
                 return PreconditionResult.FromSuccess();
             }
 
+            // Otherwise, no permission
             return PreconditionResult.FromError("You are not permitted to run this command.");
         }
 
@@ -117,7 +138,6 @@ namespace SysBot.ACNHOrders
             {
                 try
                 {
-                    // Check if the bot has permission to delete messages
                     var botUser = await context.Guild.GetCurrentUserAsync();
                     if (botUser.GetPermissions(channel).ManageMessages)
                     {
@@ -132,38 +152,48 @@ namespace SysBot.ACNHOrders
         }
     }
 
+    /// <summary>
+    /// A precondition that requires the user to have a specific "queue role" to use the command,
+    /// or be a sudo user, or bot owner.
+    /// </summary>
     public sealed class RequireQueueRoleAttribute : PreconditionAttribute
     {
         private readonly string _requiredRole;
 
         public RequireQueueRoleAttribute(string requiredRole) => _requiredRole = requiredRole;
 
-        public override async Task<PreconditionResult> CheckPermissionsAsync(ICommandContext context, CommandInfo command, IServiceProvider services)
+        public override async Task<PreconditionResult> CheckPermissionsAsync(
+            ICommandContext context,
+            CommandInfo command,
+            IServiceProvider services
+        )
         {
             var manager = Globals.Manager;
             var config = manager.Config;
 
-            // Check for sudo access, owner privileges, or if permissions are ignored
+            // If user is sudo, is owner, or ignoring all perms
             if (manager.CanUseSudo(context.User.Id) || Globals.Self.Owner == context.User.Id || config.IgnoreAllPermissions)
             {
                 await TryDeleteCommandMessageAsync(context);
                 return PreconditionResult.FromSuccess();
             }
 
-            // Ensure the user is a guild member
+            // Must be a guild user to check roles
             if (context.User is not SocketGuildUser guildUser)
                 return PreconditionResult.FromError("You must be in a guild to run this command.");
 
-            // Check if commands are currently accepted
+            // Are commands accepted at the moment?
             if (!config.AcceptingCommands)
                 return PreconditionResult.FromError("Sorry, I am not currently accepting commands!");
 
-            // Check if the user has the required role
-            if (!config.GetHasRole(_requiredRole, guildUser.Roles.Select(role => role.Name)))
+            // Check if user has the required role by name
+            bool hasRequiredRole = config.GetHasRole(_requiredRole, guildUser.Roles.Select(r => r.Name));
+            if (!hasRequiredRole)
             {
-                return PreconditionResult.FromError($"You do not have the {_requiredRole} role to run this command.");
+                return PreconditionResult.FromError($"You do not have the '{_requiredRole}' role to run this command.");
             }
 
+            // If we get here, the user has the required role
             await TryDeleteCommandMessageAsync(context);
             return PreconditionResult.FromSuccess();
         }
@@ -174,7 +204,6 @@ namespace SysBot.ACNHOrders
             {
                 try
                 {
-                    // Check if the bot has permission to delete messages
                     var botUser = await context.Guild.GetCurrentUserAsync();
                     if (botUser.GetPermissions(channel).ManageMessages)
                     {

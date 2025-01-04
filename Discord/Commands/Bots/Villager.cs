@@ -162,11 +162,17 @@ namespace SysBot.ACNHOrders.Discord.Commands.Bots
         private void EnqueueVillagerInjection(string internalName, int index)
         {
             var replace = VillagerResources.GetVillager(internalName);
+            // Check if the villager is in the "unadoptable" list (per your Order/VillagerOrderParser)
             var extraMsg = VillagerOrderParser.IsUnadoptable(internalName)
                 ? " Please note that you will not be able to adopt this villager."
                 : string.Empty;
 
-            var request = new VillagerRequest(Context.User.Username, replace, (byte)index, GameInfo.Strings.GetVillager(internalName))
+            var request = new VillagerRequest(
+                Context.User.Username,
+                replace,
+                (byte)index,
+                GameInfo.Strings.GetVillager(internalName)
+            )
             {
                 OnFinish = success =>
                 {

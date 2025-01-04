@@ -1,24 +1,7 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "C:\\Users\\brand\\source\\repos\\SysBot.ACNHOrders\\",
-  "Documents": [
-    {
-      "AbsoluteMoniker": "D:0:0:{EF7676A2-DF5A-49E8-BF8E-F522CE5FCAC3}|SysBot.ACNHOrders.csproj|c:\\users\\brand\\source\\repos\\sysbot.acnhorders\\discord\\helpers\\githubapi.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{EF7676A2-DF5A-49E8-BF8E-F522CE5FCAC3}|SysBot.ACNHOrders.csproj|solutionrelative:discord\\helpers\\githubapi.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{EF7676A2-DF5A-49E8-BF8E-F522CE5FCAC3}|SysBot.ACNHOrders.csproj|c:\\users\\brand\\source\\repos\\sysbot.acnhorders\\discord\\helpers\\banmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{EF7676A2-DF5A-49E8-BF8E-F522CE5FCAC3}|SysBot.ACNHOrders.csproj|solutionrelative:discord\\helpers\\banmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{EF7676A2-DF5A-49E8-BF8E-F522CE5FCAC3}|SysBot.ACNHOrders.csproj|c:\\users\\brand\\source\\repos\\sysbot.acnhorders\\botrunner.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{EF7676A2-DF5A-49E8-BF8E-F522CE5FCAC3}|SysBot.ACNHOrders.csproj|solutionrelative:botrunner.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{EF7676A2-DF5A-49E8-BF8E-F522CE5FCAC3}|SysBot.ACNHOrders.csproj|c:\\users\\brand\\source\\repos\\sysbot.acnhorders\\bot\\crossbot.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{EF7676A2-DF5A-49E8-BF8E-F522CE5FCAC3}|SysBot.ACNHOrders.csproj|solutionrelative:bot\\crossbot.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    }
-  ],
+  "Documents": [],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
@@ -26,7 +9,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 19,
+          "SelectedChildIndex": -1,
           "Children": [
             {
               "$type": "Bookmark",
@@ -103,57 +86,6 @@
             {
               "$type": "Bookmark",
               "Name": "ST:128:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "GitHubApi.cs",
-              "DocumentMoniker": "C:\\Users\\brand\\source\\repos\\SysBot.ACNHOrders\\Discord\\Helpers\\GitHubApi.cs",
-              "RelativeDocumentMoniker": "Discord\\Helpers\\GitHubApi.cs",
-              "ToolTip": "C:\\Users\\brand\\source\\repos\\SysBot.ACNHOrders\\Discord\\Helpers\\GitHubApi.cs",
-              "RelativeToolTip": "Discord\\Helpers\\GitHubApi.cs",
-              "ViewState": "AgIAABwAAAAAAAAAAAAQwC8AAAAJAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-12-13T02:54:44.738Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "BanManager.cs",
-              "DocumentMoniker": "C:\\Users\\brand\\source\\repos\\SysBot.ACNHOrders\\Discord\\Helpers\\BanManager.cs",
-              "RelativeDocumentMoniker": "Discord\\Helpers\\BanManager.cs",
-              "ToolTip": "C:\\Users\\brand\\source\\repos\\SysBot.ACNHOrders\\Discord\\Helpers\\BanManager.cs",
-              "RelativeToolTip": "Discord\\Helpers\\BanManager.cs",
-              "ViewState": "AgIAAJMAAAAAAAAAAADwv6YAAAAjAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-12-13T02:54:30.552Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "BotRunner.cs",
-              "DocumentMoniker": "C:\\Users\\brand\\source\\repos\\SysBot.ACNHOrders\\BotRunner.cs",
-              "RelativeDocumentMoniker": "BotRunner.cs",
-              "ToolTip": "C:\\Users\\brand\\source\\repos\\SysBot.ACNHOrders\\BotRunner.cs",
-              "RelativeToolTip": "BotRunner.cs",
-              "ViewState": "AgIAAC8AAAAAAAAAAAAgwBEAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-12-13T02:15:48Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "CrossBot.cs",
-              "DocumentMoniker": "C:\\Users\\brand\\source\\repos\\SysBot.ACNHOrders\\Bot\\CrossBot.cs",
-              "RelativeDocumentMoniker": "Bot\\CrossBot.cs",
-              "ToolTip": "C:\\Users\\brand\\source\\repos\\SysBot.ACNHOrders\\Bot\\CrossBot.cs",
-              "RelativeToolTip": "Bot\\CrossBot.cs",
-              "ViewState": "AgIAAFgCAAAAAAAAAAAUwG4CAABJAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-12-12T05:27:42.496Z"
             }
           ]
         }

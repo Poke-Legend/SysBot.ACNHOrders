@@ -10,6 +10,15 @@ namespace SysBot.ACNHOrders
         public const int MaxOrder = 40;
         public ItemArrayEditor<Item> ItemArray { get; private set; }
 
+        /// <summary>
+        /// The only constructor. It has four parameters:
+        /// 1) items[] (required)
+        /// 2) catalogue (bool, optional, default false)
+        /// 3) fillToMax (bool, optional, default true)
+        /// 4) stackMax (bool, optional, default true)
+        /// 
+        /// No parameter named 'isOrder' exists here, so do NOT call with isOrder:.
+        /// </summary>
         public MultiItem(Item[] items, bool catalogue = false, bool fillToMax = true, bool stackMax = true)
         {
             var itemArray = items;
@@ -21,20 +30,29 @@ namespace SysBot.ACNHOrders
                 var newItems = new List<Item>(items);
                 foreach (var currentItem in items)
                 {
+                    // This logic tries to replicate items to fill up to MaxOrder if needed.
                     int itemMultiplier = (int)(1f / ((1f / MaxOrder) * items.Length));
                     ProcessItem(currentItem, itemMultiplier, newItems);
                     if (newItems.Count >= MaxOrder)
                         break;
                 }
 
-                itemArray = newItems.Count > MaxOrder ? newItems.Take(MaxOrder).ToArray() : newItems.ToArray();
+                // If we exceeded 40, cut it down to 40
+                itemArray = newItems.Count > MaxOrder
+                    ? newItems.Take(MaxOrder).ToArray()
+                    : newItems.ToArray();
             }
+
+            // Now fill to max if necessary
             var itemsToAdd = (Item[])itemArray.Clone();
             FillToMax(items, catalogue, ref itemsToAdd);
 
             ItemArray = new ItemArrayEditor<Item>(itemsToAdd);
         }
 
+        /// <summary>
+        /// Parameterless constructor, if you need an empty MultiItem.
+        /// </summary>
         public MultiItem()
         {
             ItemArray = new ItemArrayEditor<Item>(Array.Empty<Item>());
@@ -48,10 +66,11 @@ namespace SysBot.ACNHOrders
 
             if (remake > 0 && currentItem.Count == 0)
             {
-                ProcessRemakeItem(currentItem, itemMultiplier, newItems, (short)remake); // Cast int to short
+                ProcessRemakeItem(currentItem, itemMultiplier, newItems, (short)remake);
             }
             else if (stackedMax < 2 && associated.Count > 1 && currentItem.ItemId != Item.DIYRecipe)
             {
+                // If item can have multiple 'associated' forms (like color variations), we add them all
                 foreach (var assoc in associated)
                 {
                     var toAdd = new Item();
@@ -62,6 +81,7 @@ namespace SysBot.ACNHOrders
             }
             else if (remake < 0)
             {
+                // If not a 'remake' item, just duplicate it
                 newItems.AddRange(DeepDuplicateItem(currentItem, Math.Max(0, itemMultiplier - 1)));
             }
         }
@@ -86,7 +106,7 @@ namespace SysBot.ACNHOrders
             for (ushort j = 1; j < varCount; ++j)
             {
                 var itemToAdd = multipliedItems[j];
-                itemToAdd.Count = (ushort)j; // Explicit cast from int to ushort
+                itemToAdd.Count = (ushort)j;
                 newItems.Add(itemToAdd);
             }
         }
@@ -110,11 +130,14 @@ namespace SysBot.ACNHOrders
             foreach (var it in itemSet)
             {
                 if (getMaxStack(it, out var max) && max != 1)
-                    it.Count = (ushort)(max - 1); // Explicit cast from int to ushort
+                {
+                    it.Count = (ushort)(max - 1);
+                }
             }
         }
 
-        public static void StackToMax(IReadOnlyCollection<Item> itemSet) => StackToMax(itemSet.ToArray());
+        public static void StackToMax(IReadOnlyCollection<Item> itemSet)
+            => StackToMax(itemSet.ToArray());
 
         public static Item[] DeepDuplicateItem(Item it, int count)
         {
@@ -140,6 +163,7 @@ namespace SysBot.ACNHOrders
             return canStack;
         }
 
+        // Example: certain flowers can be stacked to 10
         public static readonly ushort[] StackableFlowers =
         {
             2304, 2305, 2867, 2871, 2875, 2979, 2883, 2887, 2891, 2895, 2899, 2903,

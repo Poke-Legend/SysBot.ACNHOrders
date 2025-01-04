@@ -45,30 +45,24 @@ namespace SysBot.ACNHOrders
                 CaseSensitiveCommands = false
             });
 
+            // Setup logs
             _client.Log += LogAsync;
             _commands.Log += LogAsync;
 
+            // Build our DI container
             _services = new ServiceCollection()
                 .AddSingleton(bot)
                 .BuildServiceProvider();
 
             _isOffline = false;
 
-            AppDomain.CurrentDomain.ProcessExit += OnProcessExit;
-            Console.CancelKeyPress += OnConsoleCancelKeyPress;
+            // CHANGED: Remove forced process exit handlers.
+            // AppDomain.CurrentDomain.ProcessExit += OnProcessExit;
+            // Console.CancelKeyPress += OnConsoleCancelKeyPress;
         }
 
-        // Lifecycle Event Handlers
-        private void OnProcessExit(object? sender, EventArgs e)
-        {
-            ShutdownAsync().Wait();
-        }
-
-        private void OnConsoleCancelKeyPress(object? sender, ConsoleCancelEventArgs e)
-        {
-            e.Cancel = true;
-            ShutdownAsync().Wait();
-        }
+        // CHANGED: Remove OnProcessExit & OnConsoleCancelKeyPress
+        // If you keep them, do NOT call Environment.Exit(0) inside them.
 
         // Main Initialization
         public async Task MainAsync(string apiToken, CancellationToken token)
@@ -85,6 +79,7 @@ namespace SysBot.ACNHOrders
             var appInfo = await _client.GetApplicationInfoAsync();
             Owner = appInfo.Owner.Id;
 
+            // Wait until canceled, monitoring status in the background
             await MonitorStatusAsync(token);
         }
 
@@ -99,7 +94,7 @@ namespace SysBot.ACNHOrders
         {
             var context = new SocketCommandContext(_client, msg);
 
-            // Fetch the list of sudo users from GitHub
+            // Example: fetch permission data from GitHub
             var sudoJson = await GitHubApi.FetchFileContentAsync(GitHubApi.SudoApiUrl);
             if (sudoJson == null)
             {
@@ -118,17 +113,19 @@ namespace SysBot.ACNHOrders
             if (await IsUserBannedAsync(context) || await IsServerBannedAsync(context))
                 return true;
 
-            // Deserialize sudo user IDs from JSON
+            // Sudo users
             var sudoUserIds = JsonConvert.DeserializeObject<List<ulong>>(sudoJson) ?? new List<ulong>();
 
-            // Optionally fetch channel permissions if needed
+            // Allowed channels
             var channelJson = await GitHubApi.FetchFileContentAsync(GitHubApi.ChannelListApiUrl);
             var allowedChannelIds = channelJson != null
                 ? JsonConvert.DeserializeObject<List<ulong>>(channelJson) ?? new List<ulong>()
                 : new List<ulong>();
 
-            // Allow command execution for sudo users, allowed channels, or the owner
-            if (sudoUserIds.Contains(msg.Author.Id) || allowedChannelIds.Contains(msg.Channel.Id) || msg.Author.Id == Owner)
+            // Evaluate permissions
+            if (sudoUserIds.Contains(msg.Author.Id) ||
+                allowedChannelIds.Contains(msg.Channel.Id) ||
+                msg.Author.Id == Owner)
             {
                 var result = await _commands.ExecuteAsync(context, argPos, _services);
 
@@ -138,13 +135,14 @@ namespace SysBot.ACNHOrders
                         .WithTitle("❌ Command Error")
                         .WithDescription(result.ErrorReason)
                         .WithColor(Color.Orange)
-                        .WithFooter("Please check the command syntax or permissions.")
+                        .WithFooter("Check command syntax/permissions.")
                         .WithCurrentTimestamp()
                         .Build();
 
                     await msg.Channel.SendMessageAsync(embed: errorEmbed);
                 }
 
+                // Return true if we handled a known command
                 return result.Error != CommandError.UnknownCommand;
             }
             else
@@ -153,7 +151,7 @@ namespace SysBot.ACNHOrders
                     .WithTitle("Access Denied")
                     .WithDescription("You don't have permission to use this command here.")
                     .WithColor(Color.Orange)
-                    .WithFooter("Contact an admin if you believe this is an error.")
+                    .WithFooter("Contact an admin if this is an error.")
                     .WithCurrentTimestamp()
                     .Build();
 
@@ -169,7 +167,7 @@ namespace SysBot.ACNHOrders
                 var bannedEmbed = new EmbedBuilder()
                     .WithColor(Color.Red)
                     .WithTitle("❌ Banned")
-                    .WithDescription($"{context.User.Mention}, you have been banned for abuse. Order not accepted.")
+                    .WithDescription($"{context.User.Mention}, you have been banned.")
                     .Build();
                 await context.Channel.SendMessageAsync(embed: bannedEmbed).ConfigureAwait(false);
                 return true;
@@ -179,14 +177,13 @@ namespace SysBot.ACNHOrders
 
         private static async Task<bool> IsServerBannedAsync(SocketCommandContext context)
         {
-            if (BanManager.IsServerBanned(context.Guild.Id.ToString()))
+            if (context.Guild != null && BanManager.IsServerBanned(context.Guild.Id.ToString()))
             {
                 var embed = new EmbedBuilder()
                     .WithColor(Color.Red)
                     .WithTitle("🚫 Server Banned")
-                    .WithDescription("This server has been blacklisted due to violations. The bot will now leave.")
-                    .AddField("Appeal", "Please contact support if you believe this is an error.")
-                    .WithFooter("Visit https://pokelegends.org/ for more info")
+                    .WithDescription("This server has been blacklisted. The bot will now leave.")
+                    .AddField("Appeal", "Please contact support if this is an error.")
                     .Build();
 
                 await context.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
@@ -196,10 +193,8 @@ namespace SysBot.ACNHOrders
             return false;
         }
 
-
         private async Task HandleMessageAsync(SocketMessage arg)
         {
-            // Check if the message is from a user and not the bot itself
             if (arg is not SocketUserMessage msg ||
                 msg.Author.Id == _client.CurrentUser.Id ||
                 (!_bot.Config.IgnoreAllPermissions && msg.Author.IsBot))
@@ -207,48 +202,94 @@ namespace SysBot.ACNHOrders
 
             int argPos = 0;
 
-            // Check if the message is in a guild channel and if the server is blacklisted
-            
-            // Attempt to handle commands with the specified prefix
+            // If message has prefix, it might be a command
             if (msg.HasStringPrefix(_bot.Config.Prefix, ref argPos))
             {
                 if (await TryHandleCommandAsync(msg, argPos))
                     return;
             }
-            // Check if message should be deleted
             else if (await CheckMessageDeletionAsync(msg))
             {
+                // We might have deleted a non-command message
                 return;
             }
 
-            // If none of the above conditions match, try handling it as a regular message
+            // Otherwise, do whatever "regular message" handling you want
             await TryHandleMessage(msg);
         }
 
         private static Task TryHandleMessage(SocketMessage msg)
         {
-            ArgumentNullException.ThrowIfNull(msg);
+            // If you have additional logic for normal messages, handle it here
             return Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// Attempts to post a message to the specified channel ID. 
+        /// Optionally checks for duplicate (double) posts if requested.
+        /// Returns true if successful, false otherwise.
+        /// </summary>
+        public async Task<bool> TrySpeakMessage(ulong channelId, string message, bool checkForDoublePosts = false)
+        {
+            try
+            {
+                // Attempt to retrieve the channel
+                if (_client.GetChannel(channelId) is IMessageChannel textChannel)
+                {
+                    if (checkForDoublePosts)
+                    {
+                        // Fetch the last message
+                        var lastMessage = (await textChannel.GetMessagesAsync(1).FlattenAsync()).FirstOrDefault();
+                        if (lastMessage != null && lastMessage.Content == message)
+                        {
+                            // Already posted an identical message, so return true (no new post needed)
+                            return true;
+                        }
+                    }
+
+                    // Send the message
+                    await textChannel.SendMessageAsync(message).ConfigureAwait(false);
+                    return true;
+                }
+                else
+                {
+                    // The channel ID was invalid or not a text channel
+                    Console.WriteLine($"SysCord: channel ID {channelId} is not a valid text channel.");
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log or handle exceptions as needed
+                Console.WriteLine($"SysCord: TrySpeakMessage failed - {ex.Message}");
+                return false;
+            }
         }
 
         private async Task<bool> CheckMessageDeletionAsync(SocketUserMessage msg)
         {
             var context = new SocketCommandContext(_client, msg);
 
-            if (!Globals.Bot.Config.DeleteNonCommands || context.IsPrivate || msg.Author.IsBot || Globals.Bot.Config.CanUseSudo(msg.Author.Id) || msg.Author.Id == Owner)
+            if (!Globals.Bot.Config.DeleteNonCommands ||
+                context.IsPrivate ||
+                msg.Author.IsBot ||
+                Globals.Bot.Config.CanUseSudo(msg.Author.Id) ||
+                msg.Author.Id == Owner)
+            {
                 return false;
+            }
 
             if (!Globals.Bot.Config.Channels.Contains(context.Channel.Id))
                 return false;
 
             try
             {
-                await msg.DeleteAsync(RequestOptions.Default);
-                await msg.Channel.SendMessageAsync($"{msg.Author.Mention} - The order channels are for bot commands only.\nDeleted Message:```\n{msg.Content}\n```");
+                await msg.DeleteAsync();
+                await msg.Channel.SendMessageAsync($"{msg.Author.Mention} - Only bot commands are allowed here.\nDeleted Message:```\n{msg.Content}\n```");
             }
             catch (HttpException ex)
             {
-                Console.WriteLine($"Failed to delete message in {context.Channel.Name} (ID: {context.Channel.Id}) due to: {ex.Message}");
+                Console.WriteLine($"Failed to delete message in {context.Channel.Name} due to: {ex.Message}");
             }
             catch (Exception ex)
             {
@@ -258,7 +299,6 @@ namespace SysBot.ACNHOrders
             return true;
         }
 
-        // Status Monitoring and Logging
         private static Task LogAsync(LogMessage msg)
         {
             Console.ForegroundColor = msg.Severity switch
@@ -294,7 +334,8 @@ namespace SysBot.ACNHOrders
                     await _client.SetStatusAsync(currentState);
                 }
 
-                if (_bot.Config.DodoModeConfig.LimitedDodoRestoreOnlyMode && _bot.Config.DodoModeConfig.SetStatusAsDodoCode)
+                if (_bot.Config.DodoModeConfig.LimitedDodoRestoreOnlyMode &&
+                    _bot.Config.DodoModeConfig.SetStatusAsDodoCode)
                 {
                     await _client.SetGameAsync($"Dodo code: {_bot.DodoCode}");
                 }
@@ -303,12 +344,12 @@ namespace SysBot.ACNHOrders
             }
         }
 
-        // Client Ready Event Handling
         private async Task OnClientReadyAsync()
         {
             if (Ready) return;
             Ready = true;
 
+            // Example: Forward logs to Discord channels
             foreach (var channelId in _bot.Config.LoggingChannels)
             {
                 if (_client.GetChannel(channelId) is not ISocketMessageChannel channel)
@@ -317,97 +358,17 @@ namespace SysBot.ACNHOrders
                     continue;
                 }
 
-                void Logger(string msg, string identity) => channel.SendMessageAsync($"> [{DateTime.Now:hh:mm:ss}] - {identity}: {msg}");
+                void Logger(string msg, string identity)
+                    => channel.SendMessageAsync($"> [{DateTime.Now:hh:mm:ss}] - {identity}: {msg}");
                 LogUtil.Forwarders.Add(Logger);
             }
 
             await UpdateChannelNameWithStatus("🟢");
         }
 
-        public async Task<bool> TrySpeakMessage(ulong id, string message, bool noDoublePost = false)
-        {
-            try
-            {
-                if (_client.ConnectionState != ConnectionState.Connected)
-                    return false;
-                var channel = _client.GetChannel(id);
-                if (noDoublePost && channel is IMessageChannel msgChannel)
-                {
-                    var lastMsg = await msgChannel.GetMessagesAsync(1).FlattenAsync();
-                    if (lastMsg != null && lastMsg.Any())
-                        if (lastMsg.ElementAt(0).Content == message)
-                            return true; // exists
-                }
-
-                if (channel is IMessageChannel textChannel)
-                    await textChannel.SendMessageAsync(message).ConfigureAwait(false);
-                return true;
-            }
-            catch (Exception e)
-            {
-                if (e.StackTrace != null)
-                    LogUtil.LogError($"SpeakMessage failed with:\n{e.Message}\n{e.StackTrace}", nameof(SysCord));
-                else
-                    LogUtil.LogError($"SpeakMessage failed with:\n{e.Message}", nameof(SysCord));
-            }
-
-            return false;
-        }
-
-        public static async Task<bool> TrySpeakMessage(ISocketMessageChannel channel, string message)
-        {
-            try
-            {
-                await channel.SendMessageAsync(message).ConfigureAwait(false);
-                return true;
-            }
-            catch { }
-
-            return false;
-        }
-
-        public static async Task<bool> TrySendMessage(IMessageChannel channel, string message, bool noDoublePost = false)
-        {
-            try
-            {
-                if (noDoublePost)
-                {
-                    var lastMessage = (await channel.GetMessagesAsync(1).FlattenAsync()).FirstOrDefault();
-                    if (lastMessage?.Content == message) return true;
-                }
-
-                await channel.SendMessageAsync(message);
-                return true;
-            }
-            catch (HttpException ex) when (ex.HttpCode == System.Net.HttpStatusCode.TooManyRequests)
-            {
-                if (ex.Data.Contains("Retry-After"))
-                {
-                    var retryAfterMs = Convert.ToInt32(ex.Data["Retry-After"]);
-                    Console.WriteLine($"Rate limit hit. Retrying after {retryAfterMs} milliseconds...");
-                    await Task.Delay(retryAfterMs);
-                    await channel.SendMessageAsync(message);
-                    return true;
-                }
-                Console.WriteLine($"Rate limit hit, but no Retry-After header found: {ex.Message}");
-            }
-            catch (HttpException ex)
-            {
-                Console.WriteLine($"Failed to send message in {channel.Name}: {ex.Message}");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"An unexpected error occurred: {ex.Message}");
-            }
-
-            return false;
-        }
-
-        // Inside SysCord.cs - UpdateChannelNameWithStatus method
-
         public async Task UpdateChannelNameWithStatus(string statusIcon)
         {
-            var availableChannels = await ChannelManager.LoadChannelsAsync(); // Static async call to load channels
+            var availableChannels = await ChannelManager.LoadChannelsAsync();
 
             foreach (var channelId in availableChannels)
             {
@@ -418,12 +379,15 @@ namespace SysBot.ACNHOrders
                 {
                     string currentName = channel.Name;
 
-                    // Remove any existing status icon (assuming icons are either "🟢" or "🔴" at the start)
+                    // If the name starts with a status icon, remove it
                     if (currentName.StartsWith("🟢") || currentName.StartsWith("🔴"))
-                        currentName = currentName.Substring(1).Trim(); // Remove existing status icon if present
+                        currentName = currentName.Substring(1).Trim();
 
-                    // Update the channel name with the status icon if provided
-                    string newChannelName = string.IsNullOrEmpty(statusIcon) ? currentName : $"{statusIcon}{currentName}";
+                    // Prepend the new status
+                    string newChannelName = string.IsNullOrEmpty(statusIcon)
+                        ? currentName
+                        : $"{statusIcon}{currentName}";
+
                     await channel.ModifyAsync(prop => prop.Name = newChannelName);
                     Console.WriteLine($"Channel name updated to: {newChannelName} in {channel.Guild.Name}");
                 }
@@ -431,17 +395,19 @@ namespace SysBot.ACNHOrders
                 {
                     if (ex.Data["Retry-After"] is int retryAfterMs)
                     {
-                        Console.WriteLine($"Rate limit hit. Retrying after {retryAfterMs} milliseconds...");
+                        Console.WriteLine($"Rate limit hit. Retrying after {retryAfterMs} ms...");
                         await Task.Delay(retryAfterMs);
 
-                        // Retry the modification after delay
-                        string retryChannelName = string.IsNullOrEmpty(statusIcon) ? channel.Name.Substring(1).Trim() : $"{statusIcon}{channel.Name.Substring(1).Trim()}";
+                        // Retry
+                        string retryChannelName = string.IsNullOrEmpty(statusIcon)
+                            ? channel.Name.Substring(1).Trim()
+                            : $"{statusIcon}{channel.Name.Substring(1).Trim()}";
                         await channel.ModifyAsync(prop => prop.Name = retryChannelName);
-                        Console.WriteLine($"Channel name updated to: {retryChannelName} in {channel.Guild.Name} after retry");
+                        Console.WriteLine($"Channel name updated to: {retryChannelName} after retry");
                     }
                     else
                     {
-                        Console.WriteLine($"Rate limit hit, but no Retry-After header found: {ex.Message}");
+                        Console.WriteLine($"Rate limit hit, no Retry-After header: {ex.Message}");
                     }
                 }
                 catch (Exception ex)
@@ -451,14 +417,15 @@ namespace SysBot.ACNHOrders
             }
         }
 
-
         // Shutdown and Restart
         private async Task ShutdownAsync()
         {
+            // CHANGED: Removed Environment.Exit(0)
             SetOfflineMode(true);
             await UpdateChannelNameWithStatus("🔴");
             await _client.StopAsync();
-            Environment.Exit(0);
+
+            // Let the main program handle whether to exit or restart
         }
 
         public async Task StopBotAsync()

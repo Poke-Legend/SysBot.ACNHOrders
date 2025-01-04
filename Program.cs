@@ -1,8 +1,8 @@
 ﻿using System;
 using System.IO;
-using System.Threading.Tasks;
 using System.Text.Json;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace SysBot.ACNHOrders
 {
@@ -15,12 +15,23 @@ namespace SysBot.ACNHOrders
         {
             Console.WriteLine("Starting up...");
 
+            // We create a token source so we can support Ctrl+C graceful shutdown
+            using var cts = new CancellationTokenSource();
+
+            // Hook Ctrl+C to cancel
+            Console.CancelKeyPress += (sender, e) =>
+            {
+                e.Cancel = true;   // Prevent the process from terminating immediately
+                cts.Cancel();      // Signal the token
+            };
+
+            // Load or create configs
             string configPath = args.Length == 1 ? args[0] : DefaultConfigPath;
-
-            // Load or create configurations asynchronously
             var config = await LoadOrCreateConfigAsync<CrossBotConfig>(configPath, CreateDefaultConfig);
-            var serverConfig = await LoadOrCreateConfigAsync<SocketAPI.SocketAPIServerConfig>(DefaultSocketServerAPIPath, () => new SocketAPI.SocketAPIServerConfig());
+            var serverConfig = await LoadOrCreateConfigAsync<SocketAPI.SocketAPIServerConfig>(DefaultSocketServerAPIPath,
+                () => new SocketAPI.SocketAPIServerConfig());
 
+            // If either config failed to deserialize, bail out
             if (config == null || serverConfig == null)
             {
                 Console.WriteLine("Configuration deserialization failed. Exiting.");
@@ -28,16 +39,25 @@ namespace SysBot.ACNHOrders
                 return;
             }
 
-            // Start Socket API Server
+            // Start Socket API Server in the background
             var server = SocketAPI.SocketAPIServer.Instance;
             _ = server.Start(serverConfig);
 
-            // Run the bot
-            await BotRunner.RunFrom(config, CancellationToken.None).ConfigureAwait(false);
+            // IMPORTANT:
+            // BotRunner.RunFrom has its own internal `while (true)` loop that catches exceptions
+            // and restarts the bot after a delay. It will only return when a CancellationToken
+            // is triggered, or if you have logic that explicitly exits.
 
+            await BotRunner.RunFrom(config, cts.Token).ConfigureAwait(false);
+
+            // We only reach here if BotRunner.RunFrom returns normally or the token is canceled
             WaitKeyExit();
         }
 
+        /// <summary>
+        /// Attempts to load a JSON config from file.
+        /// If it doesn't exist, creates a default one, writes it to disk, and returns null (so you can exit).
+        /// </summary>
         private static async Task<T?> LoadOrCreateConfigAsync<T>(string path, Func<T> createDefault) where T : class
         {
             if (!File.Exists(path))
@@ -69,7 +89,14 @@ namespace SysBot.ACNHOrders
 
         private static CrossBotConfig CreateDefaultConfig()
         {
-            return new CrossBotConfig { IP = "192.168.0.1", Port = 6000 };
+            return new CrossBotConfig
+            {
+                IP = "127.0.0.1",
+                Port = 6000,
+                // You can add other default properties here, e.g.,
+                // SkipConsoleBotCreation = false,
+                // etc.
+            };
         }
 
         private static void WaitKeyExit()

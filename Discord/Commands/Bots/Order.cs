@@ -37,7 +37,6 @@ namespace SysBot.ACNHOrders
 
         // Basic embed color for success or informational messages
         private static readonly Color EmbedColor = new Color(52, 152, 219); // Blue (RGB)
-
         [Command("order")]
         [Summary(OrderItemSummary)]
         public async Task RequestOrderAsync([Summary(OrderItemSummary)][Remainder] string request)
@@ -49,11 +48,13 @@ namespace SysBot.ACNHOrders
             var result = VillagerOrderParser.ExtractVillagerName(request, out var villagerName, out var sanitizedOrder);
             if (result == VillagerOrderParser.VillagerRequestResult.InvalidVillagerRequested)
             {
+                // From your updated code snippet
                 var invalidEmbed = new EmbedBuilder()
                     .WithColor(Color.Orange)
                     .WithTitle("⚠️ Invalid Villager Requested")
                     .WithDescription($"{Context.User.Mention}, {villagerName} is not adoptable. Order not accepted.")
                     .Build();
+
                 await ReplyAsync(embed: invalidEmbed).ConfigureAwait(false);
                 return;
             }
@@ -65,11 +66,13 @@ namespace SysBot.ACNHOrders
                 // Check if villager injection is allowed
                 if (!cfg.AllowVillagerInjection)
                 {
+                    // From your updated code snippet
                     var disabledEmbed = new EmbedBuilder()
                         .WithColor(Color.Red)
                         .WithTitle("❌ Villager Injection Disabled")
                         .WithDescription($"{Context.User.Mention}, villager injection is currently disabled.")
                         .Build();
+
                     await ReplyAsync(embed: disabledEmbed).ConfigureAwait(false);
                     return;
                 }
@@ -87,12 +90,34 @@ namespace SysBot.ACNHOrders
                 );
             }
 
-            // Attempt to parse item(s) from user text or an attached NHI file
-            var itemsList = (await GetItemsFromRequestAsync(
-                request,
-                cfg,
-                Context.Message.Attachments.FirstOrDefault()
-            )).ToList();
+            // Now try to parse items either from an attached NHI file or from the user text
+            // (Merging the logic from your second snippet if you wish to fallback on the file approach)
+
+            var attachment = Context.Message.Attachments.FirstOrDefault();
+
+            // We will use your existing `GetItemsFromRequestAsync` if no valid NHI was attached
+            // This merges both behaviors (checking the file first, then fallback to text-based parse).
+
+            List<Item> itemsList = new List<Item>();
+            if (attachment != null)
+            {
+                // Attempt to parse items from the NHI file
+                var att = await NetUtil.DownloadNHIAsync(attachment).ConfigureAwait(false);
+                if (att.Success && att.Data is Item[] itemData)
+                {
+                    itemsList = itemData.ToList();
+                }
+            }
+
+            // If either no attachment or the attachment was invalid, we fallback to `GetItemsFromRequestAsync`
+            if (!itemsList.Any())
+            {
+                itemsList = (await GetItemsFromRequestAsync(
+                    request,
+                    cfg,
+                    attachment
+                )).ToList();
+            }
 
             // If no items were found at all
             if (!itemsList.Any())
@@ -102,17 +127,19 @@ namespace SysBot.ACNHOrders
                     .WithTitle("❌ No Valid Items")
                     .WithDescription("No valid items or NHI attachment provided.")
                     .Build();
+
                 await ReplyAsync(embed: noItemsEmbed).ConfigureAwait(false);
                 return;
             }
 
-            // Adjust item list to 40 (ACNH inventory size, typically)
+            // Adjust the item list to 40 (typical ACNH inventory size)
             var items = AdjustItemListToTargetCount(itemsList, 40);
 
             // Attempt to queue the request
             await AttemptToQueueRequest(items.ToArray(), Context.User, Context.Channel, villagerRequest)
                   .ConfigureAwait(false);
         }
+
 
         /// <summary>
         /// Command for clearing any existing orders from the current user in the queue.
@@ -229,15 +256,26 @@ namespace SysBot.ACNHOrders
         /// </summary>
         private static List<Item> AdjustItemListToTargetCount(List<Item> itemsList, int targetCount = 40)
         {
-            var items = itemsList.ToList(); // copy
+            if (itemsList == null)
+                throw new ArgumentNullException(nameof(itemsList));
+
+            // If there's nothing in the list, just return an empty list (or handle differently if desired)
+            if (itemsList.Count == 0)
+            {
+                return new List<Item>();
+            }
+
+            // Copy the original items so we don't mutate the parameter
+            var items = new List<Item>(itemsList);
             var random = new Random();
 
-            // If we have more items than the target, trim
+            // 1. If we have more items than targetCount, keep only the first targetCount items
             if (items.Count > targetCount)
             {
                 items = items.Take(targetCount).ToList();
             }
-            // If we have fewer, randomly duplicate until we reach the target
+
+            // 2. If fewer, randomly duplicate until we reach the targetCount
             while (items.Count < targetCount)
             {
                 items.Add(itemsList[random.Next(itemsList.Count)]);

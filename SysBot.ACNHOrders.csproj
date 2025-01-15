@@ -7,6 +7,8 @@
     <NuGetAuditMode>all</NuGetAuditMode>
     <PublishTrimmed>False</PublishTrimmed>
     <PlatformTarget>x64</PlatformTarget>
+    <PublishAot>False</PublishAot>
+    <NuGetAudit>False</NuGetAudit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0|AnyCPU'">
     <WarningLevel>0</WarningLevel>

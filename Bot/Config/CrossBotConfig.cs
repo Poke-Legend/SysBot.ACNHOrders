@@ -182,11 +182,6 @@ namespace SysBot.ACNHOrders
         public bool HideArrivalNames { get; set; } = false;
 
         /// <summary>
-        /// Custom emoji used as a "blocker" symbol.
-        /// </summary>
-        public string BlockerEmoji { get; set; } = "\u2764";
-
-        /// <summary>
         /// Directory containing .nhl files for field layers.
         /// </summary>
         public string FieldLayerNHLDirectory { get; set; } = "nhl";

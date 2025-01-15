@@ -15,90 +15,112 @@ namespace SysBot.ACNHOrders
         {
             Console.WriteLine("Starting up...");
 
-            // We create a token source so we can support Ctrl+C graceful shutdown
-            using var cts = new CancellationTokenSource();
-
-            // Hook Ctrl+C to cancel
-            Console.CancelKeyPress += (sender, e) =>
+            // Determine config path from args
+            string configPath = args.Length switch
             {
-                e.Cancel = true;   // Prevent the process from terminating immediately
-                cts.Cancel();      // Signal the token
+                > 1 => WarnAndReturnDefaultConfigPath(),
+                1 => args[0],
+                _ => DefaultConfigPath
             };
 
-            // Load or create configs
-            string configPath = args.Length == 1 ? args[0] : DefaultConfigPath;
-            var config = await LoadOrCreateConfigAsync<CrossBotConfig>(configPath, CreateDefaultConfig);
-            var serverConfig = await LoadOrCreateConfigAsync<SocketAPI.SocketAPIServerConfig>(DefaultSocketServerAPIPath,
-                () => new SocketAPI.SocketAPIServerConfig());
+            // If the main config doesn't exist, create a default one and quit
+            if (!File.Exists(configPath))
+            {
+                CreateConfigQuit(configPath);
+                return;
+            }
 
-            // If either config failed to deserialize, bail out
+            // Ensure the socket server config file exists (create default if missing)
+            EnsureFileExists(DefaultSocketServerAPIPath, () => new SocketAPI.SocketAPIServerConfig());
+
+            // Load configurations
+            var config = LoadConfig<CrossBotConfig>(configPath);
+            var serverConfig = LoadConfig<SocketAPI.SocketAPIServerConfig>(DefaultSocketServerAPIPath);
+
+            // If any config failed to deserialize, exit
             if (config == null || serverConfig == null)
             {
-                Console.WriteLine("Configuration deserialization failed. Exiting.");
                 WaitKeyExit();
                 return;
             }
 
-            // Start Socket API Server in the background
+            // Save them back (in case of formatting or first-time creation)
+            SaveConfig(config, configPath);
+            SaveConfig(serverConfig, DefaultSocketServerAPIPath);
+
+            // Start the socket server
             var server = SocketAPI.SocketAPIServer.Instance;
             _ = server.Start(serverConfig);
 
-            // IMPORTANT:
-            // BotRunner.RunFrom has its own internal `while (true)` loop that catches exceptions
-            // and restarts the bot after a delay. It will only return when a CancellationToken
-            // is triggered, or if you have logic that explicitly exits.
+            // Run the bot
+            await BotRunner
+                .RunFrom(config, CancellationToken.None)
+                .ConfigureAwait(false);
 
-            await BotRunner.RunFrom(config, cts.Token).ConfigureAwait(false);
-
-            // We only reach here if BotRunner.RunFrom returns normally or the token is canceled
             WaitKeyExit();
         }
 
         /// <summary>
-        /// Attempts to load a JSON config from file.
-        /// If it doesn't exist, creates a default one, writes it to disk, and returns null (so you can exit).
+        /// Logs a warning about too many arguments and returns the default config path.
         /// </summary>
-        private static async Task<T?> LoadOrCreateConfigAsync<T>(string path, Func<T> createDefault) where T : class
+        private static string WarnAndReturnDefaultConfigPath()
+        {
+            Console.WriteLine("Too many arguments supplied; they will be ignored.");
+            return DefaultConfigPath;
+        }
+
+        /// <summary>
+        /// Ensures the specified config file exists, creating a default version if missing.
+        /// </summary>
+        private static void EnsureFileExists<T>(string path, Func<T> defaultConfigFactory)
         {
             if (!File.Exists(path))
             {
-                var defaultConfig = createDefault();
-                await SaveConfigAsync(defaultConfig, path);
-                Console.WriteLine($"Created default configuration at {path}. Please configure it and restart the program.");
-                return null;
+                SaveConfig(defaultConfigFactory(), path);
             }
+        }
 
+        /// <summary>
+        /// Attempts to load and deserialize a config object from the specified path.
+        /// Returns null (with a console message) on error.
+        /// </summary>
+        private static T? LoadConfig<T>(string path) where T : class
+        {
             try
             {
-                var json = await File.ReadAllTextAsync(path).ConfigureAwait(false);
+                var json = File.ReadAllText(path);
                 return JsonSerializer.Deserialize<T>(json);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error loading configuration from {path}: {ex.Message}");
+                Console.WriteLine($"Failed to deserialize configuration from '{path}': {ex.Message}");
                 return null;
             }
         }
 
-        private static async Task SaveConfigAsync<T>(T config, string path)
+        /// <summary>
+        /// Serializes a config object to JSON and writes it to the specified path.
+        /// </summary>
+        private static void SaveConfig<T>(T config, string path)
         {
             var options = new JsonSerializerOptions { WriteIndented = true };
             var json = JsonSerializer.Serialize(config, options);
-            await File.WriteAllTextAsync(path, json).ConfigureAwait(false);
+            File.WriteAllText(path, json);
         }
 
-        private static CrossBotConfig CreateDefaultConfig()
+        /// <summary>
+        /// Creates a blank configuration file and instructs the user to configure it before exiting.
+        /// </summary>
+        private static void CreateConfigQuit(string configPath)
         {
-            return new CrossBotConfig
-            {
-                IP = "127.0.0.1",
-                Port = 6000,
-                // You can add other default properties here, e.g.,
-                // SkipConsoleBotCreation = false,
-                // etc.
-            };
+            SaveConfig(new CrossBotConfig { IP = "192.168.0.1", Port = 6000 }, configPath);
+            Console.WriteLine("Created a blank config file. Please configure it and restart the program.");
+            WaitKeyExit();
         }
 
+        /// <summary>
+        /// Prompts user to press any key, then exits.
+        /// </summary>
         private static void WaitKeyExit()
         {
             Console.WriteLine("Press any key to exit.");

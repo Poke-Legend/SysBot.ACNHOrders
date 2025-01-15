@@ -1,7 +1,0 @@
-﻿[*.cs]
-
-# RCS1075: Avoid empty catch clause that catches System.Exception
-dotnet_diagnostic.RCS1075.severity = none
-
-# IDE0005: Using directive is unnecessary.
-dotnet_diagnostic.IDE0005.severity = none

@@ -138,7 +138,6 @@ namespace SysBot.ACNHOrders
             await Task.Delay(200, token).ConfigureAwait(false);
 
             // Hide the on-screen "blocker" and ensure the screen is awake
-            await UpdateBlocker(false, token).ConfigureAwait(false);
             await SetScreenCheck(false, token).ConfigureAwait(false);
 
             // Check sys-botbase version
@@ -1232,12 +1231,10 @@ namespace SysBot.ACNHOrders
                 if (!isUserArriveLeaving && state == OverworldState.UserArriveLeaving)
                 {
                     // If user is arriving/leaving, show blocker
-                    await UpdateBlocker(true, token).ConfigureAwait(false);
                     isUserArriveLeaving = true;
                 }
                 else if (isUserArriveLeaving && state != OverworldState.UserArriveLeaving)
                 {
-                    await UpdateBlocker(false, token).ConfigureAwait(false);
                     isUserArriveLeaving = false;
                 }
 
@@ -1245,8 +1242,6 @@ namespace SysBot.ACNHOrders
                 if (VisitorList.VisitorCount < 2) // Host alone?
                     break;
             }
-
-            await UpdateBlocker(false, token).ConfigureAwait(false);
 
             // Let the new user use drop commands
             CurrentUserId = order.UserGuid;
@@ -1293,8 +1288,7 @@ namespace SysBot.ACNHOrders
 
             // Arrival -> departure cycle complete
             LogUtil.LogInfo("Order completed. Notifying visitor of completion.", Config.IP);
-            await UpdateBlocker(true, token).ConfigureAwait(false);
-
+           
             order.OrderFinished(this, Config.OrderConfig.CompleteOrderMessage);
 
             if (!string.IsNullOrEmpty(order.VillagerName) &&
@@ -1308,7 +1302,6 @@ namespace SysBot.ACNHOrders
             }
 
             await Task.Delay(5_000, token).ConfigureAwait(false);
-            await UpdateBlocker(false, token).ConfigureAwait(false);
             await Task.Delay(15_000, token).ConfigureAwait(false);
 
             // Wait until Overworld again
@@ -1646,15 +1639,6 @@ namespace SysBot.ACNHOrders
         {
             if (!Config.ExperimentalSleepScreenOnIdle && !force) return;
             await SetScreen(on, token).ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Writes a small "blocker" file, presumably read by an external overlay to obscure the screen if needed.
-        /// </summary>
-        public async Task UpdateBlocker(bool show, CancellationToken token)
-        {
-            var data = show ? Encoding.UTF8.GetBytes(Config.BlockerEmoji) : Array.Empty<byte>();
-            await FileUtil.WriteBytesToFileAsync(data, "blocker.txt", token).ConfigureAwait(false);
         }
 
         /// <summary>
